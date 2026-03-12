@@ -1,0 +1,10 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { CardPageVersion } from "@ui/pages.slint";
+export { CardPageVersion }
+
+@rust-attr(route(default, path = "/main?{version}"))
+export struct MainProps {
+    version: CardPageVersion,
+}

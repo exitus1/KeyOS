@@ -1,0 +1,203 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { Button, TextMd, Icon, TextSm, Checkbox, JumboIcon, BasePage, PageBody, ContentSection, ButtonSection, WrappedIcon, TimerCircularProgress, HeadingMd } from "@ui/widgets.slint";
+import { IconSize, Importance, Palette, Size } from "@ui/theme.slint";
+import { QrOverlay } from "../../../../widgets/qr-code.slint";
+
+import { Navigate } from "../../../../gen/navigate.slint";
+import { SaveSettingsGlobal, SaveSettingsStatus } from "../../../../globals/save-settings-global.slint";
+
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { SaveSettingsProps } from "./props.slint";
+
+export component SaveSettingsPage inherits BasePage {
+    in property <SaveSettingsProps> props;
+    property <string> qrcode-url;
+
+    VerticalLayout {
+        if SaveSettingsGlobal.status != SaveSettingsStatus.saving: SettingsNavHeader {
+            title: TR2.lookup(TrId.CreateBackupFileTitle);
+
+            clicked => {
+                SaveSettingsGlobal.status = SaveSettingsStatus.start;
+                Navigate.backward();
+            }
+        }
+
+        if SaveSettingsGlobal.status == SaveSettingsStatus.start: PageBody {
+            property <bool> understood: false;
+            ContentSection {
+                spacing: Size.sz10;
+
+                HorizontalLayout {
+                    alignment: center;
+                    // not using WrappedIcon because underbar is not the right size.
+                    JumboIcon {
+                        name: "jumbo-download";
+                    }
+                }
+
+                TextMd {
+                    text: "settings.tar";
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.CreateBackupFileContent);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                spacing: Size.sz6;
+
+                Rectangle {
+                    height: Size.sz14;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: Size.sz4;
+
+                        VerticalLayout {
+                            alignment: center;
+
+                            check-box := Checkbox {
+                                checked <=> understood;
+                            }
+                        }
+
+                        TextSm {
+                            text: TR2.lookup(TrId.CreateBackupFileISavedMySeed);
+                            color: Palette.content-primary;
+                            vertical-alignment: center;
+                            horizontal-alignment: center;
+                        }
+                    }
+
+                    TouchArea {
+                        clicked() => {
+                            check-box.checked = !check-box.checked;
+                        }
+                    }
+                }
+
+                Button {
+                    enabled: understood;
+                    importance: Importance.primary;
+                    label: TR2.lookup(TrId.CreateBackupFileSaveDeviceBackup);
+                    clicked => {
+                        if understood {
+                            SaveSettingsGlobal.save-settings-file();
+                        }
+                    }
+                }
+            }
+        }
+
+        if SaveSettingsGlobal.status == SaveSettingsStatus.saving: PageBody {
+            p-x: Size.sz4;
+            p-y: Size.sz4;
+            padding-top: Size.sz16;
+
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    TimerCircularProgress {
+                        indeterminate: true;
+                    }
+                }
+
+                HeadingMd {
+                    horizontal-alignment: center;
+                    text: TR2.lookup(TrId.CreateBackupSavingHeader);
+                }
+            }
+        }
+
+        if SaveSettingsGlobal.status == SaveSettingsStatus.success: PageBody {
+            ContentSection {
+                spacing: Size.sz10;
+
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "check";
+                    }
+                }
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.CreateBackupFileSuccessHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.format(TrId.CreateBackupFileSuccessContent, [SaveSettingsGlobal.backup-path]);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonDone);
+                    clicked => {
+                        SaveSettingsGlobal.status = SaveSettingsStatus.start;
+                        Navigate.backward();
+                    }
+                }
+            }
+        }
+
+        if SaveSettingsGlobal.status == SaveSettingsStatus.error: PageBody {
+            ContentSection {
+                spacing: Size.sz10;
+
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "close";
+                    }
+                }
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.CreateBackupFileErrorHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.CreateBackupFileErrorContent);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CreateBackupFileErrorContactSupport);
+                    importance: Importance.tertiary;
+                    clicked => {
+                        qrcode-url = "https://foundation.xyz/support"
+                    }
+                }
+
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonRetry);
+                    clicked => {
+                        SaveSettingsGlobal.status = SaveSettingsStatus.start;
+                    }
+                }
+            }
+        }
+    }
+
+    if qrcode-url != "": QrOverlay {
+        url <=> qrcode-url;
+    }
+}

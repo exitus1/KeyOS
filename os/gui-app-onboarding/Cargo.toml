@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-onboarding"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+production = []
+
+[dependencies]
+anyhow = { workspace = true }
+app-manager = { workspace = true }
+backup = { workspace = true }
+backup-shard = { workspace = true }
+bip39 = "2.2"
+bt = { workspace = true }
+foundation-ur = { workspace = true }
+fs = { workspace = true }
+futures-lite = { workspace = true }
+getrandom = { workspace = true }
+haptics = { workspace = true }
+i18n = { path = "../../i18n" }
+keycard = { workspace = true }
+keycard-scan = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+ngwallet = { workspace = true }
+oneshot = { workspace = true }
+power-manager = { workspace = true }
+ql-utils = { workspace = true }
+quantum-link = { workspace = true }
+security = { workspace = true }
+serde = { workspace = true }
+server = { workspace = true }
+slint-keyos-platform = { workspace = true }
+thiserror = { workspace = true }
+update = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+usb = { workspace = true }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

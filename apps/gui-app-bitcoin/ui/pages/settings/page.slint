@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSectionContainer, 
+    MenuSectionLayout,
+    MenuActionItem, 
+    HLine, MenuItemLayout, ItemTextPreview, BasePage, PageBody, MenuSection, MenuBooleanItem, ContentSection, NavHeader, SearchInput, TextSm
+} from "@ui/widgets.slint";
+
+import { Callbacks } from "../../callbacks.slint";
+import { Settings, ShowFiatValue, ImportPolicy} from "../../settings.slint";
+import { SettingsProps } from "props.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { ListView } from "std-widgets.slint";
+
+export component SettingsPage inherits BasePage {
+    in property <SettingsProps> props;
+
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.SettingsTitle);
+            clicked => {
+                Navigate.backward();
+            }
+        }
+
+        PageBody {
+            ContentSection {
+                MenuSection {
+                    title: TR2.lookup(TrId.SettingsSubtitleDisplay);
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            first: true;
+                            label: TR2.lookup(TrId.SettingsDisplayAmountDisplay);
+                            text: Settings.display-amount-to-string(Settings.display-amount);
+                            clicked => {
+                                Navigate.settings-display-amount({ });
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuBooleanItem {
+                            label: TR2.lookup(TrId.SettingsDisplayShowFiatValue);
+                            checked: Settings.show-fiat-value-enabled;
+                            last: !Settings.show-fiat-value-enabled;
+                            changed(checked) => {
+                                if (checked) {
+                                    Settings.set-show-fiat-value(ShowFiatValue.USD);
+                                } else {
+                                    Settings.set-show-fiat-value(ShowFiatValue.Disabled);
+                                }
+                            }
+                        }
+
+                        if (Settings.show-fiat-value-enabled): HLine { }
+                        if (Settings.show-fiat-value-enabled): MenuActionItem {
+                            last: true;
+                            label: TR2.lookup(TrId.SettingsDisplayCurrency);
+                            text: "\{Settings.fiat-value-symbol(Settings.show-fiat-value)}   \{Settings.fiat-value-code(Settings.show-fiat-value)}";
+                            clicked => {
+                                Navigate.settings-select-currency({ });
+                            }
+                        }
+                    }
+                }
+
+                MenuSection {
+                    title: TR2.lookup(TrId.SettingsSubtitleMultisig);
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            first: true;
+                            last: true;
+                            label: TR2.lookup(TrId.SettingsSubtitleMultisigPolicy);
+                            text: Settings.import-policy-to-string(Settings.import-policy);
+                            text-width: 200px;
+                            clicked => {
+                                Navigate.settings-import-policy({ });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

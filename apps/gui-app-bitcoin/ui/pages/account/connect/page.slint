@@ -1,0 +1,141 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Size, CurrentTheme, Palette } from "@ui/theme.slint";
+import { BasePage, AppHeader, PageBody, TextMd, Icon, NavHeader, HLine } from "@ui/widgets.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { ExportAccount, ExportCapabilities } from "../../../export-account.slint";
+
+import { AccountProps } from "../props.slint";
+
+component OptionItem inherits Rectangle {
+    in property <string> text;
+    in property <string> icon;
+
+    callback clicked();
+
+    height: Size.sz14;
+    padding-left: Size.sz4;
+    padding-right: Size.sz4;
+    HorizontalLayout {
+        alignment: space-between;
+
+        HorizontalLayout {
+            alignment: start;
+            spacing: Size.sz4;
+
+            if icon != "": VerticalLayout {
+                alignment: center;
+                Icon {
+                    name: root.icon;
+                    size: Size.sz6;
+                    color: Palette.content-tertiary;
+                }
+            }
+
+            TextMd {
+                text: root.text;
+                vertical-alignment: center;
+            }
+        }
+
+        VerticalLayout {
+            alignment: center;
+            Icon {
+                name: "chevron-right";
+            }
+        }
+    }
+
+    TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+export component AccountConnectPage inherits BasePage {
+    in property <AccountProps> props;
+
+    property <string> selected-connector: "Envoy";
+    property <bool> select-capability: false;
+
+    if select-capability: VerticalLayout {
+        NavHeader {
+            title: ExportAccount.connector-display-name(selected-connector);
+            clicked => {
+                select-capability = false;
+            }
+        }
+
+        PageBody {
+            alignment: start;
+
+            VerticalLayout {
+                alignment: start;
+                OptionItem {
+                    text: TR2.lookup(TrId.ConnectSingleSig);
+                    icon: "key";
+                    clicked => {
+                        Navigate.scan-connect({ account-id: props.account-id, connector-id: selected-connector, join-multisig: false }, { });
+                    }
+                }
+
+                HLine { }
+
+                OptionItem {
+                    text: TR2.lookup(TrId.ConnectMultisig);
+                    icon: "keys";
+                    clicked => {
+                        Navigate.scan-connect({ account-id: props.account-id, connector-id: selected-connector, join-multisig: true }, { });
+                    }
+                }
+
+                HLine { }
+            }
+        }
+    }
+
+    if ! select-capability: VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.ConnectTitle);
+            clicked => {
+                Navigate.backward();
+            }
+        }
+
+        Flickable {
+            PageBody {
+                alignment: start;
+
+                for connector in ExportAccount.all-connectors(): VerticalLayout {
+                    property <ExportCapabilities> capabilities: ExportAccount.connector-capabilities(connector);
+                    alignment: start;
+                    OptionItem {
+                        text: ExportAccount.connector-display-name(connector);
+
+                        clicked => {
+                            if (capabilities.single && capabilities.join-multisig) {
+                                selected-connector = connector;
+                                select-capability = true;
+                            } else {
+                                // If there is only one capability, the value of
+                                // capabilities.join-multisig will indicate the parameter value here,
+                                // since single and join-multisig are mutually exclusive
+                                Navigate.scan-connect({
+                                    account-id: props.account-id,
+                                    connector-id: connector,
+                                    join-multisig: capabilities.join-multisig
+                                }, { });
+                            }
+                        }
+                    }
+
+                    HLine { }
+                }
+            }
+        }
+    }
+}

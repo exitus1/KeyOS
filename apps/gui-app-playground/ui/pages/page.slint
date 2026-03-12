@@ -1,0 +1,79 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox } from "std-widgets.slint";
+import { HeadingLg, TextMd, Button, BasePage } from "@ui/widgets.slint";
+import { Size, Palette } from "@ui/theme.slint";
+import { Navigate } from "../gen/navigate.slint";
+
+export component MainPagePage inherits BasePage {
+    VerticalLayout {
+        padding: 20px;
+        spacing: 20px;
+        alignment: start;
+
+        HeadingLg {
+            text: "Developer Playground";
+            horizontal-alignment: center;
+        }
+
+        TextMd {
+            text: "Select a playground to test:";
+            horizontal-alignment: center;
+            color: Palette.content-secondary;
+        }
+
+        VerticalLayout {
+            spacing: 15px;
+            padding-top: 20px;
+
+            Button {
+                label: "Loader";
+                importance: primary;
+                clicked => {
+                    Navigate.loader-page({ });
+                }
+            }
+
+            Button {
+                label: "Haptics";
+                importance: secondary;
+                clicked => {
+                    Navigate.haptics-page({ });
+                }
+            }
+
+            Button {
+                label: "LEDs";
+                importance: primary;
+                clicked => {
+                    Navigate.led-page({ });
+                }
+            }
+
+            Button {
+                label: "Keycard Formatter";
+                importance: secondary;
+                clicked => {
+                    Navigate.keycard-formatter-page({ });
+                }
+            }
+
+            Button {
+                label: "Backup";
+                importance: primary;
+                clicked => {
+                    Navigate.backup-page({ });
+                }
+            }
+
+            Button {
+                label: "Bluetooth";
+                importance: secondary;
+                clicked => {
+                    Navigate.bluetooth-page({ });
+                }
+            }
+        }
+    }
+}

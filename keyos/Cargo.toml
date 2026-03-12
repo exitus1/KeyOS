@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "keyos"
+version = "0.1.0"
+edition = "2021"
+description = "Common routines and constants for KeyOS"
+
+[dependencies]
+core = { version = '1.0.0', optional = true, package = 'rustc-std-workspace-core' }
+
+[features]
+default = []
+trace-systemview = []
+
+# This is being built as part of libstd
+rustc-dep-of-std = ['core']
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

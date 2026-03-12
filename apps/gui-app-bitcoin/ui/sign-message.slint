@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Navigate, Animate } from "gen/navigate.slint";
+
+export enum SignMessageState {
+    Idle,
+    Sign,
+    Signing,
+    Success,
+    Error,
+}
+
+export enum FileSaveState {
+    Idle,
+    Saved,
+    Error,
+}
+
+export struct MessageSignatureView {
+    message: string,
+    address: string,
+    signature: string,
+}
+
+export global SignMessage {
+    in property <SignMessageState> state;
+    in property <string> message;
+    in property <string> derivation-path;
+    in property <string> address;
+    in property <string> account-id;
+    in property <MessageSignatureView> signed-message;
+    in-out property <FileSaveState> file-save-state: FileSaveState.Idle;
+    in property <string> saved-file-path;
+
+    callback start-sign-message(string);
+    callback cancel-signing();
+    callback sign-message();
+    pure callback get-signed-message-formatted() -> string;
+    callback save-signed-message-to-file();
+
+    public function done() {
+        self.cancel-signing();
+        self.file-save-state = FileSaveState.Idle;
+        Navigate.backward-animate(Animate.None);
+    }
+}

@@ -1,0 +1,10 @@
+appId = "0x6f732f706f7765722d6d616e61676572"
+memory = ["RSTC", "PMC"]
+syscall = ["PowerManagement", "SetThreadPriority"]
+extends = "../../api/power-manager"
+
+[appName]
+en = "Power Management Server"
+
+[permissions]
+"template" = ["i2c", "gpio"]

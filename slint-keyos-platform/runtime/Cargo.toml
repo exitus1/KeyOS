@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "slint-keyos-platform"
+version = "0.1.0"
+edition = "2021"
+description = "KeyOS platform support for Slint UI framework"
+
+[features]
+settings = ["dep:settings"]
+recovery-os = []
+default = ["settings"]
+
+[target.'cfg(not(keyos))'.dependencies.i-slint-core]
+workspace = true
+features = ["image-decoders"]
+
+[dependencies]
+async-task = { workspace = true }
+euclid = "0.22"
+file-backed = { path = "../../utils/file-backed" }
+foundation-ur = { workspace = true }
+fs = { workspace = true }
+futures-lite = { workspace = true }
+gui-server-api = { workspace = true }
+i-slint-common = { workspace = true }
+i-slint-core = { workspace = true, default-features = false }
+i18n = { path = "../../i18n/" }
+image = "0.25"
+indoc = "2.0.5"
+itertools = "0.13.0"
+itoa = { version = "1.0" }
+libloading = "0.8"
+log = { workspace = true }
+log-server = { workspace = true }
+lru = "0.13"
+paste = { workspace = true }
+percent-encoding = { version = "2.3.1" }
+phf = { version = "0.11" }
+qrcode = { version = "0.12", default-features = false }
+rkyv = { workspace = true }
+ryu = { version = "1.0" }
+serde = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true, optional = true }
+slint-keyos-platform-common = { path = "../common", features = ["slint"] }
+slint-keyos-platform-macros = { path = "../macros" }
+slotmap = "1.0.7"
+thiserror = { version = "1.0" }
+toml = "0.8.14"
+worker = { path = "../../worker" }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[dependencies.slint]
+features = [
+    "compat-1-2",
+    "unsafe-single-threaded",
+    "renderer-software",
+    "software-renderer-systemfonts",
+    "serde",
+    "std",
+]
+workspace = true
+
+[dependencies.tiny-skia]
+default-features = false
+features = ["no-std-float", "simd"]
+version = "0.11.4"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

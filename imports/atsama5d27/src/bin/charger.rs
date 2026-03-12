@@ -1,0 +1,418 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundationdevices.com>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+#![no_std]
+#![no_main]
+
+use {
+    atsama5d27::{
+        aic::{Aic, InterruptEntry, SourceKind},
+        pio::{Direction, Func, Pio},
+        pit::{Pit, PIV_MAX},
+        pmc::{PeripheralId, Pmc},
+        twi::Twi,
+        uart::{Uart, Uart1},
+    },
+    core::{
+        arch::global_asm,
+        fmt::Write,
+        panic::PanicInfo,
+        ptr::addr_of_mut,
+        sync::atomic::{
+            compiler_fence,
+            AtomicBool,
+            Ordering::{self, SeqCst},
+        },
+    },
+    is31fl32xx::{Is31fl32xx, OscillatorClock, PwmResolution, SoftwareShutdownMode, IS31FL3205},
+};
+
+global_asm!(include_str!("../start.S"));
+
+type UartType = Uart<Uart1>;
+const UART_PERIPH_ID: PeripheralId = PeripheralId::Uart1;
+
+// MCK: 164MHz
+// Clock frequency is divided by 2 because of the default `h32mxdiv` PMC setting
+const MASTER_CLOCK_SPEED: u32 = 164000000 / 2;
+
+#[no_mangle]
+fn _entry() -> ! {
+    extern "C" {
+        // These symbols come from `link.ld`
+        static mut _sbss: u32;
+        static mut _ebss: u32;
+    }
+
+    // Initialize RAM
+    unsafe {
+        r0::zero_bss(addr_of_mut!(_sbss), addr_of_mut!(_ebss));
+    }
+
+    atsama5d27::l1cache::disable_dcache();
+
+    let mut pmc = Pmc::new();
+    pmc.enable_peripheral_clock(PeripheralId::Pit);
+    pmc.enable_peripheral_clock(PeripheralId::Aic);
+    pmc.enable_peripheral_clock(PeripheralId::Pioa);
+    pmc.enable_peripheral_clock(PeripheralId::Piob);
+    pmc.enable_peripheral_clock(PeripheralId::Pioc);
+    pmc.enable_peripheral_clock(PeripheralId::Piod);
+    pmc.enable_peripheral_clock(PeripheralId::Twi0);
+
+    let mut aic = Aic::new();
+    aic.init();
+    aic.set_spurious_handler_fn_ptr(aic_spurious_handler as unsafe extern "C" fn() as usize);
+
+    let uart_irq_ptr = uart_irq_handler as unsafe extern "C" fn() as usize;
+    aic.set_interrupt_handler(InterruptEntry {
+        peripheral_id: UART_PERIPH_ID,
+        vector_fn_ptr: uart_irq_ptr,
+        kind: SourceKind::LevelSensitive,
+        priority: 0,
+    });
+
+    // Enable interrupts
+    unsafe {
+        core::arch::asm!("cpsie if");
+    }
+
+    // Timer for delays
+    let mut pit = Pit::new();
+    pit.set_interval(PIV_MAX);
+    pit.set_enabled(true);
+    pit.set_clock_speed(MASTER_CLOCK_SPEED);
+    pit.busy_wait_ms(MASTER_CLOCK_SPEED, 500);
+
+    let mut console = UartType::new();
+    console.set_rx_interrupt(true);
+    console.set_rx(true);
+
+    // Do 8 clock cycles of SCL to reset all the possibly stuck slaves
+    let mut scl = Pio::pc28();
+    scl.set_func(Func::Gpio);
+    scl.set_direction(Direction::Output);
+    for _ in 0..1 {
+        scl.set(false);
+        pit.busy_wait_ms(MASTER_CLOCK_SPEED, 1);
+        scl.set(true);
+        pit.busy_wait_ms(MASTER_CLOCK_SPEED, 1);
+    }
+
+    let scl = Pio::pc28();
+    scl.set_func(Func::E); // TWI
+    let sda = Pio::pc27();
+    sda.set_func(Func::E); // TWI
+    let twi0 = Twi::twi0();
+
+    writeln!(console, "TWI0: initializing master").ok();
+    twi0.init_master(MASTER_CLOCK_SPEED as usize, 100_000);
+    writeln!(console, "TWI0 status: {:?}", twi0.status()).ok();
+
+    //////////////////////////////////
+
+    let mut led_charge_pump_en = Pio::pd23();
+
+    led_charge_pump_en.set_func(Func::Gpio);
+    led_charge_pump_en.set_direction(Direction::Output);
+    led_charge_pump_en.set(true); // Enable RGB LED 5v charge pump
+
+    let led_shutdown = Pio::pd26();
+    led_shutdown.set_func(Func::Gpio);
+    led_shutdown.set_direction(Direction::Output);
+
+    // RGB LED driver
+    let mut leds =
+        Is31fl32xx::<IS31FL3205, _, _>::init_with_i2c(0x34, led_shutdown, unsafe { twi0.clone() });
+    let mut pit = Pit::new();
+    pit.set_clock_speed(MASTER_CLOCK_SPEED);
+    leds.enable_device(
+        &mut pit,
+        OscillatorClock::SixteenMHz,
+        PwmResolution::Eightbit,
+        SoftwareShutdownMode::Normal,
+    )
+    .expect("leds enable");
+    // Set 50% LED scaling on all channels
+    leds.set_all_led_scaling(0xff).expect("set led scaling");
+    // Set max global current
+    leds.set_global_current(0xff / 8)
+        .expect("set max global current");
+
+    // Set default 0 brightness (turn off all LEDs)
+    for ch in 0..12 {
+        leds.set(ch, 0).expect("set led dark");
+    }
+
+    //////////////////////////////////
+
+    let wpt_chg = Pio::pa28(); // WPT_CHG_B
+    wpt_chg.set_func(Func::Gpio);
+    wpt_chg.set_direction(Direction::Input);
+
+    let mut wpt_en1 = Pio::pa24(); // WPT_EN1
+    wpt_en1.set_func(Func::Gpio);
+    wpt_en1.set_direction(Direction::Output);
+    wpt_en1.set(false);
+    let mut wpt_en2 = Pio::pd6(); // WPT_EN2
+    wpt_en2.set_func(Func::Gpio);
+    wpt_en2.set_direction(Direction::Output);
+    wpt_en2.set(false);
+
+    let mut wpt_term = Pio::pd11(); // WPT_TERM
+    wpt_term.set_func(Func::Gpio);
+    wpt_term.set_direction(Direction::Output);
+    wpt_term.set(false);
+
+    let mut wpt_fault = Pio::pd13(); // WPT_FAULT
+    wpt_fault.set_func(Func::Gpio);
+    wpt_fault.set_direction(Direction::Output);
+    wpt_fault.set(false);
+
+    let mut bc_cd = Pio::pd20(); // BC_CD is battery charger disable pin
+    bc_cd.set_func(Func::Gpio);
+    bc_cd.set_direction(Direction::Output);
+
+    let mut bc_otg = Pio::pa29(); // BC_OTG is battery charger disable pin
+    bc_otg.set_func(Func::Gpio);
+    bc_otg.set_direction(Direction::Output);
+    bc_otg.set(false); // Disable OTG (boost) mode
+
+    //////////////////////////////////
+
+    let mut bq = bq24157::Bq24157::new(unsafe { twi0.clone() });
+    assert!(bq.verify_chip_id().unwrap(), "unexpected chip ID");
+    writeln!(console, "BQ24517 chip ID verified").ok();
+
+    //////////////////////////////////
+    let status = bq.status().unwrap();
+    writeln!(console, "fault chg: {:?}", status.charge_fault()).ok();
+
+    let safety = bq.safety_limits().unwrap();
+    writeln!(console, "Safety limits: {:?}", safety).ok();
+    const V_CURR_SENSE: u8 = 0b1111;
+    const VR_MAX: u8 = 0b1111;
+    let mut safety = bq.safety_limits().unwrap();
+    safety.set_v_curr_sense(V_CURR_SENSE);
+    safety.set_vr_max(VR_MAX);
+    writeln!(console, "Setting safety limits: {:?}", safety).ok();
+    bq.set_safety_limits(safety).unwrap();
+    writeln!(
+        console,
+        "Safety limits initialized: {:?}",
+        bq.safety_limits()
+    )
+    .ok();
+    // assert_eq!(bq.safety_limits().unwrap().v_curr_sense(), V_CURR_SENSE, "safety is
+    // locked");
+
+    //////////////////////////////////
+
+    let status = bq.status().unwrap();
+    writeln!(console, "fault chg: {:?}", status.charge_fault()).ok();
+
+    writeln!(console, "Resetting charger").ok();
+    bq.reset_charger().unwrap();
+
+    //////////////////////////////////
+    let status = bq.status().unwrap();
+    writeln!(console, "fault chg: {:?}", status.charge_fault()).ok();
+
+    writeln!(
+        console,
+        "Setting input current limit to 500 mA and enabling TE"
+    )
+    .ok();
+    let mut control = bq.control().unwrap();
+    writeln!(console, "before: {:?}", control).ok();
+    control.set_te(true);
+    control.set_i_lim(0b01);
+    bq.set_control(control).unwrap();
+    writeln!(console, "after: {:?}", bq.control().unwrap()).ok();
+
+    //////////////////////////////////
+    let status = bq.status().unwrap();
+    writeln!(console, "fault chg: {:?}", status.charge_fault()).ok();
+
+    writeln!(console, "Setting batt regulated voltage to 4.45V").ok();
+    let mut batt_voltage = bq.batt_voltage().unwrap();
+    writeln!(console, "before: {:?}", batt_voltage).ok();
+    batt_voltage.set_bat_vreg(0b101111); // 3.5V + 0b101111 * 0.020mV = 4.44V (closest to 4.45V)
+    bq.set_batt_voltage(batt_voltage).unwrap();
+    writeln!(console, "after: {:?}", bq.batt_voltage().unwrap()).ok();
+
+    //////////////////////////////////
+    let status = bq.status().unwrap();
+    writeln!(console, "fault chg: {:?}", status.charge_fault()).ok();
+
+    writeln!(console, "Disabling low current").ok();
+    let mut special_charger_voltage = bq.special_charger_voltage().unwrap();
+    writeln!(console, "before: {:?}", special_charger_voltage).ok();
+
+    special_charger_voltage.set_low_chg(false);
+    bq.set_special_charger_voltage(special_charger_voltage)
+        .unwrap();
+    writeln!(
+        console,
+        "after: {:?}",
+        bq.special_charger_voltage().unwrap()
+    )
+    .ok();
+
+    //////////////////////////////////
+    let status = bq.status().unwrap();
+    writeln!(console, "fault chg: {:?}", status.charge_fault()).ok();
+
+    writeln!(
+        console,
+        "Setting charger current to 550 mA with termination current at 100 mA"
+    )
+    .ok();
+    let mut chg_curr = bq.charger_current().unwrap();
+    writeln!(console, "before: {:?}", chg_curr).ok();
+    chg_curr.set_v_iterm(0b011); // 50mA + 1 * 50mA + 0*100mA + 0*200mA = 100mA
+    chg_curr.set_chr_curr_sense_v(0b000); // 550 mA
+    bq.set_charge_current(chg_curr).unwrap();
+    writeln!(console, "after: {:?}", bq.charger_current().unwrap()).ok();
+
+    let mut buf = [0; 7];
+    twi0.write_read_bytes(0x6A, &[0], &mut buf)
+        .expect("dumo chip regs");
+    for (i, byte) in buf.iter().enumerate() {
+        writeln!(console, "0x{:02x} = 0x{:02x}", i, *byte).ok();
+    }
+
+    writeln!(console, "Setting CD to LOW to enable charging").ok();
+    bc_cd.set(false);
+
+    //////////////////////////////////
+    let mut fuel_gauge = bq27421::Bq27421::new(Twi::twi0());
+    assert!(
+        fuel_gauge.verify_chip_id().unwrap(),
+        "unexpected fuel gauge chip ID"
+    );
+    writeln!(
+        console,
+        "Fuel gauge status: {:?}",
+        fuel_gauge.status().unwrap()
+    )
+    .ok();
+
+    loop {
+        let status = bq.status().unwrap();
+        writeln!(console, "").ok();
+        let wireless_charging = !wpt_chg.get();
+        writeln!(console, "wireless charging: {:?}", wireless_charging).ok();
+        writeln!(console, "{:?}", status).ok();
+        writeln!(console, "{:?}", status.state().unwrap()).ok();
+        writeln!(
+            console,
+            "fault chg: {:?}   fault boost: {:?}",
+            status.charge_fault().unwrap(),
+            status.boost_fault().unwrap(),
+        )
+        .ok();
+        writeln!(
+            console,
+            "Fuel gauge flags: {:?}",
+            fuel_gauge.flags().unwrap()
+        )
+        .ok();
+        let charge_current = fuel_gauge.charge_current().unwrap();
+        writeln!(
+            console,
+            "State of charge: {}  Charge current: {}  Capacity: {}",
+            fuel_gauge.state_of_charge().unwrap(),
+            charge_current,
+            fuel_gauge.capacity().unwrap(),
+        )
+        .ok();
+        if charge_current < 0 {
+            for ch in 0..12 {
+                leds.set(ch, if ch == 2 { 100 } else { 0 })
+                    .expect("set led dark");
+            }
+        } else {
+            leds.set(2, 0).expect("set led2");
+            leds.set(if wireless_charging { 0 } else { 1 }, 100)
+                .expect("set led1");
+
+            leds.set(
+                if wireless_charging { 3 } else { 4 },
+                if charge_current > 50 { 100 } else { 0 },
+            )
+            .expect("set led4");
+            leds.set(
+                if wireless_charging { 8 } else { 7 },
+                if charge_current > 150 { 100 } else { 0 },
+            )
+            .expect("set led7");
+            leds.set(
+                if wireless_charging { 11 } else { 10 },
+                if charge_current > 250 { 100 } else { 0 },
+            )
+            .expect("set led10");
+        }
+        pit.busy_wait_ms(MASTER_CLOCK_SPEED, 1000);
+    }
+}
+
+#[no_mangle]
+unsafe extern "C" fn aic_spurious_handler() {
+    core::arch::asm!("bkpt");
+}
+
+static WPT_FAULT: AtomicBool = AtomicBool::new(false);
+static WPT_TERM: AtomicBool = AtomicBool::new(false);
+
+#[no_mangle]
+unsafe extern "C" fn uart_irq_handler() {
+    let mut uart = UartType::new();
+    let char = uart.getc() as char;
+    writeln!(uart, "Received character: {}", char).ok();
+
+    if char == 't' {
+        let term_val = !WPT_TERM.load(Ordering::Relaxed);
+
+        let mut wpt_term = Pio::pd11(); // WPT_TERM
+        wpt_term.set_func(Func::Gpio);
+        wpt_term.set_direction(Direction::Output);
+        wpt_term.set(term_val);
+        WPT_TERM.store(term_val, Ordering::Relaxed);
+
+        if term_val {
+            writeln!(uart, "WPT terminated").ok();
+        } else {
+            writeln!(uart, "WPT resumed").ok();
+        }
+    } else if char == 'f' {
+        let fault_val = !WPT_FAULT.load(Ordering::Relaxed);
+
+        let mut wpt_fault = Pio::pd13(); // WPT_FAULT
+        wpt_fault.set_func(Func::Gpio);
+        wpt_fault.set_direction(Direction::Output);
+        wpt_fault.set(fault_val);
+
+        WPT_FAULT.store(fault_val, Ordering::Relaxed);
+        if fault_val {
+            writeln!(uart, "WPT faulted").ok();
+        } else {
+            writeln!(uart, "WPT fault removed").ok();
+        }
+    }
+}
+
+#[inline(never)]
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    let mut console = Uart::<Uart1>::new();
+
+    compiler_fence(SeqCst);
+    writeln!(console, "{}", _info).ok();
+
+    loop {
+        unsafe {
+            core::arch::asm!("bkpt");
+        }
+    }
+}

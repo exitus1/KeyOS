@@ -1,0 +1,11 @@
+appId = "0x616d6269656e745f6c696768740a0000"
+syscall = ["SetThreadPriority"]
+
+[appName]
+en = "Ambient light sensor"
+
+[servers."os/ambient-light"]
+AmbientLightSubscribe = { id = 1, type = "scalarEvent" }
+
+[permissions]
+"template" = ["i2c", "gpio"]

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "backup"
+version = "0.1.0"
+edition = "2021"
+description = "Backup API crate"
+publish = false
+
+[dependencies]
+crypto = { workspace = true }
+fs = { workspace = true }
+rkyv = { workspace = true }
+security = { workspace = true }
+server = { workspace = true }
+thiserror = { workspace = true }

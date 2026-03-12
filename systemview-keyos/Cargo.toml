@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "systemview-keyos"
+version = "0.1.0"
+edition = "2021"
+description = "KeyOS platform support for Slint UI framework"
+
+[target.'cfg(keyos)'.dependencies]
+xous = { path = "../xous/xous-rs" }
+armv7 = { workspace = true }
+cty = "0.2"
+
+[build-dependencies]
+bindgen = { version = "0.69.2", default-features = false, features = ["runtime"] }
+cc = "1.0"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

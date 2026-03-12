@@ -1,0 +1,62 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "goodbye": "Goodbye"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Passport Prime",
+      "subtitle": "Your journey begins here"
+    },
+    "setup": {
+      "instruction": "Please follow the steps to set up your device",
+      "button": "Get Started"
+    }
+  },
+  "settings": {
+    "home": {
+      "title": "Home",
+      "description": "Manage your device settings"
+    },
+    "settings": {
+      "brightness": "Screen Brightness",
+      "volume": "Volume",
+      "language": "Language",
+      "title": "Settings"
+    },
+    "profile": {
+      "username": "Username",
+      "password": "Password"
+    }
+  },
+  "control-center": {
+    "network": {
+      "wifi": "Wi-Fi",
+      "bluetooth": "Bluetooth",
+      "airplane_mode": "Airplane Mode"
+    },
+    "system": {
+      "update": "System Update",
+      "about": "About Device",
+      "restart": "Restart"
+    }
+  },
+  "bitcoin": {
+    "wallet": {
+      "balance": "Balance",
+      "send": "Send",
+      "receive": "Receive",
+      "address": "Wallet Address"
+    },
+    "transactions": {
+      "history": "Transaction History",
+      "details": "Transaction Details",
+      "pending": "Pending Transactions"
+    },
+    "security": {
+      "backup": "Backup Wallet",
+      "passphrase": "Passphrase",
+      "pin": "PIN Code"
+    }
+  }
+}

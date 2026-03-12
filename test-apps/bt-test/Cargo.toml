@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "bt-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+bt = { workspace = true }
+hex = "0.4.3"
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+server = { path = "../../server" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

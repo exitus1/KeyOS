@@ -1,0 +1,29 @@
+[package]
+name = "libblur"
+version = "0.13.3"
+edition = "2021"
+description = "Fast image blurring in pure Rust"
+readme = "../../README.md"
+keywords = ["blur", "gauss_blur", "image_blur", "fast_blur", "stack_blur"]
+license = "Apache-2.0 OR BSD-3-Clause"
+authors = ["Radzivon Bartoshyk"]
+documentation = "https://github.com/awxkee/libblur"
+categories = ["multimedia::images", "multimedia::video", "algorithms"]
+homepage = "https://github.com/awxkee/libblur"
+repository = "https://github.com/awxkee/libblur.git"
+exclude = ["*.jpg", "../../assets/*", "*.png"]
+
+[lib]
+name = "libblur"
+path = "src/lib.rs"
+
+[dependencies]
+colorutils-rs = { version = "0.5.8", optional = true }
+erydanos = { version = "0.2.12", optional = true }
+half = { version = "2.4.1", features = ["num-traits"] }
+num-traits = "0.2.18"
+rayon = "1.10.0"
+
+[features]
+colorutils-rs = ["dep:colorutils-rs", "erydanos"]
+default = ["colorutils-rs"]

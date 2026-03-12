@@ -1,0 +1,9 @@
+[advisories]
+ignore = [
+    "RUSTSEC-2023-0071", # rsa Marvin Attack - no fix available yet
+]
+# Ignore informational warnings (unmaintained, unsound notices)
+informational_warnings = []
+
+[yanked]
+enabled = false  # critical-section 1.1.3 is yanked but still functional

@@ -1,0 +1,115 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../gen/tr.slint";
+import { TextSm, Button, SwitchControlled , MenuSectionContainer, MenuItemLayout, MenuSectionLayout, MenuActionItem, HLine, BasePage, PageBody, ContentSection } from "@ui/widgets.slint";
+import { Size, Palette, Timings } from "@ui/theme.slint";
+
+import { SettingsNavHeader } from "../../widgets/nav-header.slint";
+import { Navigate } from "../../gen/navigate.slint";
+
+import { BackupProps } from "props.slint";
+import { EraseStatus } from "../settings/advanced/erase-device/props.slint";
+import { BackupGlobal } from "../../globals/backup-global.slint";
+import { QlGlobal } from "../../globals/ql-global.slint";
+
+export component BackupPage inherits BasePage {
+    in property <BackupProps> props;
+
+    private property <bool> envoy-connected: QlGlobal.ql-live;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.BackupTitle);
+        }
+
+        PageBody {
+            ContentSection {
+                VerticalLayout {
+                    spacing: Size.sz4;
+
+                    if !envoy-connected: HorizontalLayout {
+                        alignment: start;
+                        TextSm {
+                            color: Palette.content-tertiary;
+                            text: TR2.lookup(TrId.BackupContent);
+                        }
+                    }
+
+                    MenuSectionContainer {
+                        VerticalLayout {
+                            padding: Size.sz0_25;
+                            alignment: start;
+                            MenuItemLayout {
+                                first: true;
+                                last: true;
+                                label: TR2.lookup(TrId.BackupMagicBackups);
+
+                                switch := SwitchControlled {
+                                    checked: BackupGlobal.magic-backup-enabled;
+                                    enabled: false; // see SFT-6525
+                                }
+
+                                clicked => {
+                                    BackupGlobal.set-magic-backup-enabled(switch.checked);
+                                }
+                            }
+                        }
+                    }
+
+                    TextSm {
+                        color: Palette.content-tertiary;
+                        text: BackupGlobal.last-backup-time-ago;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                    }
+                }
+
+                if BackupGlobal.magic-backup-enabled: Button {
+                    label: BackupGlobal.creating-backup ? TR2.lookup(TrId.BackupBackingUp) : TR2.lookup(TrId.BackupBackUpNow);
+                    enabled: envoy-connected && !BackupGlobal.creating-backup;
+                    loading: BackupGlobal.creating-backup;
+                    background: Palette.background-brand;
+                    clicked => {
+                        BackupGlobal.create-backup()
+                    }
+                }
+
+                MenuSectionContainer {
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            first: true;
+                            last: true;
+                            label: TR2.lookup(TrId.BackupVerifyKeycards);
+                            clicked => {
+                                Navigate.verify-backup({ });
+                            }
+                        }
+                    }
+                }
+
+                MenuSectionContainer {
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            first: true;
+                            label: TR2.lookup(TrId.BackupAdvancedBackups);
+                            clicked => {
+                                Navigate.advanced-backup({ });
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuActionItem {
+                            last: true;
+                            label: TR2.lookup(TrId.BackupRestoreBackup);
+                            clicked => {
+                                Navigate.erase-device({ status: EraseStatus.confirmation }, { });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

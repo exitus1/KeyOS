@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CallbackResult } from "@ui/theme.slint";
+import { AuthView, ScanQrCaller } from "./authenticator-types.slint";
+
+export global AuthenticatorCallbacks {
+    callback scan-qr(ScanQrCaller);
+    callback search(string);
+    callback save(string, string, string, int) -> CallbackResult;
+    callback validate-new-label(string) -> string;
+    callback validate-edit-label(int, string) -> string;
+    callback validate-edit-account(string) -> string;
+    callback validate-edit-issuer(string) -> string;
+    callback edit(int, string, string, string, int) -> CallbackResult;
+    callback set-archived(int, bool);
+    callback set-archive-mode(bool);
+    callback delete-code(int);
+    callback move-position(int, bool);
+    callback set-sort-mode(int);
+    callback get-view-index([AuthView], int) -> int;
+
+    in property <int> time-until-refresh: 0;
+    in-out property <[AuthView]> entries: [];
+    in-out property <int> sort-mode: 0;
+    in-out property <string> search-text: "";
+}

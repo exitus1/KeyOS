@@ -1,0 +1,14 @@
+appId = "0x73657474696e67735f6d616e61676572"
+memory = ["SFC"]
+syscall = ["SetThreadPriority"]
+extends = "../../api/settings"
+
+[appName]
+en = "Settings Manager"
+
+[servers."os/settings"]
+SubscriberDisconnected = { id = 8, type = "scalar" }
+
+[permissions]
+template = ["fs-generic"]
+"os/fs" = ["GetSystemAppDataReadAccess", "GetSystemAppDataWriteAccess"]

@@ -1,0 +1,209 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Palette, Size, UISize, Utils} from "@ui/theme.slint";
+import {Switch, TextMd, TextXs} from "@ui/widgets.slint";
+
+struct ColorEntry {
+    name: string,
+    color: color,
+}
+
+component Swatch {
+    // Public properties
+    in property <string> name;
+    in property <color> color;
+    width: 120px;
+
+    VerticalLayout {
+        alignment: start;
+        spacing: Size.sz2;
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: Size.sz10;
+                height: Size.sz10;
+                border-radius: Size.sz2;
+                background: color;
+                border-color: Palette.border-tertiary;
+                border-width: Size.sz0_25;
+            }
+        }
+
+        TextXs {
+            text: name;
+            horizontal-alignment: center;
+            color: Palette.content-tertiary;
+        }
+
+        TextXs {
+            text: Utils.color-to-hex(color);
+            horizontal-alignment: center;
+            color: Palette.content-tertiary;
+        }
+    }
+}
+
+export component ColorsPage inherits Page {
+    background: Palette.background-primary;
+
+    private property <[[ColorEntry]]> background-colors: [
+        [
+            { name: "Background Primary", color: Palette.background-primary },
+            {
+                name: "Background Primary Alternative",
+                color: Palette.background-primary-alternative
+            },
+            { name: "Background Hover", color: Palette.background-hover },
+            { name: "Background Pressed", color: Palette.background-pressed },
+            { name: "Background Selected", color: Palette.background-selected },
+            { name: "Background Disabled", color: Palette.background-disabled },
+            { name: "Background Inverse", color: Palette.background-inverse },
+            { name: "Background Brand", color: Palette.background-brand },
+        ],
+        [
+            { name: "Background Brand Hover", color: Palette.background-brand-hover },
+            { name: "Background Brand Pressed", color: Palette.background-brand-pressed },
+            { name: "Background Info", color: Palette.background-info },
+            { name: "Background Info Subtle", color: Palette.background-info-subtle },
+            { name: "Background Notice", color: Palette.background-notice },
+            { name: "Background Notice Subtle", color: Palette.background-notice-subtle },
+            { name: "Background Negative", color: Palette.background-negative },
+            { name: "Background Negative Subtle", color: Palette.background-negative-subtle },
+        ],
+        [
+            { name: "Background Positive", color: Palette.background-positive },
+            { name: "Background Positive Subtle", color: Palette.background-positive-subtle },
+        ]
+    ];
+
+    private property <[[ColorEntry]]> content-colors: [
+        [
+            { name: "Content Primary", color: Palette.content-primary },
+            { name: "Content Secondary", color: Palette.content-secondary },
+            { name: "Content Tertiary", color: Palette.content-tertiary },
+            { name: "Content Primary Inverse", color: Palette.content-primary-inverse },
+            { name: "Content Secondary Inverse", color: Palette.content-secondary-inverse },
+            { name: "Content Tertiary Inverse", color: Palette.content-tertiary-inverse },
+            { name: "Content Disabled", color: Palette.content-disabled },
+            { name: "Content Brand", color: Palette.content-brand },
+        ],
+        [
+            { name: "Content Copper Brand", color: Palette.content-copper-brand },
+            { name: "Content Light Copper Brand", color: Palette.content-lightcopper-brand },
+            { name: "Content Link", color: Palette.content-link },
+            { name: "Content Link Hover", color: Palette.content-link-hover },
+            { name: "Content Link Pressed", color: Palette.content-link-pressed },
+            { name: "Content Notice", color: Palette.content-notice },
+            { name: "Content Notice Bold", color: Palette.content-notice-bold },
+            { name: "Content Negative", color: Palette.content-negative },
+        ],
+        [
+            { name: "Content Negative Bold", color: Palette.content-negative-bold },
+            { name: "Content Positive", color: Palette.content-positive },
+            { name: "Content Positive Bold", color: Palette.content-positive-bold },
+        ]
+    ];
+
+    private property <[[ColorEntry]]> border-colors: [
+        [
+            { name: "Border Primary", color: Palette.border-primary },
+            { name: "Border Secondary", color: Palette.border-secondary },
+            { name: "Border Tertiary", color: Palette.border-tertiary },
+            { name: "Border Disabled", color: Palette.border-disabled },
+            { name: "Border Brand", color: Palette.border-brand },
+            { name: "Border Inverse", color: Palette.border-inverse },
+            { name: "Border Focus", color: Palette.border-focus },
+            { name: "Border Info", color: Palette.border-info },
+        ],
+        [
+            { name: "Border Notice", color: Palette.border-notice },
+            { name: "Border Negative", color: Palette.border-negative },
+            { name: "Border Positive", color: Palette.border-positive },
+        ]
+    ];
+
+    private property <[[ColorEntry]]> overlay-colors: [
+        [
+            { name: "Overlay 50", color: Palette.overlay-50 },
+            { name: "Overlay 50 Inverse", color: Palette.overlay-50-inverse },
+        ]
+    ];
+
+    VerticalLayout {
+        spacing: Size.sz6;
+
+        // Draw the Background colors
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz6;
+
+            TextMd {
+                text: "Background Colors";
+            }
+
+            for row in background-colors: HorizontalLayout {
+                alignment: start;
+                for entry in row: Swatch {
+                    name: entry.name;
+                    color: entry.color;
+                }
+            }
+        }
+
+        // Draw the Content colors
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz6;
+
+            TextMd {
+                text: "Content Colors";
+            }
+
+            for row in content-colors: HorizontalLayout {
+                alignment: start;
+                for entry in row: Swatch {
+                    name: entry.name;
+                    color: entry.color;
+                }
+            }
+        }
+
+        // Draw the Border colors
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz6;
+
+            TextMd {
+                text: "Border Colors";
+            }
+
+            for row in border-colors: HorizontalLayout {
+                alignment: start;
+                for entry in row: Swatch {
+                    name: entry.name;
+                    color: entry.color;
+                }
+            }
+        }
+
+        // Draw the Surface colors
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz6;
+
+            TextMd {
+                text: "Surface & Overlay Colors";
+            }
+
+            for row in overlay-colors: HorizontalLayout {
+                alignment: start;
+                for entry in row: Swatch {
+                    name: entry.name;
+                    color: entry.color;
+                }
+            }
+        }
+    }
+}

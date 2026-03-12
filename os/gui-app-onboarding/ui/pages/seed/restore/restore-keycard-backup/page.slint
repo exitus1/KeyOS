@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, TextLg, Icon, JumboIcon, JumboIconPageBody, Shield, HeadingMd, TextMd, TimerCircularProgress, IconButton, ButtonSection, Dialog, NavHeader } from "@ui/widgets.slint";
+import { KeyCardAnimation } from "@ui/widgets/key-card-animation.slint";
+
+import { OnboardingBasePage,  OnboardingContentSection } from "../../../../widgets/base-page.slint";
+import { Font } from "@ui/fonts.slint";
+import { Palette, Size, Utils, UISize } from "@ui/theme.slint";
+import { RestoreKeycardBackupProps } from "props.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+import { StepList } from "@ui/widgets/step-list.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { OnboardingCallbacks, MasterSeedState, KeycardRestoreKind, KeycardRestoreGlobal, SeedGlobal } from "../../../../onboarding-callbacks.slint";
+import { RestoreSeedLoading, RestoreSuccessContent, RestoreFailed } from "../../../../widgets/restore-seed.slint";
+
+component Restoring inherits Rectangle {
+    NavHeader {
+        y: 0;
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    JumboIconPageBody {
+        OnboardingContentSection {
+            HorizontalLayout {
+                alignment: center;
+                if (KeycardRestoreGlobal.reading-from-keycard): TimerCircularProgress {
+                    indeterminate: true;
+                    Icon {
+                        name: "nfc-1-card-vert";
+                        size: 96px;
+                    }
+                }
+                if (!KeycardRestoreGlobal.reading-from-keycard): KeyCardAnimation { }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz5;
+                HeadingMd {
+                    vertical-stretch: 0;
+                    text: TR2.lookup(TrId.RecoverRestoreCardHeader);
+                    horizontal-alignment: center;
+                }
+            }
+
+            StepList {
+                steps: KeycardRestoreGlobal.steps;
+            }
+        }
+
+        ButtonSection {
+            // strictly visual, flow will navigate to success when done
+            Button {
+                enabled: false;
+                label: TR2.lookup(TrId.CommonButtonContinue);
+                importance: primary;
+            }
+        }
+    }
+}
+
+component Success inherits Rectangle {
+    JumboIconPageBody {
+        RestoreSuccessContent {
+            StepList {
+                steps: KeycardRestoreGlobal.steps;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonButtonContinue);
+                importance: primary;
+                clicked => {
+                    if (SeedGlobal.is-master-key-recovery) {
+                        OnboardingCallbacks.finish-onboarding();
+                    } else {
+                        Navigate.restore-magic-backup({ });
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component RestoreKeycardBackupPage inherits OnboardingBasePage {
+    property <MasterSeedState> state: SeedGlobal.master-seed-state;
+
+    init => {
+        KeycardRestoreGlobal.start-keycard-restore();
+    }
+
+    if state == MasterSeedState.Idle: Restoring { }
+    if state == MasterSeedState.SavingToSE || state == MasterSeedState.EncryptingFs: RestoreSeedLoading { }
+    if state == MasterSeedState.Success: Success { }
+    if state == MasterSeedState.Failed: RestoreFailed {
+        // todo: localize
+        title: "Failed to restore Keycard Backup";
+        retry => {
+            KeycardRestoreGlobal.start-keycard-restore();
+        }
+    }
+}

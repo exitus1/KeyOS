@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { TextMd, Button, SearchInput, Icon, TextSm, BasePage, PageBody } from "@ui/widgets.slint";
+import { Palette, Size, Utils, Timings } from "@ui/theme.slint";
+import { ListView } from "std-widgets.slint";
+
+import { Callbacks } from "../../../../callbacks.slint";
+import { DateTimeGlobal } from "../../../../globals/date-time-global.slint";
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { TimeZone } from "../../../../globals/date-time-global.slint";
+
+import { TimeZoneProps } from "props.slint";
+
+export component TimeZonePage inherits BasePage {
+    in property <TimeZoneProps> props;
+
+    private property <length> item-height: Size.sz16;
+
+    init() => {
+        DateTimeGlobal.timezone-search-text-edited(search-bar.text);
+    }
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: "Time Zone";
+        }
+
+        PageBody {
+            padding-top: 0;
+            padding-bottom: 0;
+            VerticalLayout {
+                spacing: Size.sz2;
+                HorizontalLayout {
+                    padding-top: Size.sz4;
+                    padding-bottom: Size.sz4;
+                    alignment: center;
+                    search-bar := SearchInput {
+                        width: parent.width;
+                        height: Size.sz14;
+                        placeholder: "Search...";
+                        edited(text) => {
+                            DateTimeGlobal.timezone-search-text-edited(text);
+                            // scroll to top when search text changes
+                            fl.viewport-y = 0px;
+                        }
+                    }
+                }
+
+                fl := ListView {
+                    viewport-height: DateTimeGlobal.timezone-search-list.length * item-height;
+                    viewport-width: parent.width;
+                    height: 688px;
+                    width: parent.width;
+
+                    vertical-scrollbar-policy: always-off;
+                    horizontal-scrollbar-policy: always-off;
+                    mouse-drag-pan-enabled: true;
+
+                    for tz[index] in DateTimeGlobal.timezone-search-list: Rectangle {
+                        width: parent.width;
+                        height: item-height;
+
+                        HorizontalLayout {
+                            padding-left: Size.sz4;
+                            padding-right: Size.sz4;
+                            spacing: Size.sz4;
+                            alignment: space-between;
+
+                            VerticalLayout {
+                                alignment: center;
+                                TextSm {
+                                    text: tz.display-full;
+                                    color: Palette.content-primary;
+                                    width: 360px;
+                                    overflow: elide;
+                                    wrap: no-wrap;
+                                }
+                            }
+
+                            VerticalLayout {
+                                alignment: center;
+                                Icon {
+                                    name: "check";
+                                    color: Palette.content-brand;
+                                    opacity: DateTimeGlobal.selected-timezone.id == tz.id ? 1 : 0;
+                                    animate opacity { duration: Timings.prop-change; }
+                                }
+                            }
+                        }
+
+                        TouchArea {
+                            mouse-cursor: pointer;
+                            clicked => {
+                                search-bar.clear-focus();
+                                DateTimeGlobal.timezone-selected(tz);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

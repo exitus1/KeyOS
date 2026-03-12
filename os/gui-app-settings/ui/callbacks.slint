@@ -1,0 +1,13 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global Callbacks {
+    callback scan-clicked() -> string;
+    callback save-log-files() -> bool;
+
+    callback close-settings();
+
+    pure callback get-seed-words() -> [string];
+    pure callback get-standard-seed-qr() -> image;
+    pure callback get-compact-seed-qr() -> image;
+}

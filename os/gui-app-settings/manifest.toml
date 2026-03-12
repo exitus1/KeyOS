@@ -1,0 +1,96 @@
+appId = "0xc192b79230473875f159d4423d74d00f"
+
+[appName]
+en = "Settings"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/app-manager" = ["LaunchAppBlocking"]
+"os/backup" = ["StatusSubscribe", "CreateBackup", "CreateBackupFile"]
+"os/bt" = ["GetBleVersionInfo", "SubscribeBleState", "GetBtAddr"]
+"os/power-manager" = [
+    "GetStatus",
+    "GetExtendedStatus",
+    "SetOtgPriority",
+    "Reboot",
+    "StatusSubscribe",
+]
+"os/security" = [
+    "ChangePin",
+    "GetOsVersionInfo",
+    "GetDeviceId",
+    "Lockout",
+    "GetSeed",
+    "GetPinEntryMode",
+    "GetSeedFingerprint",
+]
+"os/fs" = [
+    "GetAirlockReadAccess",
+    "GetAirlockWriteAccess",
+    "GetSystemWriteAccess",
+    "GetUserReadAccess",
+    "GetUserWriteAccess",
+    "GetUsbReadAccess",
+    "GetUsbWriteAccess",
+]
+"os/gui-server" = ["SwitchToLauncher", "SetWakeLock"]
+"os/settings" = [
+    "GetTimeZone",
+    "SetTimeZone",
+    "LookupTimeZone",
+    "ListTimeZone",
+    "SetScreenBrightness",
+    "SubscribeScreenBrightness",
+    "SetSystemTheme",
+    "GetDeviceName",
+    "SetDeviceName",
+    "GetAutoLock",
+    "SetAutoLock",
+    "GetShowSecurityWords",
+    "SetShowSecurityWords",
+    "GetUseStandardTimeFormat",
+    "SetUseStandardTimeFormat",
+    "GetEnvoyTimeSync",
+    "SetEnvoyTimeSync",
+    "GetMagicBackupEnabled",
+    "SetMagicBackupEnabled",
+    "GetPrimeColor",
+    "GetOnboardingStatus",
+    "SubscribeMagicBackupEnabled",
+]
+"os/quantum-link" = [
+    "GetXidDocument",
+    "SubscribePairingEvent",
+    "ClearPairedDevice",
+    "SendPrimeMagicBackupEnabled",
+    "SubscribeConnectionStatus",
+    "EnvoyTimezone",
+    "StartFirmwareUpdate",
+    "CheckFirmwareUpdate",
+    "NotifyFirmwareInstall",
+    "RestoreShard",
+    "BackupShard",
+]
+"os/update" = [
+    "ApplyDownloadedUpdate",
+    "ClearUpdateApplied",
+    "ContinueUpdate",
+    "FirmwareVersion",
+    "GetUpdateApplied",
+    "GetUpdateStatus",
+    "StartUpdate",
+    "SubscribeUpdateProgress",
+]
+"os/keycard" = [
+    "IdentifyKeycard",
+    "GenerateShards",
+    "PopShard",
+    "PushShard",
+    "ResetShards",
+    "LoadShardFromKeycard",
+    "StoreShardToKeycard",
+    "RestoreMasterSeed",
+    "DetectKeycard",
+    "CheckBackup",
+]
+"os/haptics" = ["Vibrate"]

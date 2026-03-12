@@ -1,0 +1,12 @@
+appId = "0x6775692d6170702d6b6579626f617264"
+
+[appName]
+en = "Keyboard"
+
+[permissions]
+template = ["gui-app"]
+"os/gui-server" = [
+    "KeyPressed",
+    "KeyReleased",
+]
+"os/haptics" = ["Vibrate"]

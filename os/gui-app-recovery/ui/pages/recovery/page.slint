@@ -1,0 +1,383 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, ButtonSection, Shield, Icon, HeadingMd, HeadingXl, TextLg, TextSm, TextMd,
+         TextXs, TimerCircularProgress, Shimmer, IconButton, PopupMenu, ConfirmationModal, BasePage } from "@ui/widgets.slint";
+import { Size, Palette, UISize, Importance, Utils, Images } from "@ui/theme.slint";
+import { UIColors } from "@ui/palettes/ui-colors.slint";
+import { AppHeader } from "@ui/widgets/app-header.slint";
+import { JumboIcon } from "@ui/widgets/jumbo-icon.slint";
+import { StepLine, StepLineSection } from "@ui/widgets/step-list.slint";
+import { SegmentedControl } from "@ui/widgets/segmented-control.slint";
+import { RoundContainer } from "@ui/widgets/round-container.slint";
+import { Divider } from "@ui/widgets/divider.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { IconSize } from "@ui/types.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { RecoveryGlobal, RecoveryStep, RecoveryValidationStep } from "../../globals/recovery-global.slint";
+import { Navigate } from "../../gen/navigate.slint";
+
+export component RecoveryPage inherits BasePage {
+    width: 100%;
+    height: 100%;
+
+    property <length> hash-link-x: 0;
+    property <length> hash-link-y: 0;
+
+    Image {
+        source: Images.common("images/background");
+    }
+
+    function begin-recovery() {
+        RecoveryGlobal.recovery-error = false;
+        RecoveryGlobal.recovery-in-progress = true;
+        RecoveryGlobal.recovery-complete = false;
+        Callbacks.recovery-clicked();
+    }
+
+    function reset-recovery() {
+        RecoveryGlobal.recovery-in-progress = false;
+        RecoveryGlobal.new-keyos-selected = false;
+        RecoveryGlobal.new-keyos-valid = false;
+        RecoveryGlobal.new-keyos-validation-in-progress = false;
+        RecoveryGlobal.new-keyos-validation-error = false;
+        RecoveryGlobal.new-keyos-validation-error-str = "";
+        RecoveryGlobal.recovery-error = false;
+        RecoveryGlobal.recovery-error-str = "";
+        RecoveryGlobal.is-recovering-critical-components = false;
+        RecoveryGlobal.is-tar-copied = false;
+        RecoveryGlobal.recovery-complete = false;
+        RecoveryGlobal.is-usb-drive-connected = false;
+
+        Callbacks.reset-usb-drive();
+    }
+
+    VerticalLayout {
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-bottom: Size.sz16;
+
+        AppHeader {
+            title: TR2.lookup(TrId.RecoveryTitle);
+
+            property <bool> can-go-back: RecoveryGlobal.new-keyos-selected && (!RecoveryGlobal.new-keyos-validation-in-progress && (!RecoveryGlobal.recovery-in-progress || RecoveryGlobal.recovery-error));
+
+            if can-go-back: IconButton {
+                icon: "chevron-left";
+                importance: Importance.tertiary;
+                clicked => {
+                    reset-recovery();
+                }
+            }
+        }
+
+        // Waiting for USB device to be inserted or tar file to be copied
+        if !RecoveryGlobal.is-usb-drive-connected && !RecoveryGlobal.is-tar-copied: VerticalLayout {
+            alignment: start;
+            spacing: Size.sz10;
+            padding-top: Size.sz8;
+
+            HorizontalLayout {
+                alignment: center;
+
+                TimerCircularProgress {
+                    percent: 0.15;
+                    size: IconSize.px184;
+                    indeterminate: true;
+                    back-color: UIColors.neutral-700;
+                }
+            }
+
+            HeadingMd {
+                horizontal-alignment: center;
+                text: TR2.lookup(TrId.MainHeader);
+                color: Palette.content-primary;
+            }
+        }
+
+        // Verify and perform the recovery with the selected archive
+        if RecoveryGlobal.is-usb-drive-connected || RecoveryGlobal.is-tar-copied: VerticalLayout {
+            alignment: space-between;
+
+            if RecoveryGlobal.recovery-in-progress && RecoveryGlobal.new-keyos-valid: VerticalLayout {
+                alignment: space-between;
+                padding-left: Size.sz6;
+                padding-right: Size.sz6;
+                padding-top: Size.sz8;
+                padding-bottom: 96px;
+                spacing: Size.sz8;
+
+                HorizontalLayout {
+                    height: IconSize.px184;
+                    alignment: center;
+                    if RecoveryGlobal.recovery-in-progress: TimerCircularProgress {
+                        percent: RecoveryGlobal.recovery-progress;
+                        back-color: UIColors.neutral-700;
+
+                        if !self.indeterminate: HeadingXl {
+                            text: Math.round(RecoveryGlobal.recovery-progress * 100) + "%";
+                        }
+                    }
+                    if !RecoveryGlobal.recovery-in-progress && RecoveryGlobal.recovery-complete: JumboIcon {
+                        name: "jumbo-circle";
+
+                        Icon {
+                            name: RecoveryGlobal.recovery-error ? "close" : "check";
+                            size: IconSize.px96;
+                            color: Palette.content-brand;
+                        }
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz6;
+                    alignment: center;
+
+                    StepLineSection {
+                        extracting := StepLine {
+                            error: RecoveryGlobal.recovery-error;
+                            done: !self.loading && !self.error;
+                            loading: RecoveryGlobal.curr-recovery-step == RecoveryStep.Extracting && !self.error;
+                            text: self.loading ? TR2.lookup(TrId.ProgressInstallingFirmware) : TR2.lookup(TrId.ProgressKeyosInstalled);
+                        }
+
+                        rebooting := StepLine {
+                            done: false; // this step never ends
+                            loading: RecoveryGlobal.curr-recovery-step == RecoveryStep.Rebooting;
+                            text: self.loading ? TR2.lookup(TrId.ProgressRebooting) : TR2.lookup(TrId.ProgressReboot);
+                        }
+                    }
+                }
+
+                if !RecoveryGlobal.recovery-complete || RecoveryGlobal.recovery-error: VerticalLayout {
+                    spacing: Size.sz4;
+
+                    TextMd {
+                        height: Size.sz12;
+                        horizontal-alignment: center;
+                        text: !RecoveryGlobal.recovery-complete ? TR2.lookup(TrId.ProgressSubheader) : RecoveryGlobal.recovery-error-str;
+                        color: Palette.content-notice;
+                    }
+                }
+            }
+
+            if RecoveryGlobal.new-keyos-selected && !RecoveryGlobal.recovery-in-progress: VerticalLayout {
+                spacing: Size.sz10;
+
+                HorizontalLayout {
+                    height: IconSize.px184;
+                    alignment: center;
+                    if RecoveryGlobal.new-keyos-validation-in-progress: TimerCircularProgress {
+                        percent: RecoveryGlobal.recovery-progress;
+                        size: IconSize.px184;
+                        indeterminate: RecoveryGlobal.new-keyos-validation-step == RecoveryValidationStep.Reading;
+                        back-color: UIColors.neutral-700;
+
+                        if !self.indeterminate: HeadingXl {
+                            text: Math.round(RecoveryGlobal.recovery-progress * 100) + "%";
+                        }
+                    }
+                    if !RecoveryGlobal.new-keyos-validation-in-progress && !RecoveryGlobal.recovery-in-progress: JumboIcon {
+                        name: RecoveryGlobal.new-keyos-valid ? "jumbo-download" : "jumbo-circle";
+
+                        if !RecoveryGlobal.new-keyos-valid: Icon {
+                            name: "close";
+                            size: IconSize.px96;
+                            color: Palette.content-brand;
+                        }
+                    }
+                }
+
+                if !RecoveryGlobal.new-keyos-valid && RecoveryGlobal.new-keyos-validation-error: VerticalLayout {
+                    spacing: Size.sz5;
+
+                    HeadingMd {
+                        horizontal-alignment: center;
+                        text: TR2.lookup(TrId.VerificationFailedHeader);
+                        color: Palette.content-primary;
+                    }
+
+                    TextMd {
+                        horizontal-alignment: center;
+                        text: RecoveryGlobal.new-keyos-validation-error-str;
+                        color: Palette.content-primary;
+                    }
+                }
+
+                if RecoveryGlobal.new-keyos-validation-in-progress: HeadingMd {
+                    horizontal-alignment: center;
+                    text: RecoveryGlobal.new-keyos-file-path;
+                    color: Palette.content-primary;
+                }
+
+                if RecoveryGlobal.new-keyos-valid: VerticalLayout {
+                    spacing: Size.sz4;
+
+                    TextMd {
+                        horizontal-alignment: center;
+                        text: TR2.lookup(TrId.SummarySelectedFile);
+                        color: Palette.content-tertiary;
+                    }
+
+                    TextMd {
+                        horizontal-alignment: center;
+                        text: RecoveryGlobal.new-keyos-file-path;
+                        color: Palette.content-primary;
+                    }
+
+                    TextMd {
+                        horizontal-alignment: center;
+                        text: TR2.format(TrId.SummaryKeyosVersion, [RecoveryGlobal.new-keyos-version]);
+                        color: Palette.content-tertiary;
+                    }
+
+                    TextMd {
+                        horizontal-alignment: center;
+                        text: TR2.format(TrId.SummaryBuildDate, [RecoveryGlobal.new-keyos-build-date]);
+                        color: Palette.content-tertiary;
+                    }
+
+                    if RecoveryGlobal.num-apps != 0: TextMd {
+                        horizontal-alignment: center;
+                        text: TR2.format(TrId.SummaryIncluding, [RecoveryGlobal.num-apps, RecoveryGlobal.num-assets]);
+                        color: Palette.content-tertiary;
+                    }
+                }
+
+                if RecoveryGlobal.new-keyos-validation-in-progress: StepLineSection {
+                    reading := StepLine {
+                        done: RecoveryGlobal.new-keyos-validation-step == RecoveryValidationStep.Copying || RecoveryGlobal.new-keyos-validation-step == RecoveryValidationStep.Verifying;
+                        loading: !reading.done;
+                        text: self.loading ? TR2.lookup(TrId.ProgressReadingFile) : TR2.lookup(TrId.ProgressFileRead);
+                    }
+
+                    copy := StepLine {
+                        done: RecoveryGlobal.new-keyos-validation-step == RecoveryValidationStep.Verifying;
+                        loading: RecoveryGlobal.new-keyos-validation-step == RecoveryValidationStep.Copying;
+                        text: self.loading ? TR2.lookup(TrId.ProgressCopyingFile) : self.done ? TR2.lookup(TrId.ProgressFileCopied) : TR2.lookup(TrId.ProgressCopyFile);
+                    }
+
+                    verify := StepLine {
+                        done: !RecoveryGlobal.new-keyos-validation-in-progress;
+                        loading: RecoveryGlobal.new-keyos-validation-step == RecoveryValidationStep.Verifying;
+                        text: self.loading ? TR2.lookup(TrId.ProgressVerifyingFile) : TR2.lookup(TrId.ProgressVerifyFile);
+                    }
+                }
+            }
+        }
+
+        if RecoveryGlobal.new-keyos-valid && !RecoveryGlobal.recovery-in-progress: ButtonSection {
+            VerticalLayout {
+                padding: Size.sz4;
+                alignment: center;
+
+                HorizontalLayout {
+                    spacing: Size.sz2;
+                    alignment: center;
+
+                    Icon {
+                        name: "info";
+                        size: Size.sz6;
+                        color: Palette.content-brand;
+                    }
+
+                    TextLg {
+                        text: TR2.lookup(TrId.SummaryKeyosHash);
+                        bold: true;
+                        color: Palette.content-brand;
+
+                        TouchArea {
+                            clicked => {
+                                hash-link-x = self.x;
+                                hash-link-y = self.y;
+                                RecoveryGlobal.is-hash-view-open = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonRecover);
+                importance: Importance.primary;
+                clicked() => {
+                    if (RecoveryGlobal.is-recovering-critical-components) {
+                        RecoveryGlobal.is-critical-recovery-confirmation-modal-showing = true;
+                    } else {
+                        begin-recovery();
+                    }
+                }
+            }
+        }
+
+        if RecoveryGlobal.is-usb-drive-connected && (RecoveryGlobal.new-keyos-validation-error || RecoveryGlobal.recovery-error): ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonButtonRetry);
+                importance: Importance.primary;
+                clicked() => {
+                    reset-recovery();
+                }
+            }
+        }
+    }
+
+    if RecoveryGlobal.is-critical-recovery-confirmation-modal-showing: ConfirmationModal {
+        critical: true;
+        icon: "alert";
+        title: TR2.lookup(TrId.AdvancedModalCriticalRecoveryHeader);
+        text: TR2.lookup(TrId.AdvancedModalCriticalRecoveryContent);
+        confirm-button-label: TR2.lookup(TrId.AdvancedModalCriticalRecoveryStartRecovery);
+        cancel-button-label: TR2.lookup(TrId.CommonButtonCancel);
+
+        cancel-clicked => {
+            RecoveryGlobal.is-critical-recovery-confirmation-modal-showing = false;
+        }
+
+        confirm-clicked => {
+            RecoveryGlobal.is-critical-recovery-confirmation-modal-showing = false;
+
+            begin-recovery();
+        }
+    }
+
+    if RecoveryGlobal.is-hash-view-open: Rectangle {
+        background: Palette.black.transparentize(0.7);
+        PopupMenu {
+            x: root.width / 2 - self.width / 2;
+            y: root.height / 2 - self.height / 2 + Size.sz16;
+            z: 100;
+
+            VerticalLayout {
+                padding: Size.sz8;
+                spacing: Size.sz8;
+
+                HeadingMd {
+                    horizontal-alignment: center;
+                    text: TR2.lookup(TrId.SummaryModalHeader);
+                    color: Palette.content-primary;
+                }
+
+                TextMd {
+                    padding: Size.sz6;
+                    horizontal-alignment: center;
+                    text: RecoveryGlobal.new-keyos-hash;
+                    color: Palette.content-tertiary;
+                }
+
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonConfirm);
+                    importance: Importance.primary;
+                    clicked() => {
+                        RecoveryGlobal.is-hash-view-open = false;
+                    }
+                }
+            }
+        }
+
+        TouchArea {
+            clicked => {
+                RecoveryGlobal.is-hash-view-open = false;
+            }
+        }
+    }
+}

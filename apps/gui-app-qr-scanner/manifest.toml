@@ -1,0 +1,11 @@
+appId = "0x6775692d6170702d6578616d706c652e"
+
+[appName]
+en = "QR Scanner"
+
+[permissions]
+template = ["gui-app", "navigable"]
+"os/camera" = ["IsReady", "GetFrameMemoryMirror", "GetFrameBufId"]
+"os/gui-server" = ["IsCameraReady", "ShowCamera"]
+"os/haptics" = ["Vibrate"]
+"os/settings" = ["SetCameraEnabled", "SubscribeCameraEnabled"]

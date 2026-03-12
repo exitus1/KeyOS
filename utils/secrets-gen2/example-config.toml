@@ -1,0 +1,95 @@
+# Example configuration file for secrets-gen2
+
+[keys]
+# P256 keypair for provisioning
+ProvisioningKey = { type = "P256" }
+
+# P256 keypair for SC server
+ScServerKey = { type = "P256" }
+
+# Random 32-byte key for FIDO
+FidoPrivateKey = { type = "random", params = { length = 32 } }
+
+# Random entropy for bootloader
+BootloaderEntropy = { type = "random", params = { length = 32, count = 2 } }
+
+[injectors]
+# Inject into provision.toml
+[[injectors.files]]
+file = "~/dev/config/provision.toml"
+type = "toml"
+injections = [
+  { key = "ProvisioningKey", format = "private-hex", name = "provisioning-secret" },
+  { key = "ScServerKey", format = "public-hex", name = "sc-server-pubkey" },
+  { key = "FidoPrivateKey", name = "fido-private-key" },
+]
+
+# Inject into .env file
+[[injectors.files]]
+file = "~/dev/sc-server/.env"
+type = "env"
+injections = [
+  { key = "ScServerKey", format = "private-hex", name = "SC_SIGNING_KEY" },
+  { key = "ProvisioningKey", format = "public-hex", name = "SC_PROVISIONING_PUBKEY" },
+  { key = "BootloaderEntropy", format = "csv", name = "SC_EXTRA_ENTROPY" },
+]
+
+# Save keys to individual files
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/provisioning-signing-private-key.pem"
+type = "raw"
+injections = [{ key = "ProvisioningKey", format = "private-pem" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/provisioning-signing-public-key.pem"
+type = "raw"
+injections = [{ key = "ProvisioningKey", format = "public-pem" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/provisioning-signing-private-key.hex"
+type = "raw"
+injections = [{ key = "ProvisioningKey", format = "private-hex" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/provisioning-signing-public-key.hex"
+type = "raw"
+injections = [{ key = "ProvisioningKey", format = "public-hex" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/scs-signing-private-key.pem"
+type = "raw"
+injections = [{ key = "ScServerKey", format = "private-pem" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/scs-signing-public-key.pem"
+type = "raw"
+injections = [{ key = "ScServerKey", format = "public-pem" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/scs-signing-private-key.hex"
+type = "raw"
+injections = [{ key = "ScServerKey", format = "private-hex" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/scs-signing-public-key.hex"
+type = "raw"
+injections = [{ key = "ScServerKey", format = "public-hex" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/fido-private-key.hex"
+type = "raw"
+injections = [{ key = "FidoPrivateKey", format = "hex" }]
+
+[[injectors.files]]
+file = "~/dev/keyOS/generated-keys/extra-entropy.txt"
+type = "raw"
+injections = [{ key = "BootloaderEntropy", format = "csv" }]
+
+# Example of Rust file injection
+[[injectors.files]]
+file = "~/dev/keyOS/src/constants.rs"
+type = "rs"
+injections = [
+  { key = "FidoPrivateKey", format = "hex-array", inject = "FidoPrivateKey" },
+  { key = "ProvisioningKey", format = "public-hex", inject = "ProvisioningPublicKey" },
+]

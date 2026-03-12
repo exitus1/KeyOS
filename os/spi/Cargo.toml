@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "spi-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = "0.4.14"
+server = { path = "../../server" }
+spi = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+dma = { workspace = true }
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+power-manager = { workspace = true }
+st25r95 = { workspace = true }
+utralib = { workspace = true }
+xous = { path = "../../xous/xous-rs" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

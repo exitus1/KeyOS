@@ -1,0 +1,18 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Size, UISize, Palette } from "@ui/theme.slint";
+
+// has background color
+export component OnboardingBasePage inherits Rectangle {
+    y: UISize.control-center-status-bar-height;
+    width: UISize.screen-width;
+    height: UISize.app-window-height;
+
+    background: Palette.background-primary;
+}
+
+export component OnboardingContentSection inherits VerticalLayout {
+    alignment: start;
+    spacing: Size.sz10;
+}

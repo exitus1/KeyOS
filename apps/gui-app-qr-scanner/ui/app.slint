@@ -1,0 +1,159 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Size, Palette, UISize, Importance, Utils, Images, ScanQrAction, Timings, CurrentTheme } from "@ui/theme.slint";
+import { TextSm, Button, IconButton, BasePage, Link } from "@ui/widgets.slint";
+import { AppHeader } from "@ui/widgets/app-header.slint";
+import { TR2, TrId } from "./gen/tr.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+
+export global Callbacks {
+    callback enable-camera-clicked() -> bool;
+    callback button-clicked(ScanQrAction);
+}
+
+export global Global {
+    // ScanQrOptions fields
+    in-out property <string> header-title: "";
+    in-out property <string> header-left-icon: "";
+    in-out property <string> header-left-text: "";
+    in-out property <string> header-right-icon: "";
+    in-out property <string> header-right-text: "";
+    in-out property <string> message: "";
+    in-out property <string> button-icon: "";
+    in-out property <string> button-text: "";
+    in property <bool> camera-enabled: false;
+    in property <percent> scan-progress: 0%;
+}
+
+export component AppWindow inherits Window {
+
+    property <bool> light-mode: false;
+
+    background: Palette.transparent;
+
+    Image {
+        width: UISize.screen-width;
+        height: UISize.screen-height;
+        source: @image-url("./qr-scan-bg.png");
+    }
+
+    BasePage {
+        // Overlay the app header and any text
+        VerticalLayout {
+            alignment: space-between;
+            AppHeader {
+                title: Global.header-title != "" ? Global.header-title : TR2.lookup(TrId.ScanTitle);
+                title-color: Palette.white;
+
+                if Global.header-left-icon != "": IconButton {
+                    icon: Global.header-left-icon;
+                    importance: Importance.white;
+                    clicked => {
+                        Callbacks.button-clicked(ScanQrAction.left-clicked);
+                    }
+                }
+
+                if Global.header-left-text != "" && Global.header-left-icon == "": VerticalLayout {
+                    alignment: center;
+                    Link {
+                        label: Global.header-left-text;
+                        importance: Importance.white;
+                        height: Size.sz6;
+                        clicked => {
+                            Callbacks.button-clicked(ScanQrAction.left-clicked);
+                        }
+                    }
+                }
+
+                // If both left parameters are blank or filled, fill the space with an empty Rectangle so the right button is positioned correctly
+                if (Global.header-left-text == "" && Global.header-left-icon == "") || (Global.header-left-text != "" && Global.header-left-icon != ""): Rectangle { }
+
+                if Global.header-right-icon != "": IconButton {
+                    icon: Global.header-right-icon;
+                    importance: Importance.white;
+                    clicked => {
+                        Callbacks.button-clicked(ScanQrAction.right-clicked);
+                    }
+                }
+
+                if Global.header-right-text != "" && Global.header-right-icon == "": VerticalLayout {
+                    alignment: center;
+                    Link {
+                        label: Global.header-right-text;
+                        importance: Importance.white;
+                        height: Size.sz6;
+                        clicked => {
+                            Callbacks.button-clicked(ScanQrAction.right-clicked);
+                        }
+                    }
+                }
+            }
+
+            VerticalLayout {
+                height: 196px;
+                alignment: start;
+                spacing: Size.sz4;
+                padding: Size.sz8;
+
+                HorizontalLayout {
+                    alignment: center;
+                    height: 3px;
+                    if Global.scan-progress != 0: Rectangle {
+                        height: 3px;
+                        width: 270px;
+                        border-radius: Size.sz0_5;
+                        background: #51595a;
+
+                        HorizontalLayout {
+                            alignment: start;
+                            Rectangle {
+                                background: Palette.white;
+                                width: Global.scan-progress * parent.width;
+                                border-radius: Size.sz0_5;
+                                animate width { duration: Timings.prop-change; }
+                            }
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    TextSm {
+                        text: Global.camera-enabled ? Global.message : TR2.lookup(TrId.DisabledContent);
+                        horizontal-alignment: center;
+                        color: Palette.white;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    if Global.button-icon != "" || Global.button-text != "" || !Global.camera-enabled: Button {
+                        icon: Global.camera-enabled ? Global.button-icon : "";
+                        label: Global.camera-enabled ? Global.button-text : TR2.lookup(TrId.DisabledEnableCamera);
+                        importance: Global.camera-enabled ? Importance.white : Importance.primary;
+                        clicked => {
+                            if Global.camera-enabled {
+                                Callbacks.button-clicked(ScanQrAction.button-clicked);
+                            } else {
+                                Global.camera-enabled = Callbacks.enable-camera-clicked();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Image {
+        visible: !Global.camera-enabled;
+        x: 176px;
+        y: 313px;
+        width: 128px;
+        height: 128px;
+        source: @image-url("./camera-big.svg");
+    }
+}
+
+export { Utils, Images, TR, CurrentTheme }
+export * from "gen/exports.slint";

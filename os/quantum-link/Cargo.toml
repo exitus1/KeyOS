@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "quantum-link-server"
+version = "0.1.0"
+edition = "2021"
+description = "Quantum Server"
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+backup = { workspace = true }
+backup-shard = { workspace = true }
+bt = { workspace = true }
+btp = { workspace = true }
+foundation-api = { workspace = true }
+fs = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+power-manager = { workspace = true }
+quantum-link = { workspace = true }
+rkyv = { workspace = true }
+security = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

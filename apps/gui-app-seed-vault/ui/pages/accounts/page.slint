@@ -1,0 +1,175 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Size, Importance } from "@ui/theme.slint";
+import { IconButton, AppHeader, OverlayMenu, PopupMenuItem, BasePage, Movable, Link } from "@ui/widgets.slint";
+import { CardPageVersion, CardList } from "@ui/pages.slint";
+import { EditPageVersion } from "@ui/pages.slint";
+import { AccountsProps } from "./props.slint";
+import { SeedEntry } from "../../widgets/seed-entry.slint";
+import { Callbacks as CB } from "../../callbacks.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+export component AccountsPage inherits BasePage {
+    in property <AccountsProps> props;
+
+    private property <bool> is-menu-open: false;
+    private property <bool> reorder-mode: false;
+
+    function get-bottom-text() -> string {
+        if (CB.entries.length == 0) {
+            if (props.version == CardPageVersion.main) {
+                return TR2.lookup(TrId.AccountsEmptyNoItems);
+            } else if (props.version == CardPageVersion.archive) {
+                return TR2.lookup(TrId.ArchiveNoArchivedItems);
+            }
+        }
+        return "";
+    }
+
+    VerticalLayout {
+        AppHeader {
+            title: props.version == CardPageVersion.main ? TR2.lookup(TrId.AccountsTitle) : TR2.lookup(TrId.ArchiveTitle);
+            side-padding: Size.sz8;
+
+            if props.version == CardPageVersion.main: Rectangle { }
+
+            if props.version == CardPageVersion.main && !reorder-mode: IconButton {
+                icon: "ellipsis";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    is-menu-open = !is-menu-open;
+                }
+            }
+
+            if props.version == CardPageVersion.main && reorder-mode: VerticalLayout {
+                alignment: center;
+                Link {
+                    label: TR2.lookup(TrId.CommonButtonDone);
+                    touch-factor: 1.5;
+                    importance: Importance.normal;
+                    clicked => {
+                        reorder-mode = false;
+                        card-list.exit-reorder-mode();
+                    }
+                }
+            }
+
+            if props.version == CardPageVersion.archive: IconButton {
+                icon: "chevron-left";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    CB.set-archive-mode(false);
+                    Navigate.backward();
+                }
+            }
+        }
+
+        card-list := CardList {
+            sort-mode: CB.sort-mode;
+            sort-mode-titles: [
+                TR2.lookup(TrId.ReorderAlphabetical),
+                TR2.lookup(TrId.ReorderDate),
+                TR2.lookup(TrId.ReorderCustom)
+            ];
+            search-text: CB.search-text;
+            new-text: props.version == CardPageVersion.main ? TR2.lookup(TrId.AccountsNewItem) : "";
+            bottom-text: get-bottom-text();
+
+            set-sort-mode(mode) => {
+                CB.sort-mode = mode;
+                CB.set-sort-mode(mode);
+            }
+
+            search(text) => {
+                CB.search-text = text;
+                CB.search(text)
+            }
+
+            new => {
+                Navigate.create({ });
+            }
+
+            for entry[index] in CB.entries: Movable {
+                move-mode: reorder-mode && CB.sort-mode == 2;
+                first: index == 0;
+                last: index + 1 == CB.entries.length;
+
+                SeedEntry {
+                    seed: entry;
+                    reorder-mode: reorder-mode && CB.sort-mode == 2;
+                    archive-mode: props.version == CardPageVersion.archive;
+                    first: parent.first;
+                    last: parent.last;
+
+                    clicked() => {
+                        if !reorder-mode {
+                            Navigate.details({
+                                seed: entry,
+                                version: props.version == CardPageVersion.main ? EditPageVersion.edit : EditPageVersion.archive,
+                            }, { });
+                        }
+                    }
+                }
+
+                move-position(up) => {
+                    CB.move-position(entry.index, up);
+                }
+            }
+        }
+    }
+
+    // Ellipsis menu
+    if is-menu-open: OverlayMenu {
+        PopupMenuItem {
+            label: TR2.lookup(TrId.AccountsMenuNewItem);
+            icon: "plus";
+            first: true;
+            clicked => {
+                is-menu-open = false;
+                Navigate.create({ });
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.AccountsMenuSearch);
+            icon: "search";
+            clicked => {
+                is-menu-open = false;
+                card-list.show-search-bar();
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.AccountsMenuReorder);
+            icon: "arrows-vertical";
+            clicked => {
+                is-menu-open = false;
+                // Clear search
+                CB.search("");
+                reorder-mode = true;
+                card-list.enter-reorder-mode();
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.AccountsMenuViewArchive);
+            icon: "archive";
+            last: true;
+            clicked => {
+                is-menu-open = false;
+                // Clear search
+                CB.search("");
+                CB.set-archive-mode(true);
+                Navigate.accounts({ version: CardPageVersion.archive }, { });
+            }
+        }
+
+        touched-off => {
+            is-menu-open = false;
+        }
+    }
+}

@@ -1,0 +1,221 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+use std::time::Instant;
+
+use gui_server_api::consts::{MODAL_DRAG_BAR_MARGIN_PX, MODAL_HEIGHT, SCREEN_HEIGHT, SCREEN_WIDTH};
+use gui_server_api::error::NavigationError;
+use gui_server_api::msg::{NavigationResult, ShowModal};
+use gui_server_api::InputMessage;
+use gui_server_api::{
+    touch::{Touch, TouchKind},
+    ModalStyle,
+};
+use log::debug;
+use server::ArchiveRequest;
+use xous::PID;
+
+use crate::touch::TouchGestureOrigin;
+use crate::{AppState, Gui, GuiState};
+
+const BACKGROUND_DARKEN_ALPHA_MAX: u8 = 255 - 24; // The higher, the darker
+
+const MODAL_SLIDE_STEP_PX: usize = 64;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ModalStateInner {
+    /// Started, waiting for it to connect to us
+    Waiting,
+    /// Popping up, actively being animated
+    Expanding,
+    /// Fully expanded and being displayed
+    Normal,
+    /// Being actively dragged
+    Dragged,
+    /// Popping out
+    Collapsing,
+}
+
+#[derive(Debug)]
+pub(crate) struct ModalState {
+    modal_style: ModalStyle,
+    modal_height: usize,
+    state: ModalStateInner,
+    top: PID,
+    bottom: PID,
+    navigation_request: Option<ArchiveRequest<ShowModal>>,
+}
+
+impl ModalState {
+    fn is_draggable(&self) -> bool { matches!(self.modal_style, ModalStyle::SlideUpDraggablePopup) }
+
+    fn final_height(&self) -> usize {
+        if self.is_fullscreen() {
+            SCREEN_HEIGHT
+        } else {
+            MODAL_HEIGHT
+        }
+    }
+
+    pub fn modal_pid(&self) -> PID { self.top }
+
+    pub fn background_pid(&self) -> PID { self.bottom }
+
+    // Returns true if collapsed
+    pub fn animation_tick(&mut self) -> bool {
+        // Instant style has no animation
+        if matches!(self.modal_style, ModalStyle::Instant) {
+            return matches!(self.state, ModalStateInner::Collapsing);
+        }
+
+        match self.state {
+            ModalStateInner::Normal | ModalStateInner::Waiting | ModalStateInner::Dragged => false,
+            ModalStateInner::Expanding => {
+                if self.modal_height < self.final_height().saturating_sub(MODAL_SLIDE_STEP_PX) {
+                    self.modal_height += MODAL_SLIDE_STEP_PX;
+                } else {
+                    self.modal_height = self.final_height();
+                    self.state = ModalStateInner::Normal;
+                }
+                false
+            }
+            ModalStateInner::Collapsing => {
+                if self.modal_height > MODAL_SLIDE_STEP_PX {
+                    self.modal_height -= MODAL_SLIDE_STEP_PX;
+                    false
+                } else {
+                    true
+                }
+            }
+        }
+    }
+
+    pub fn respond(&mut self, result: NavigationResult) {
+        if let Some(r) = self.navigation_request.take() {
+            let _ = r.response.respond(result);
+        }
+        self.state = ModalStateInner::Collapsing;
+    }
+
+    pub fn get_navigation_request(&self) -> Option<&[u8]> {
+        self.navigation_request.as_ref().map(|r| r.message.args.as_slice())
+    }
+
+    pub fn is_waiting(&self) -> bool { self.state == ModalStateInner::Waiting }
+
+    pub fn expand(&mut self) { self.state = ModalStateInner::Expanding }
+
+    pub fn y(&self) -> usize { SCREEN_HEIGHT - self.modal_height }
+
+    pub fn is_fullscreen(&self) -> bool {
+        matches!(self.modal_style, ModalStyle::SlideUpFullscreen | ModalStyle::Instant)
+    }
+
+    pub fn dark_overlay_alpha(&self) -> u8 {
+        let height_ratio = self.modal_height as f32 / self.final_height() as f32;
+        (BACKGROUND_DARKEN_ALPHA_MAX as f32 * height_ratio) as u8
+    }
+}
+
+impl Gui {
+    pub(crate) fn modal_activate(&mut self, modal_pid: PID, mut request: ArchiveRequest<ShowModal>) {
+        debug!("Entered modal state, top PID: {modal_pid}");
+        request.response.set_response(|| Err(NavigationError::CanceledBySystem));
+        let state = match self.windows.get_mut(&modal_pid).map(|w| &mut w.state) {
+            None | Some(AppState::Starting) => ModalStateInner::Waiting,
+            Some(AppState::Active { last_activated }) => {
+                *last_activated = Instant::now();
+                self.notify_switcher_app_activated(modal_pid);
+                ModalStateInner::Expanding
+            }
+            Some(AppState::Closing) | Some(AppState::Terminating) => {
+                log::warn!("Trying to start a modal that's closing (pid={modal_pid}");
+                ModalStateInner::Waiting
+            }
+        };
+        let modal_style = request.message.modal_style;
+        let initial_height = match modal_style {
+            ModalStyle::Instant => SCREEN_HEIGHT,
+            _ => 0,
+        };
+        let initial_state = match modal_style {
+            ModalStyle::Instant => ModalStateInner::Normal,
+            _ => state,
+        };
+        self.change_state(GuiState::Modal(ModalState {
+            modal_style,
+            modal_height: initial_height,
+            state: initial_state,
+            top: modal_pid,
+            bottom: request.response.pid(),
+            navigation_request: Some(request),
+        }))
+    }
+
+    pub(crate) fn modal_process_touch(&mut self, touch: Touch) {
+        let GuiState::Modal(modal_state) = &mut self.state else {
+            log::warn!("Modal touch while not in modal state");
+            return;
+        };
+        let modal_y = SCREEN_HEIGHT - modal_state.modal_height;
+        match modal_state.state {
+            ModalStateInner::Waiting | ModalStateInner::Expanding | ModalStateInner::Collapsing => {}
+            ModalStateInner::Dragged => {
+                match touch.kind {
+                    TouchKind::Drag => {
+                        let new_h = SCREEN_HEIGHT.saturating_sub(touch.y) + MODAL_DRAG_BAR_MARGIN_PX / 2;
+                        // Clamp the min and max height of the window
+                        modal_state.modal_height = new_h.min(MODAL_HEIGHT);
+                        self.update_layers();
+                    }
+                    TouchKind::Release => {
+                        if modal_state.modal_height < MODAL_HEIGHT / 2 {
+                            debug!("Collapsing");
+                            modal_state.state = ModalStateInner::Collapsing;
+                        } else {
+                            debug!("Expanding");
+                            modal_state.state = ModalStateInner::Expanding;
+                        }
+                    }
+                    TouchKind::Press => (),
+                }
+            }
+            ModalStateInner::Normal => {
+                if touch.is_press() {
+                    if modal_state.is_draggable()
+                        && touch.is_within_area(0, modal_y, SCREEN_WIDTH, MODAL_DRAG_BAR_MARGIN_PX)
+                    {
+                        modal_state.state = ModalStateInner::Dragged;
+                        return;
+                    }
+                    if !touch.is_within_area(0, modal_y, SCREEN_WIDTH, SCREEN_HEIGHT - modal_y) {
+                        debug!("Touch consumed, collapsing modal");
+                        modal_state.state = ModalStateInner::Collapsing;
+                        self.touch_state.origin = TouchGestureOrigin::None;
+                        return;
+                    }
+                }
+
+                let touch = touch.translate_pos(0, modal_y);
+
+                if let Some(modal_window) = self.windows.get(&modal_state.top) {
+                    xous::try_send_message(
+                        modal_window.input_cid,
+                        touch.as_input_message(InputMessage::Touch as usize),
+                    )
+                    .ok();
+                }
+            }
+        }
+    }
+
+    pub(crate) fn is_modal_active(&self) -> bool { matches!(self.state, GuiState::Modal(_)) }
+
+    pub(crate) fn modal_background_pid(&self) -> Option<PID> {
+        if let GuiState::Modal(modal_state) = &self.state {
+            Some(modal_state.background_pid())
+        } else {
+            None
+        }
+    }
+}

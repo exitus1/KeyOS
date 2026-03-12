@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[formatting]
+indent_string = "    "
+allowed_blank_lines = 1
+inline_table_expand = true
+array_auto_collapse = false
+array_auto_expand = false
+
+[[rule]]
+include = ["**/Cargo.toml"]
+keys = ["dependencies", "workspace.dependencies"]
+
+[rule.formatting]
+reorder_keys = true

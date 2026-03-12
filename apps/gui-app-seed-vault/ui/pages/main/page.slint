@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette } from "@ui/theme.slint";
+import { Button, HeadingLg, TextMd, ShieldPage, ContentSection, ButtonSection, WrappedIcon } from "@ui/widgets.slint";
+import { MainProps } from "./props.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+export component MainPage inherits ShieldPage {
+    in property <MainProps> props;
+    property <bool> light-mode: true;
+
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "acorn";
+            }
+        }
+
+        HeadingLg {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.MainHeader);
+            horizontal-alignment: center;
+        }
+
+        TextMd {
+            text: TR2.lookup(TrId.MainSubheader);
+            color: Palette.content-secondary;
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.MainNewItem);
+            importance: primary;
+            clicked => {
+                Navigate.create({ });
+            }
+        }
+    }
+}

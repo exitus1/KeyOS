@@ -1,0 +1,24 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { FwUpdateState, FwUpdateError } from "@ui/pages/fw-update-page.slint";
+
+export global UpdateGlobal {
+    in property <string> firmware-file-name: "";
+
+    // if empty, no update available
+    in property <string> new-keyos-version;
+    in property <bool> checking-fw-update;
+    in property <string> last-update-checked-on;
+    callback check-fw-update();
+
+    in property <FwUpdateState> fw-update-state;
+    in property <FwUpdateError> fw-update-error;
+    in property <float> fw-update-progress;
+    in property <string> fw-update-eta;
+
+    in property <bool> update-sufficient-battery;
+
+    callback manual-update();
+    callback download-firmware-update();
+}

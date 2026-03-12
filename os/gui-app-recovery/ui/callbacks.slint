@@ -1,0 +1,14 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global Callbacks {
+    callback recovery-clicked();
+    callback reset-all-settings-and-data();
+    callback reboot-clicked();
+    callback shut-down-clicked();
+    callback hide-keyboard();
+    callback reset-usb-drive();
+
+    callback has-sufficient-battery-charge() -> bool;
+    callback listen-to-fs-events();
+}

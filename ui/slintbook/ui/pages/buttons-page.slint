@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Button, SlideToButton, HeadingMd, TextMd} from "@ui/widgets.slint";
+import {Importance, Palette, Size, Utils} from "@ui/theme.slint";
+
+export component ButtonsPage inherits Page {
+    width: 1000px;
+    height: 800px;
+    private property <string> output;
+    VerticalLayout {
+        spacing: Size.sz4;
+        VerticalLayout {
+            spacing: Size.sz4;
+            HeadingMd {
+                text: "Output: " + output;
+                height: 40px;
+            }
+
+            Rectangle {
+                width: 100%;
+                height: 60px * 3 + Size.sz4 * 4;
+                background: Palette.background-primary;
+                VerticalLayout {
+                    spacing: Size.sz4;
+                    padding: Size.sz4;
+                    alignment: start;
+
+                    for state in ["enabled", "disabled", "pressed"]: HorizontalLayout {
+                        spacing: Size.sz4;
+                        for importance in [
+                            Importance.primary,
+                            Importance.secondary,
+                            Importance.tertiary,
+                            Importance.notice,
+                            Importance.negative
+                        ]: Button {
+                            id: Utils.importance-to-str(importance) + "-" + state;
+                            width: 167px;
+                            label: "Button";
+                            importance: importance;
+                            enabled: state != "disabled";
+                            force-pressed: state == "pressed";
+                            clicked(id) => {
+                                output = "Clicked on " + id + "!";
+                            }
+                        }
+                    }
+                }
+            }
+
+            SlideToButton {
+                width: 440px;
+                label: "Sign";
+                info-label: "Slide to sign";
+                activated-label: "Signed!";
+                activated-icon: "check";
+                icon: "arrow-right";
+                activated(od) => {
+                    status1.text = "Signed!";
+                }
+                is-dark: false;
+            }
+
+            status1 := TextMd {
+                text: "Waiting for signature...";
+            }
+
+            SlideToButton {
+                width: 440px;
+                label: "Shut Down";
+                icon: "arrow-right";
+                activated-label: "Shutting Down!";
+                activated-icon: "check";
+                activated(od) => {
+                    status2.text = "Shutting Down!";
+                }
+                is-dark: true;
+            }
+
+            status2 := TextMd {
+                text: "System running...";
+            }
+        }
+    }
+}

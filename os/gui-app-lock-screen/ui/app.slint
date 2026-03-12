@@ -1,0 +1,536 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, UISize, Palettes, CurrentTheme, Images, Utils, Size } from "@ui/theme.slint";
+import { TextSm, BasePage, BaseWindow, NavHeader, TextMd, Icon, LoginLayout, PinEntry, PasswordEntry, TextLg, HeadingMd } from "@ui/widgets.slint";
+import { IconButton } from "@ui/widgets/icon-button.slint";
+import { TR2, TrId } from "gen/tr.slint";
+
+export global State {
+    in-out property <bool> show-login: false;
+
+    in-out property <string> hours: "01";
+    in-out property <string> minutes: "00";
+
+    in-out property <string> date: "May 18, 2025";
+
+    in-out property <string> title: "";
+
+    // true - pin, false - passphrase
+    in-out property <bool> is-pin-entry: true;
+
+    // configured from Rust at startup
+    in property <int> max-login-attempts: 10;
+
+    // change after every validation
+    in-out property <int> remaining-attempts: 12;
+
+    // A login request is ongoing or not
+    in property <bool> is-check-ongoing: false;
+
+    // The current value of the PIN/password input
+    in-out property <string> input;
+
+    // The security words for the current pin prefix (if any)
+    in property <[string]> security-words: [];
+
+    // The locked prefix for the security words
+    in property <string> locked-prefix: "";
+
+    // Whether to show security words (set from Settings)
+    in property <bool> show-security-words-enabled: false;
+
+    // Whether the caller requests words to be returned on success
+    in-out property <bool> want-security-words: false;
+
+    // attempt to log the user in with the given pin
+    callback verify-pin();
+
+    // get the security words for the given pin
+    callback get-security-words(string) -> [string];
+
+    in property <bool> nav-request: false;
+
+    // The login was cancelled
+    callback cancelled();
+
+    // misc
+    callback show-control-center();
+    callback hide-control-center();
+    callback swipe-timeout-restart();
+
+    // (current-position, pressed-position, height) -> offset
+    callback ease-swipe-offset(length, length, length) -> length;
+}
+
+global AuthHelpers {
+    public pure function failed-attempts(remaining-attempts: int) -> int {
+        Math.max(0, State.max-login-attempts - remaining-attempts)
+    }
+
+    public pure function has-error(remaining-attempts: int) -> bool {
+        AuthHelpers.failed-attempts(remaining-attempts) > 0
+    }
+}
+
+component TimeText inherits Text {
+    color: Palette.content-primary;
+    font-size: 88px;
+    font-weight: 400;
+    vertical-alignment: center;
+}
+
+component LockShield inherits Rectangle {
+    in property <float> bg-opacity: self.opacity;
+    in-out property <bool> locked;
+
+    height: 300px;
+    width: 320px;
+
+    Image {
+        opacity: bg-opacity;
+        source: CurrentTheme.is-dark ? @image-url("images/lock-shield-dark.png") : @image-url("images/lock-shield-light.png");
+    }
+
+    VerticalLayout {
+        alignment: center;
+        spacing: Size.sz2;
+
+        HorizontalLayout {
+            alignment: center;
+            Icon {
+                size: Size.sz16;
+                name: locked ? "lock" : "unlock";
+                color: Palette.content-tertiary;
+            }
+        }
+
+        HorizontalLayout {
+            alignment: center;
+
+            TimeText {
+                width: 45%;
+                text: State.hours;
+                horizontal-alignment: right;
+            }
+
+            TimeText {
+                width: 20px;
+                horizontal-alignment: center;
+                text: ":";
+            }
+
+            TimeText {
+                width: 45%;
+                text: State.minutes;
+                horizontal-alignment: left;
+            }
+        }
+
+        TextSm {
+            color: Palette.content-tertiary;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            text: State.date;
+        }
+    }
+}
+
+component SecurityWord inherits Rectangle {
+    in property <string> word;
+
+    width: 120px;
+    height: Size.sz11;
+
+    background: Palette.background-primary-alternative;
+    border-radius: Size.sz11 / 2;
+    TextLg {
+        text: word;
+        color: Palette.content-secondary;
+        bold: true;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+component IncorrectPinWarning inherits VerticalLayout {
+    property <int> failed-attempts: AuthHelpers.failed-attempts(State.remaining-attempts);
+
+    spacing: Size.sz4;
+
+    // TODO: update translation to work from lock screen context
+    if State.remaining-attempts > 6: TextSm {
+        color: Palette.content-lightcopper-brand;
+        text: failed-attempts == 1 ? TR2.lookup(TrId.CommonChangePin1FailedAttempt) : TR2.format(TrId.CommonChangePinXFailedAttempts, [failed-attempts]);
+        horizontal-alignment: center;
+    }
+    if State.remaining-attempts <= 6: TextSm {
+        color: Palette.content-lightcopper-brand;
+        text: State.remaining-attempts == 1 ? TR2.format(TrId.CommonChangePinXFailedAttemptsFactoryWarning1Remaining, [failed-attempts]) : TR2.format(TrId.CommonChangePinXFailedAttemptsFactoryWarningXRemaining, [failed-attempts, State.remaining-attempts]);
+        horizontal-alignment: center;
+    }
+}
+
+component VerifyPin inherits Rectangle {
+    in property <string> header;
+    out property <bool> has-focus: pin-entry.has-focus;
+
+    property <bool> pin-incorrect: AuthHelpers.has-error(State.remaining-attempts);
+    property <bool> show-security-words: State.show-security-words-enabled && State.security-words.length > 0;
+
+    forward-focus: pin-entry;
+
+    LoginLayout {
+        property <bool> has-focus <=> root.has-focus;
+        property <bool> animated: !State.nav-request;
+
+        alignment: start;
+        padding-top: animated ? 0 : Size.sz16;
+
+        animate padding-top {
+            duration: animated ? 300ms : 0ms;
+            easing: ease-out-quad;
+        }
+
+        changed has-focus => {
+            self.padding-top = Size.sz16;
+        }
+
+        HeadingMd {
+            text: TR2.lookup(TrId.MainEnterPin);
+            horizontal-alignment: center;
+        }
+
+        pin-entry := PinEntry {
+            animated: animated;
+            pin <=> State.input;
+            pin-incorrect: pin-incorrect;
+            is-check-ongoing: State.is-check-ongoing;
+            locked-len: State.show-security-words-enabled ? State.locked-prefix.character-count : 0;
+            accepted => {
+                if (self.pin-length >= 6) {
+                    State.verify-pin();
+                }
+            }
+
+            changed pin => {
+                if State.show-security-words-enabled {
+                    if State.locked-prefix.is-empty {
+                        if self.pin.character-count >= 4 {
+                            State.locked-prefix = self.pin;
+                            State.security-words = State.get-security-words(self.pin);
+                        }
+                    }
+                }
+            }
+        }
+
+        // We show either the warning only, the security words only or neither
+        if pin-incorrect && !show-security-words: IncorrectPinWarning { }
+
+        if show-security-words: VerticalLayout {
+            padding: Size.sz4;
+            spacing: Size.sz4;
+
+            TextMd {
+                text: TR2.lookup(TrId.MainSecurityWords);
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                spacing: Size.sz4;
+                for word in State.security-words: SecurityWord {
+                    word: word;
+                }
+            }
+        }
+    }
+}
+
+component VerifyPassword inherits Rectangle {
+    out property <bool> has-focus: password-input.has-focus;
+    property <bool> pin-incorrect: AuthHelpers.has-error(State.remaining-attempts);
+    property <bool> show-security-words: State.show-security-words-enabled && State.security-words.length > 0;
+
+    forward-focus: password-input;
+
+    LoginLayout {
+        property <bool> has-focus <=> root.has-focus;
+        property <bool> animated: !State.nav-request;
+
+        alignment: start;
+        padding-top: animated ? 0 : Size.sz16;
+
+        animate padding-top {
+            duration: animated ? 300ms : 0ms;
+            easing: ease-out-quad;
+        }
+
+        changed has-focus => {
+            self.padding-top = Size.sz16;
+        }
+
+        HeadingMd {
+            text: TR2.lookup(TrId.MainEnterPassword);
+            horizontal-alignment: center;
+        }
+
+        password-input := PasswordEntry {
+            animated: animated;
+            password <=> State.input;
+            is-check-ongoing: State.is-check-ongoing;
+            locked-len: State.show-security-words-enabled ? State.locked-prefix.character-count : 0;
+            accepted => {
+                if self.password.character-count >= 6 {
+                    State.verify-pin();
+                }
+            }
+
+            changed password => {
+                if State.show-security-words-enabled {
+                    if State.locked-prefix.is-empty {
+                        if self.password.character-count >= 4 {
+                            State.locked-prefix = self.password;
+                            State.security-words = State.get-security-words(self.password);
+                        }
+                    }
+                }
+            }
+        }
+
+        // We show either the warning only, the security words only or neither
+        if pin-incorrect && !show-security-words: IncorrectPinWarning { }
+
+        if show-security-words: VerticalLayout {
+            padding: Size.sz4;
+            spacing: Size.sz4;
+
+            TextMd {
+                text: TR2.lookup(TrId.MainSecurityWords);
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                spacing: Size.sz4;
+                for word in State.security-words: SecurityWord {
+                    word: word;
+                }
+            }
+        }
+    }
+}
+
+component VerifyAuth inherits Rectangle {
+    callback lost-focus();
+
+    if State.is-pin-entry: VerifyPin {
+        changed has-focus => {
+            if !self.has-focus {
+                root.lost-focus()
+            }
+        }
+        init => {
+            self.focus()
+        }
+    }
+
+    if !State.is-pin-entry: VerifyPassword {
+        changed has-focus => {
+            if !self.has-focus {
+                root.lost-focus()
+            }
+        }
+        init => {
+            self.focus()
+        }
+    }
+}
+
+component LoginScreen inherits BasePage {
+    callback back();
+
+    VerticalLayout {
+        NavHeader {
+            title: State.title;
+            left-icon: "chevron-left";
+
+            clicked => {
+                back();
+            }
+        }
+
+        Rectangle {
+            verify-auth := VerifyAuth {
+                lost-focus => {
+                    back()
+                }
+            }
+        }
+    }
+}
+
+component ChallengeRequest inherits Rectangle {
+    init => {
+        State.show-control-center();
+    }
+
+    LoginScreen {
+        back => {
+            State.cancelled()
+        }
+    }
+}
+
+component LockScreen inherits Rectangle {
+    property <bool> show-login <=> State.show-login;
+
+    function set-show-login(show-login: bool) {
+        if (show-login) {
+            State.show-control-center();
+        } else {
+            focus-handler.focus();
+            State.hide-control-center();
+        }
+    }
+
+    public function swipe-cancel() {
+        swipe.cancel();
+    }
+
+    init => {
+        set-show-login(false);
+    }
+
+    changed show-login => {
+        set-show-login(show-login);
+    }
+
+    if State.show-login: LoginScreen {
+        back => {
+            show-login = false;
+            State.cancelled();
+        }
+    }
+
+    lock_screen := Rectangle {
+        states [
+            dragging when swipe.is-swiping && !show-login: {
+                y: swipe.offset_y;
+            }
+            show-login when !swipe.is-swiping && show-login: {
+                y: -root.height;
+                shield.bg-opacity: 0%;
+                in {
+                    animate y {
+                        duration: 500ms;
+                        easing: ease-out-quad;
+                    }
+                    animate shield.bg-opacity {
+                        duration: 250ms; // shield must fade out before reaching the top
+                        easing: ease-out-quad;
+                    }
+                }
+            }
+            show-lock-screen when !swipe.is-swiping && !show-login: {
+                y: 0px;
+                shield.bg-opacity: 100%;
+                in {
+                    animate y {
+                        duration: 400ms;
+                        easing: ease-out-quad;
+                    }
+                }
+            }
+        ]
+
+        shield := LockShield {
+            y: 128px;
+            locked: !swipe.is-swiping && !show-login;
+        }
+    }
+
+    TextMd {
+        y: 744px;
+        text: TR2.lookup(TrId.MainSwipeup);
+        color: Palette.content-secondary;
+        states [
+            login when show-login && !swipe.is-swiping: {
+                opacity: 0;
+            }
+            locked when !show-login && !swipe.is-swiping: {
+                opacity: 1;
+            }
+            swiping when swipe.is-swiping: {
+                opacity: 1 - swipe.swipe-percent;
+            }
+        ]
+    }
+
+    swipe := SwipeGestureHandler {
+        enabled: !show-login;
+        out property <bool> is-swiping: offset_y != 0px;
+        out property <length> offset_y: 0px;
+        out property <length> new_offset_y: 0px;
+        out property <float> swipe-percent: Math.min(1, Math.abs(self.current-position.y - self.pressed-position.y) / swipe-threshold);
+        property <length> swipe-threshold: 80px;
+        property <length> bottom-edge-margin: 60px; // this includes default touch offset of -30px
+
+        handle-swipe-up: true;
+
+        moved => {
+            new_offset_y = State.ease-swipe-offset(self.current-position.y, self.pressed-position.y, root.height);
+
+            // Prevent jumps by only allowing the increase in offset_y if the gesture starts close to the bottom edge
+            if (self.pressed-position.y >= UISize.screen-height - bottom-edge-margin) {
+                if (new_offset_y < offset_y) {
+                    offset_y = new_offset_y;
+                }
+            } else {
+                offset_y = new_offset_y;
+            }
+
+            State.swipe-timeout-restart();
+        }
+
+        swiped => {
+            if (self.current-position.y - self.pressed-position.y < -swipe-threshold) {
+                show-login = true;
+            }
+            offset_y = 0px;
+        }
+
+        cancelled => {
+            offset_y = 0px;
+        }
+    }
+
+    focus-handler := FocusScope {
+        init => {
+            self.focus()
+        }
+
+        focus-changed-event(reason) => {
+            self.focus();
+        }
+    }
+}
+
+export component AppWindow inherits BaseWindow {
+    public function swipe-cancel() {
+        lock-screen.swipe-cancel();
+    }
+
+    lock-screen := LockScreen {
+        visible: !State.nav-request;
+    }
+
+    if State.nav-request: ChallengeRequest { }
+}
+
+import { TR } from "@ui/i18n/i18n.slint";
+export { CurrentTheme, Images, Utils, TR}
+export * from "gen/exports.slint";

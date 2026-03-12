@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "crypto-server"
+version = "0.1.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bc-rand = "0.2.1"
+bc-shamir = "0.4"
+crypto = { workspace = true }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+rkyv = { workspace = true }
+server = { path = "../../server" }
+xous = { path = "../../xous/xous-rs" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true, features = ["rkyv"] }
+dma = { workspace = true }
+power-manager = { workspace = true }
+securam-manager = { path = "../../imports/securam-manager" }
+sha2 = "0.10"
+utralib = { workspace = true }
+
+[target.'cfg(not(keyos))'.dependencies]
+hmac = "0.12"
+sha2 = "0.10"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

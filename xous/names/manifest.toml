@@ -1,0 +1,11 @@
+appId = "0x786f75732d6e616d6573000000000000"
+syscall = ["AllowMessagesCID", "SetThreadPriority"]
+
+[appName]
+en = "Xous Names"
+
+[servers."os/nameserver"]
+Register = { id = 0, type = "lendMut" }
+AddManifest = { id = 1, type = "lendMut" }
+BlockingConnect = { id = 6, type = "lendMut" }
+TryConnect = { id = 7, type = "lendMut" }

@@ -1,0 +1,92 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { BasePage } from "@ui/widgets.slint";
+import { Button, Shield, Icon, HeadingMd, HeadingLg, Checkbox, WrappedIcon, TextLg, TextSm, TextMd,
+         TextXs, TimerCircularProgress, Shimmer, IconButton, StepList, PopupMenu } from "@ui/widgets.slint";
+import { Size, Palette, UISize, Importance, Utils, Images } from "@ui/theme.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { AppHeader } from "@ui/widgets/app-header.slint";
+import { JumboIcon } from "@ui/widgets/jumbo-icon.slint";
+import { SegmentedControl } from "@ui/widgets/segmented-control.slint";
+import { RoundContainer } from "@ui/widgets/round-container.slint";
+import { Divider } from "@ui/widgets/divider.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+import { IconSize } from "@ui/types.slint";
+import { GenericAlertGlobal } from "../../globals/globals.slint";
+import { Callbacks } from "../../callbacks.slint";
+
+export component GenericAlertPage inherits BasePage {
+    VerticalLayout {
+        padding-left: 5px;
+        padding-right: 5px;
+        padding: Size.sz4;
+        alignment: stretch;
+
+        AppHeader {
+            title: GenericAlertGlobal.app-title;
+        }
+
+        VerticalLayout {
+            alignment: stretch;
+            padding-left: Size.sz6;
+            padding-right: Size.sz6;
+            padding-bottom: Size.sz11;
+            spacing: Size.sz6;
+
+            HorizontalLayout {
+                alignment: center;
+                WrappedIcon {
+                    outer-icon: "jumbo-circle";
+                    inner-icon: GenericAlertGlobal.icon;
+                }
+            }
+
+            HeadingLg {
+                text: GenericAlertGlobal.title;
+                horizontal-alignment: center;
+            }
+
+            TextSm {
+                text: GenericAlertGlobal.line1;
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+
+            if GenericAlertGlobal.line2 != "": TextSm {
+                text: GenericAlertGlobal.line2;
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+
+            // Fill the space
+            Rectangle {
+                vertical-stretch: 1;
+            }
+
+            Button {
+                label: GenericAlertGlobal.button1-title;
+                importance: Importance.primary;
+                clicked(id) => {
+                    Callbacks.button1-clicked();
+                }
+            }
+
+            if GenericAlertGlobal.button2-title != "": Button {
+                label: GenericAlertGlobal.button2-title;
+                importance: Importance.secondary;
+                clicked(id) => {
+                    Callbacks.button2-clicked();
+                }
+            }
+
+            if GenericAlertGlobal.button3-title != "": Button {
+                label: GenericAlertGlobal.button3-title;
+                importance: Importance.tertiary;
+                clicked(id) => {
+                    Callbacks.button3-clicked();
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Button, Shield, Icon, HeadingMd, TextLg, TextSm, TextMd,
+         TextXs, TimerCircularProgress, Shimmer, IconButton, StepList, PopupMenu, BasePage, ConfirmationModal } from "@ui/widgets.slint";
+import { Size, Palette, UISize, Importance, Utils, Images } from "@ui/theme.slint";
+import { UIColors } from "@ui/palettes/ui-colors.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { AppHeader } from "@ui/widgets/app-header.slint";
+import { JumboIcon } from "@ui/widgets/jumbo-icon.slint";
+import { SegmentedControl } from "@ui/widgets/segmented-control.slint";
+import { RoundContainer } from "@ui/widgets/round-container.slint";
+import { Divider } from "@ui/widgets/divider.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { IconSize } from "@ui/types.slint";
+import { Navigate } from "../../gen/exports.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { EraseGlobal } from "../../globals/erase-global.slint";
+
+export component ErasePage inherits BasePage {
+    in-out property <bool> is-reset-all-settings-and-data-modal-showing: false;
+
+    VerticalLayout {
+        padding-left: 5px;
+        padding-right: 5px;
+
+        AppHeader {
+            // TODO: i18n
+            title: EraseGlobal.is-complete ? (EraseGlobal.is-error ? "Error" : "Erase Complete") : (EraseGlobal.is-erasing-settings ? "Erasing Settings" : "Erasing Device");
+        }
+
+        VerticalLayout {
+            padding: Size.sz4;
+            spacing: Size.sz11;
+
+            HorizontalLayout {
+                alignment: center;
+
+                if !EraseGlobal.is-complete: TimerCircularProgress {
+                    percent: EraseGlobal.erase-progress;
+                    size: IconSize.px184;
+                    back-color: UIColors.neutral-700;
+
+                    HeadingMd {
+                        text: Math.round(EraseGlobal.erase-progress * 100) + "%";
+                    }
+                }
+                if EraseGlobal.is-complete: JumboIcon {
+                    name: "jumbo-circle";
+                    Icon {
+                        name: EraseGlobal.is-error ? "close" : "check";
+                        size: IconSize.px96;
+                        color: Palette.content-brand;
+                    }
+                }
+            }
+
+            VerticalLayout {
+                padding: Size.sz2;
+                spacing: Size.sz4;
+
+                Button {
+                    enabled: EraseGlobal.is-complete;
+                    icon: "off";
+                    label: TR2.lookup(TrId.CommonButtonShutDown);
+                    importance: Importance.primary;
+                    clicked => {
+                        Callbacks.shut-down-clicked();
+                    }
+                }
+            }
+        }
+    }
+}

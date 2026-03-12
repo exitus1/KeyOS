@@ -1,0 +1,22 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { BackupCreatedProps } from "props.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingPage } from "../../../widgets/onboarding-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { OnboardingBasePage } from "../../../widgets/base-page.slint";
+
+export component BackupCreatedPage inherits OnboardingBasePage {
+    in property <BackupCreatedProps> props;
+
+    OnboardingPage {
+        jumbo-icon: "jumbo-circle";
+        jumbo-icon-has-inner: true;
+        jumbo-icon-inner: "check";
+        heading: TR2.lookup(TrId.BackupManualSuccessHeader);
+        on-button-click => {
+            Navigate.connect-wallet({ });
+        }
+    }
+}

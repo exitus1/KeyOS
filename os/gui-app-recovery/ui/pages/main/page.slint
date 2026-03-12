@@ -1,0 +1,131 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { Button, Shield, Icon, HeadingMd, TextLg, TextSm, TextMd,
+         TextXs, TimerCircularProgress, Shimmer, IconButton, StepList, PopupMenu, BasePage, ConfirmationModal, ErrorModal } from "@ui/widgets.slint";
+import { Size, Palette, UISize, Importance, Utils, Images } from "@ui/theme.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { AppHeader } from "@ui/widgets/app-header.slint";
+import { JumboIcon } from "@ui/widgets/jumbo-icon.slint";
+import { SegmentedControl } from "@ui/widgets/segmented-control.slint";
+import { RoundContainer } from "@ui/widgets/round-container.slint";
+import { Divider } from "@ui/widgets/divider.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { IconSize } from "@ui/types.slint";
+import { Navigate } from "../../gen/exports.slint";
+import { Callbacks } from "../../callbacks.slint";
+
+export component MainPage inherits BasePage {
+    in-out property <bool> is-erase-device-modal-showing;
+    private property <bool> is-insufficient-battery-charge-modal-showing;
+
+    VerticalLayout {
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-bottom: Size.sz4;
+
+        VerticalLayout {
+            alignment: start;
+
+            AppHeader {
+                title: TR2.lookup(TrId.AdvancedTitle);
+            }
+
+            VerticalLayout {
+                padding: Size.sz4;
+                spacing: Size.sz11;
+                alignment: start;
+
+                VerticalLayout {
+                    padding: Size.sz2;
+                    spacing: Size.sz4;
+
+                    TextMd {
+                        text: TR2.lookup(TrId.AdvancedFirmwareRecoveryContent);
+                        horizontal-alignment: center;
+                    }
+
+                    Button {
+                        label: TR2.lookup(TrId.AdvancedFirmwareRecoveryButton);
+                        icon: "shield";
+                        importance: Importance.primary;
+                        clicked => {
+                            if (Callbacks.has-sufficient-battery-charge()) {
+                                Navigate.recovery({ replace: true });
+                                Callbacks.listen-to-fs-events();
+                            } else {
+                                is-insufficient-battery-charge-modal-showing = true;
+                            }
+                        }
+                    }
+                }
+
+                VerticalLayout {
+                    padding: Size.sz2;
+                    spacing: Size.sz4;
+
+                    TextMd {
+                        text: TR2.lookup(TrId.AdvancedEraseAllDataContent);
+                        horizontal-alignment: center;
+                    }
+
+                    Button {
+                        label: TR2.lookup(TrId.AdvancedEraseAllDataButton);
+                        importance: Importance.negative;
+
+                        clicked => {
+                            root.is-erase-device-modal-showing = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            padding: Size.sz4;
+            spacing: Size.sz4;
+            alignment: end;
+
+            Button {
+                icon: "off";
+                label: TR2.lookup(TrId.CommonButtonShutDown);
+                importance: Importance.secondary;
+                clicked => {
+                    Callbacks.shut-down-clicked();
+                }
+            }
+        }
+    }
+
+    if is-erase-device-modal-showing: ConfirmationModal {
+        critical: true;
+        icon: "alert";
+        title: TR2.lookup(TrId.EraseEncryptedModalHeader);
+        text: TR2.lookup(TrId.EraseEncryptedModalContent);
+        confirm-button-label: TR2.lookup(TrId.EraseEncryptedModalEraseEncryptedDrive);
+        cancel-button-label: TR2.lookup(TrId.CommonButtonCancel);
+
+        cancel-clicked => {
+            is-erase-device-modal-showing = false;
+        }
+
+        confirm-clicked => {
+            is-erase-device-modal-showing = false;
+
+            Navigate.erase({ replace: true });
+
+            Callbacks.reset-all-settings-and-data();
+        }
+    }
+
+    if is-insufficient-battery-charge-modal-showing: ErrorModal {
+        icon: "alert";
+        icon-color: Palette.content-negative;
+        title: TR2.lookup(TrId.AdvancedModalLowBatteryHeader);
+        text: TR2.lookup(TrId.AdvancedModalLowBatteryContent);
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+
+        confirm-clicked => {
+            is-insufficient-battery-charge-modal-showing = false;
+        }
+    }
+}

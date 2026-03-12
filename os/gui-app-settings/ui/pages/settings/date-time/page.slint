@@ -1,0 +1,143 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { TextSm, Button, Switch, MenuSectionContainer, Icon, HLine, MenuBooleanItem, MenuSection, MenuSectionLayout, BasePage, PageBody, ContentSection } from "@ui/widgets.slint";
+import { Size, Palette, Timings } from "@ui/theme.slint";
+import { MenuItemLayout } from "@ui/widgets/settings-menu.slint";
+
+import { DateTimeGlobal } from "../../../globals/date-time-global.slint";
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+
+import { DateTimeProps } from "props.slint";
+
+component MenuItemTime inherits MenuItemLayout {
+    label-color: self.enabled ? Palette.content-primary : Palette.content-tertiary;
+    in property <string> text;
+
+    HorizontalLayout {
+        alignment: end;
+        spacing: Size.sz2;
+
+        TextSm {
+            text: root.text;
+            color: root.label-color;
+        }
+
+        if (root.enabled): Icon {
+            name: "chevron-right";
+            colorize: Palette.content-tertiary;
+        }
+    }
+}
+
+export component DateTimePage inherits BasePage {
+    in property <DateTimeProps> props;
+
+    private property <bool> auto: DateTimeGlobal.envoy-time-sync;
+    private property <bool> time-24: DateTimeGlobal.time-24;
+
+    function two-digits(n: int) -> string {
+        if n < 10 {
+            return "0\{n}";
+        } else {
+            return "\{n}";
+        }
+    }
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.DateTimeTitle);
+        }
+
+        PageBody {
+            ContentSection {
+                VerticalLayout {
+                    spacing: Size.sz4;
+
+                    MenuSectionContainer {
+                        MenuSectionLayout {
+                            MenuBooleanItem {
+                                first: true;
+                                label: TR2.lookup(TrId.DateTimeSetAutomatically);
+                                checked: root.auto;
+                                changed(auto) => {
+                                    DateTimeGlobal.set-envoy-time-sync(auto);
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemTime {
+                                label: TR2.lookup(TrId.DateTimeDate);
+                                enabled: !root.auto;
+                                text: "\{DateTimeGlobal.year}/\{two-digits(DateTimeGlobal.month)}/\{two-digits(DateTimeGlobal.day)}";
+
+                                clicked => {
+                                    Navigate.time({ time-24: time-24 }, { });
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemTime {
+                                last: true;
+                                label: TR2.lookup(TrId.DateTimeTime);
+                                enabled: !root.auto;
+                                text: DateTimeGlobal.display-time;
+
+                                clicked => {
+                                    Navigate.time({ time-24: time-24 }, { });
+                                }
+                            }
+                        }
+                    }
+
+                    MenuSection {
+                        title: TR2.lookup(TrId.DateTimeCustomize);
+                        MenuSectionLayout {
+                            MenuBooleanItem {
+                                first: true;
+                                label: TR2.lookup(TrId.DateTime24Hour);
+                                checked: time-24;
+                                changed => {
+                                    DateTimeGlobal.set-time-24(!time-24);
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                last: true;
+                                label: TR2.lookup(TrId.DateTimeTimeZone);
+
+                                HorizontalLayout {
+                                    alignment: end;
+                                    spacing: Size.sz4;
+                                    TextSm {
+                                        text: DateTimeGlobal.selected-timezone.display-short;
+                                        color: Palette.content-tertiary;
+                                        horizontal-alignment: left;
+                                        vertical-alignment: center;
+                                        overflow: clip;
+                                        wrap: no-wrap;
+                                    }
+
+                                    Icon {
+                                        name: "chevron-right";
+                                        colorize: Palette.content-tertiary;
+                                    }
+                                }
+
+                                clicked => {
+                                    Navigate.time-zone({ });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

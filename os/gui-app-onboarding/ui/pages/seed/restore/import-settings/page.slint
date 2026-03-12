@@ -1,0 +1,91 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, UISize, Importance } from "@ui/theme.slint";
+import {    AppHeader, Shield, Button, JumboIcon, HeadingMd, TextSm } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../../../widgets/base-page.slint";
+
+
+import { Navigate } from "../../../../gen/navigate.slint";
+import { ImportSettingsProps } from "props.slint";
+import { IconButton } from "@ui/widgets/icon-button.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+
+
+
+export component ImportSettingsPage inherits OnboardingBasePage {
+    in property <ImportSettingsProps> props;
+
+    HorizontalLayout {
+        alignment: center;
+        Shield {
+            height: 736px;
+            VerticalLayout {
+                alignment: space-between;
+                padding-bottom: Size.sz12;
+                VerticalLayout {
+                    alignment: start;
+                    spacing: Size.sz6;
+                    HorizontalLayout {
+                        IconButton {
+                            icon: "chevron-left";
+                            importance: Importance.tertiary;
+                            clicked => {
+                                Navigate.backward();
+                            }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: center;
+                        JumboIcon {
+                            name: "jumbo-download";
+                        }
+                    }
+
+                    VerticalLayout {
+                        spacing: Size.sz5;
+                        HeadingMd {
+                            vertical-stretch: 0;
+                            text: TR2.lookup(TrId.ImportSettingsHeader);
+                            horizontal-alignment: center;
+                        }
+
+                        TextSm {
+                            text: TR2.lookup(TrId.ImportSettingsContent);
+                            color: Palette.content-secondary;
+                            horizontal-alignment: center;
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    VerticalLayout {
+                        spacing: Size.sz4;
+                        Button {
+                            width: 424px;
+                            icon: "";
+                            label: TR2.lookup(TrId.CommonButtonSkip);
+                            importance: secondary;
+                            clicked => {
+                                // Navigate.restore-backup-success({ kind: backup-code });
+                            }
+                        }
+
+                        Button {
+                            width: 424px;
+                            icon: "";
+                            label: TR2.lookup(TrId.ImportSettingsImportBackupFile);
+                            importance: primary;
+                            clicked => {
+                                // Navigate.restore-backup-success({ });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

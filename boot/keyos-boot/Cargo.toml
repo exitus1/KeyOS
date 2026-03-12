@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundationdevices.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+authors = ["Foundation Devices <hello@foundationdevices.com>"]
+description = "FFI from at91bootstrap to Foundation's rustlang modules"
+license = "GPL-3.0-or-later"
+edition = "2021"
+name = "keyos-boot"
+version = "0.2.1"
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+
+[build-dependencies]
+png-decoder = "0.1.1"
+rxing = "0.7.1"
+sha2 = "0.10.8"
+
+[dependencies]
+arrayvec = { version = "0.7.6", default-features = false }
+atsama5d27 = { workspace = true }
+boot-common = { path = "../common" }
+cosign2 = { workspace = true }
+embedded-graphics = "0.8.1"
+ft3269 = { workspace = true }
+fuse = { workspace = true }
+keyos = { path = "../../keyos" }
+micro-ecc-sys = { path = "../../imports/micro-ecc-sys", default-features = false }
+securam-manager = { path = "../../imports/securam-manager", features = ["bootloader"] }
+
+[features]
+production = ["tamper"]
+tamper = []

@@ -1,0 +1,15 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { NavHeader} from "@ui/widgets.slint";
+
+import { Navigate } from "../gen/navigate.slint";
+
+export component SettingsNavHeader inherits NavHeader {
+    in property <bool> enabled: true;
+    clicked => {
+        if (enabled) {
+            Navigate.backward();
+        }
+    }
+}

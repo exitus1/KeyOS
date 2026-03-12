@@ -1,0 +1,217 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { PopupMenu, PopupMenuItem, TextMd, TextSm, Icon, Button } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+import { BrowserGlobal, SortMode, SortDirection, AirlockMode } from "./global.slint";
+
+export component SelectModePopupMenu inherits PopupMenu {
+    property <bool> has-single-selected: BrowserGlobal.selected-count == 1;
+    property <bool> has-any-selected: BrowserGlobal.selected-count > 0;
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainDone);
+        icon: "check";
+        first: true;
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.is-select-mode = false;
+            BrowserGlobal.menu-done();
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainMove);
+        icon: "arrow-right";
+        enabled: has-any-selected;
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.menu-move();
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainCopy);
+        icon: "copy";
+        enabled: has-any-selected;
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.menu-copy();
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainRename);
+        icon: "edit";
+        enabled: has-single-selected;
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.menu-rename();
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainDelete);
+        icon: "close";
+        last: true;
+        enabled: has-any-selected;
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.menu-delete();
+        }
+    }
+}
+
+export component FilePopupMenu inherits PopupMenu {
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MenuSelect);
+        icon: BrowserGlobal.is-select-mode ? "check" : "check-circle";
+        first: true;
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.is-select-mode = !BrowserGlobal.is-select-mode;
+            BrowserGlobal.select-mode-toggled(BrowserGlobal.is-select-mode);
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MenuAddFolder);
+        icon: "folder";
+        clicked => {
+            BrowserGlobal.is-file-menu-open = false;
+            BrowserGlobal.menu-create-folder();
+        }
+    }
+
+    PopupMenuItem {
+        label: BrowserGlobal.show-hidden-files ? TR2.lookup(TrId.MainHideFiles) : TR2.lookup(TrId.MainShowFiles);
+        icon: BrowserGlobal.show-hidden-files ? "eye-off" : "eye";
+        clicked => {
+            BrowserGlobal.show-hidden-files = !BrowserGlobal.show-hidden-files;
+            BrowserGlobal.reload-files();
+            BrowserGlobal.is-file-menu-open = false;
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MenuSearchSort);
+        icon: "search";
+        last: !BrowserGlobal.is-airlock-selected && !BrowserGlobal.show-quick-tip;
+        clicked => {
+            BrowserGlobal.is-search-mode = !BrowserGlobal.is-search-mode;
+            BrowserGlobal.is-file-menu-open = false;
+
+            if !BrowserGlobal.is-search-mode {
+                BrowserGlobal.search-query = "";
+                BrowserGlobal.sort-mode = SortMode.Alphabetical;
+                BrowserGlobal.sort-direction = SortDirection.Descending;
+                BrowserGlobal.reload-files();
+            }
+        }
+    }
+
+    if BrowserGlobal.is-airlock-selected: PopupMenuItem {
+        label: TR2.lookup(TrId.AirlockMenuAirlockReadOnly);
+        icon: BrowserGlobal.airlock-mode == AirlockMode.ReadOnly ? "check" : "";
+        divider: false;
+        clicked => {
+            BrowserGlobal.airlock-mode-changed(AirlockMode.ReadOnly);
+        }
+    }
+    if BrowserGlobal.is-airlock-selected: PopupMenuItem {
+        label: TR2.lookup(TrId.AirlockMenuAirlockReadWrite);
+        icon: BrowserGlobal.airlock-mode == AirlockMode.ReadWrite ? "check" : "";
+        last: !BrowserGlobal.show-quick-tip;
+        clicked => {
+            BrowserGlobal.airlock-mode-changed(AirlockMode.ReadWrite);
+        }
+    }
+
+    if BrowserGlobal.show-quick-tip: VerticalLayout {
+        HorizontalLayout {
+            padding: Size.sz4;
+            spacing: Size.sz4;
+
+            Icon {
+                name: "info";
+                size: Size.sz6;
+                color: Palette.content-tertiary;
+            }
+
+            TextSm {
+                text: TR2.lookup(TrId.MenuQuickTip);
+                color: Palette.content-tertiary;
+            }
+        }
+
+        VerticalLayout {
+            padding: Size.sz4;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            spacing: Size.sz4;
+            TextMd {
+                text: TR2.lookup(TrId.MenuTapAndHold);
+                color: Palette.content-primary;
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonDismiss);
+                importance: Importance.tertiary;
+                clicked => {
+                    BrowserGlobal.show-quick-tip = false;
+                }
+            }
+        }
+    }
+}
+
+export component SortPopupMenu inherits PopupMenu {
+    property <string> icon: BrowserGlobal.sort-direction == SortDirection.Ascending ? "sort-ascending" : "sort-descending";
+
+    function change-sort(new_mode: SortMode) {
+        if BrowserGlobal.sort-mode == new_mode {
+            if BrowserGlobal.sort-direction == SortDirection.Ascending {
+                BrowserGlobal.sort-direction = SortDirection.Descending;
+            } else {
+                BrowserGlobal.sort-direction = SortDirection.Ascending;
+            }
+        } else {
+            BrowserGlobal.sort-mode = new_mode;
+        }
+        BrowserGlobal.reload-files();
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainSortByAlphabetical);
+        left-icon: BrowserGlobal.sort-mode == SortMode.Alphabetical ? icon : "";
+        left-icon-reserve: true;
+        icon: BrowserGlobal.sort-mode == SortMode.Alphabetical ? "check" : "";
+        first: true;
+        clicked => {
+            change-sort(SortMode.Alphabetical);
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.MainSortByFileSize);
+        left-icon: BrowserGlobal.sort-mode == SortMode.FileSize ? icon : "";
+        left-icon-reserve: true;
+        icon: BrowserGlobal.sort-mode == SortMode.FileSize ? "check" : "";
+        clicked => {
+            change-sort(SortMode.FileSize);
+        }
+    }
+
+    PopupMenuItem {
+        label: TR2.lookup(TrId.SortByModificationDate);
+        left-icon: BrowserGlobal.sort-mode == SortMode.ModificationDate ? icon : "";
+        left-icon-reserve: true;
+        icon: BrowserGlobal.sort-mode == SortMode.ModificationDate ? "check" : "";
+        last: true;
+        clicked => {
+            change-sort(SortMode.ModificationDate);
+        }
+    }
+}

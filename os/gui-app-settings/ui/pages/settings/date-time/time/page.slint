@@ -1,0 +1,110 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { TextMd, Button, SearchInput, TextSm, BasePage, PageBody, ContentSection, ButtonSection } from "@ui/widgets.slint";
+import { Importance, Palette, Size, Utils, UISize } from "@ui/theme.slint";
+
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { TimeSelector12, TimeSelector24, DateSelector } from "../../../../widgets/date-time-scroll.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+import { DateTimeGlobal } from "../../../../globals/date-time-global.slint";
+
+import { TimeProps } from "props.slint";
+
+export component TimePage inherits BasePage {
+    in property <TimeProps> props;
+
+    private property <length> slider-width: 0.3 * root.width;
+
+    private property <int> new-hour: DateTimeGlobal.hour;
+    private property <int> new-minute: DateTimeGlobal.minute;
+
+    background: transparent;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: "Set Date & Time";
+        }
+
+        PageBody {
+            ContentSection {
+                spacing: Size.sz4;
+                TextSm {
+                    text: "Date";
+                    color: Palette.content-tertiary;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+
+                    date := DateSelector {
+                        width: 3 * slider-width;
+                        item-size: 48px;
+                        min-year: 2025;
+                        year: DateTimeGlobal.year;
+                        month: DateTimeGlobal.month;
+                        day: DateTimeGlobal.day;
+                        changed => {
+                        }
+                    }
+                }
+
+                TextSm {
+                    text: "Time";
+                    color: Palette.content-tertiary;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+
+                    if props.time-24: TimeSelector24 {
+                        width: 2 * slider-width;
+                        item-size: 48px;
+                        hours: DateTimeGlobal.hour;
+                        minutes: DateTimeGlobal.minute;
+                        changed => {
+                            new-hour = self.hours;
+                            new-minute = self.minutes;
+                        }
+                    }
+
+                    if ! props.time-24: TimeSelector12 {
+                        width: 3 * slider-width;
+                        item-size: 48px;
+                        hours: Math.mod(DateTimeGlobal.hour, 12);
+                        minutes: DateTimeGlobal.minute;
+                        am-pm: Math.floor(DateTimeGlobal.hour / 12);
+                        changed => {
+                            new-hour = self.hours + 12 * self.am-pm;
+                            new-minute = self.minutes;
+                        }
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    importance: Importance.primary;
+                    label: "Save";
+                    clicked => {
+                        if DateTimeGlobal.year != date.year || DateTimeGlobal.month != date.month || DateTimeGlobal.day != date.day {
+                            DateTimeGlobal.date-changed(date.year, date.month, date.day);
+                            DateTimeGlobal.year = date.year;
+                            DateTimeGlobal.month = date.month;
+                            DateTimeGlobal.day = date.day;
+                            debug("year: \{DateTimeGlobal.year}, month: \{DateTimeGlobal.month}, day: \{DateTimeGlobal.day}");
+                        }
+                        if DateTimeGlobal.hour != new-hour || DateTimeGlobal.minute != new-minute {
+                            DateTimeGlobal.time-changed(new-hour, new-minute, 0);
+                            DateTimeGlobal.hour = new-hour;
+                            DateTimeGlobal.minute = new-minute;
+                            debug("hour: \{DateTimeGlobal.hour}, minute: \{DateTimeGlobal.minute}");
+                        }
+                        Navigate.backward();
+                    }
+                }
+            }
+        }
+    }
+}

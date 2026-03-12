@@ -1,0 +1,182 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+use atsama5d27::udphs::{EndpointDirection, EndpointType};
+use server::{AsScalar, FromScalar};
+
+use super::SetupPacket;
+use crate::error::UsbError;
+
+// === Messages used by higher level drivers ===
+#[derive(Debug, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+pub struct SetupPacketCallback(pub SetupPacket);
+
+impl server::Archive for SetupPacketCallback {
+    type Response = Option<Vec<u8>>;
+}
+
+impl server::MessageId for SetupPacketCallback {
+    const ID: xous::MessageId = 0;
+    const SERVER: &str = "";
+}
+
+// === External messages ===
+
+#[derive(Debug, server::Message, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+#[response(Result<Vec<u8>, UsbError>)]
+pub struct RegisterInterface {
+    pub if_class: u8,
+    pub if_subclass: u8,
+    pub if_protocol: u8,
+    pub endpoints: Vec<EndpointProperties>,
+    pub interface_functional_descriptors: Vec<u8>,
+    pub associated_interface_count: u8,
+}
+
+#[derive(Debug, server::Message)]
+#[response(())]
+pub struct WaitForConnection;
+
+#[derive(Debug, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+pub struct EndpointProperties {
+    pub ep_type: EndpointType,
+    pub ep_direction: EndpointDirection,
+    pub max_packet_len: u16,
+    pub interval: u8,
+}
+
+#[derive(Debug, server::Message, Clone)]
+pub struct SetEndpointStalled {
+    pub endpoint: u8,
+    pub stalled: bool,
+}
+
+impl FromScalar<2> for SetEndpointStalled {
+    fn from_scalar(value: [u32; 2]) -> Self { Self { endpoint: value[0] as u8, stalled: value[1] != 0 } }
+}
+
+impl AsScalar<2> for SetEndpointStalled {
+    fn as_scalar(&self) -> [u32; 2] { [self.endpoint as u32, self.stalled as u32] }
+}
+
+#[derive(Debug, server::Message)]
+#[response(Result<usize, UsbError>)]
+pub struct ReadEndpoint {
+    pub buf: xous::MemoryRange,
+    pub endpoint: u8,
+    pub length: u16,
+}
+
+impl From<server::SimpleMemoryMessage> for ReadEndpoint {
+    fn from(msg: server::SimpleMemoryMessage) -> Self {
+        Self { buf: msg.buf, endpoint: msg.arg1 as u8, length: msg.arg2 as u16 }
+    }
+}
+
+impl From<ReadEndpoint> for server::SimpleMemoryMessage {
+    fn from(read: ReadEndpoint) -> Self {
+        Self { buf: read.buf, arg1: read.endpoint as usize, arg2: read.length as usize }
+    }
+}
+
+#[derive(Debug, server::Message)]
+#[response(Result<usize, UsbError>)]
+pub struct WriteEndpoint {
+    pub buf: xous::MemoryRange,
+    pub endpoint: u8,
+    pub length: u16,
+}
+
+impl From<server::SimpleMemoryMessage> for WriteEndpoint {
+    fn from(msg: server::SimpleMemoryMessage) -> Self {
+        Self { buf: msg.buf, endpoint: msg.arg1 as u8, length: msg.arg2 as u16 }
+    }
+}
+
+impl From<WriteEndpoint> for server::SimpleMemoryMessage {
+    fn from(read: WriteEndpoint) -> Self {
+        Self { buf: read.buf, arg1: read.endpoint as usize, arg2: read.length as usize }
+    }
+}
+
+#[derive(Debug, server::Message, Clone)]
+pub struct SetDeviceEmulationEnabled(pub bool);
+
+#[derive(Debug, server::Message, Clone)]
+#[response(usize)]
+pub struct NumInterfaces;
+
+#[derive(Debug, server::Message, Clone)]
+#[response(Result<(), UsbError>)]
+pub struct RegisterSetupResponder(pub xous::CID);
+
+#[derive(Debug, server::Message, Clone)]
+#[response(bool)]
+pub struct IsDeviceEmulationEnabled;
+
+#[derive(Debug, server::Message, Clone)]
+#[response(bool)]
+pub struct IsDeviceEmulationConnected;
+
+#[derive(Debug, server::Message, Clone)]
+#[response(bool)]
+pub struct IsCableConnected;
+
+#[derive(Debug, server::Message, Clone)]
+#[response(bool)]
+pub struct IsDeviceMode;
+
+#[derive(Debug, server::Message, Clone, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
+#[response(Result<(), UsbError>)]
+pub struct RegisterCapability {
+    pub cap_type: u8,
+    pub cap_subtype: u8,
+    pub cap_uuid: Vec<u8>,
+    pub capability_functional_descriptors: Vec<u8>,
+}
+
+#[derive(Debug, server::Message, Clone)]
+pub struct SetVidPid {
+    pub vid: Option<u16>,
+    pub pid: Option<u16>,
+}
+
+impl FromScalar<2> for SetVidPid {
+    fn from_scalar(value: [u32; 2]) -> Self {
+        Self {
+            vid: if value[0] == 0 { None } else { Some(value[0] as u16) },
+            pid: if value[1] == 0 { None } else { Some(value[1] as u16) },
+        }
+    }
+}
+
+impl AsScalar<2> for SetVidPid {
+    fn as_scalar(&self) -> [u32; 2] { [self.vid.unwrap_or(0) as u32, self.pid.unwrap_or(0) as u32] }
+}
+
+#[derive(Debug, server::Message, Clone)]
+#[response(Result<(), UsbError>)]
+pub struct ResetController;
+
+impl AsScalar<4> for SetupPacket {
+    fn as_scalar(&self) -> [u32; 4] {
+        [
+            (self.request_type as u32) << 8 | self.request as u32,
+            self.value as u32,
+            self.index as u32,
+            self.length as u32,
+        ]
+    }
+}
+
+impl FromScalar<4> for SetupPacket {
+    fn from_scalar(value: [u32; 4]) -> Self {
+        Self {
+            request_type: (value[0] >> 8) as u8,
+            request: value[0] as u8,
+            value: value[1] as u16,
+            index: value[2] as u16,
+            length: value[3] as u16,
+        }
+    }
+}

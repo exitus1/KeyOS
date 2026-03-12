@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette } from "@ui/theme.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { HeadingMd, TextSm, TextMd, ButtonSection, Button, NavHeader } from "@ui/widgets.slint";
+import { OnboardingCallbacks } from "../../onboarding-callbacks.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { ShieldSection, ShieldContent, OnboardingShieldPage, OverlayImage } from "../../widgets/shield-page.slint";
+
+export component UpdateDevicePage inherits OnboardingShieldPage {
+    property <string> current-version: OnboardingCallbacks.current-keyos-version;
+    property <string> new-version: OnboardingCallbacks.new-keyos-version;
+
+    NavHeader {
+        y: 0;
+        left-icon: "";
+        right-icon: "file";
+        right-clicked => {
+            OnboardingCallbacks.update-from-file()
+        }
+    }
+
+    ShieldSection {
+        ShieldContent {
+            HeadingMd {
+                vertical-stretch: 0;
+                text: TR2.lookup(TrId.UpdateDeviceHeader);
+                horizontal-alignment: center;
+            }
+
+            TextMd {
+                text: TR2.format(TrId.UpdateDeviceCurrentVersion, [current-version]);
+                horizontal-alignment: center;
+            }
+
+            TextSm {
+                text: TR2.lookup(TrId.UpdateDeviceUpdatedTo);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+
+            TextMd {
+                text: TR2.format(TrId.UpdateDeviceNewVersion, [new-version]);
+                horizontal-alignment: center;
+            }
+        }
+
+        ButtonSection {
+            TextSm {
+                text: TR2.lookup(TrId.UpdateDeviceChargeBattery);
+                color: Palette.content-tertiary;
+                visible: !OnboardingCallbacks.update-sufficient-battery;
+                horizontal-alignment: center;
+            }
+
+            Button {
+                label: TR2.lookup(TrId.UpdateDeviceInstallUpdate);
+                importance: primary;
+                enabled: OnboardingCallbacks.update-sufficient-battery;
+                clicked => {
+                    Navigate.update-progress({ });
+                }
+            }
+        }
+    }
+
+    OverlayImage {
+        image: "images/three-d/update";
+    }
+}

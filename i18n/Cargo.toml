@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "i18n"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "i18n"
+path = "src/lib.rs" 
+
+[dependencies]
+chrono = "0.4.38"
+chrono-tz = "0.10.0"
+fixed_decimal = "0.5.6"
+icu = "1.5.0"
+icu_provider = "1.5.0"
+icu_provider_blob = "1.5.0"
+num-format = "0.4.4"
+rusty-money = "0.4.1"

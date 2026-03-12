@@ -1,0 +1,9 @@
+appId = "0x6f732f68617074696373000000000000"
+syscall = ["SetThreadPriority"]
+extends = "../../api/haptics"
+
+[appName]
+en = "Haptic Feedback (vibration) Server"
+
+[permissions]
+"template" = ["i2c", "gpio"]

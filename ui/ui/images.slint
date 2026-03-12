@@ -1,0 +1,575 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Linecap, GradientDirection, GradientStop, CardColor, Size} from "./types.slint";
+import {UIColors} from "./palettes/ui-colors.slint";
+
+export global Images {
+    // #IF PREVIEW
+    // pure public function common(name: string) -> image {
+    //     if (name == "images/Montserrat-28") {
+    //         return @image-url("@ui/images/Montserrat-28.png");
+    //     }
+    //     if (name == "images/background-dark") {
+    //         return @image-url("@ui/images/background-dark.png");
+    //     }
+    //     if (name == "images/background") {
+    //         return @image-url("@ui/images/background.png");
+    //     }
+    //     if (name == "images/backup-setup") {
+    //         return @image-url("@ui/images/backup-setup.svg");
+    //     }
+    //     if (name == "images/battery") {
+    //         return @image-url("@ui/images/battery.png");
+    //     }
+    //     if (name == "images/bg-gradient-recovery") {
+    //         return @image-url("@ui/images/bg-gradient-recovery.png");
+    //     }
+    //     if (name == "images/bg-slider") {
+    //         return @image-url("@ui/images/bg-slider.svg");
+    //     }
+    //     if (name == "images/bitcoin-graph") {
+    //         return @image-url("@ui/images/bitcoin-graph.png");
+    //     }
+    //     if (name == "images/card-circle-shadow-64") {
+    //         return @image-url("@ui/images/card-circle-shadow-64.png");
+    //     }
+    //     if (name == "images/card-circle-shadow") {
+    //         return @image-url("@ui/images/card-circle-shadow.png");
+    //     }
+    //     if (name == "images/charging-bolt-bg") {
+    //         return @image-url("@ui/images/charging-bolt-bg.png");
+    //     }
+    //     if (name == "images/charging-bolt") {
+    //         return @image-url("@ui/images/charging-bolt.png");
+    //     }
+    //     if (name == "images/diagonal-lines") {
+    //         return @image-url("@ui/images/diagonal-lines.svg");
+    //     }
+    //     if (name == "images/glow") {
+    //         return @image-url("@ui/images/glow.png");
+    //     }
+    //     if (name == "images/jumbo-circle") {
+    //         return @image-url("@ui/images/jumbo-circle.png");
+    //     }
+    //     if (name == "images/jumbo-download") {
+    //         return @image-url("@ui/images/jumbo-download.png");
+    //     }
+    //     if (name == "images/jumbo-shield") {
+    //         return @image-url("@ui/images/jumbo-shield.png");
+    //     }
+    //     if (name == "images/keyboard_bg") {
+    //         return @image-url("@ui/images/keyboard_bg.png");
+    //     }
+    //     if (name == "images/keyboard_bg_overlay") {
+    //         return @image-url("@ui/images/keyboard_bg_overlay.png");
+    //     }
+    //     if (name == "images/keyboard_bg_with_top_bar") {
+    //         return @image-url("@ui/images/keyboard_bg_with_top_bar.png");
+    //     }
+    //     if (name == "images/logo") {
+    //         return @image-url("@ui/images/logo.png");
+    //     }
+    //     if (name == "images/manage-keys") {
+    //         return @image-url("@ui/images/manage-keys.svg");
+    //     }
+    //     if (name == "images/nfc-card") {
+    //         return @image-url("@ui/images/nfc-card.svg");
+    //     }
+    //     if (name == "images/regulatory") {
+    //         return @image-url("@ui/images/regulatory.svg");
+    //     }
+    //     if (name == "images/save-settings") {
+    //         return @image-url("@ui/images/save-settings.svg");
+    //     }
+    //     if (name == "images/scan-qr-btn") {
+    //         return @image-url("@ui/images/scan-qr-btn.png");
+    //     }
+    //     if (name == "images/screen_heading_shield") {
+    //         return @image-url("@ui/images/screen_heading_shield.png");
+    //     }
+    //     if (name == "images/shield-bottom-alpha-mask") {
+    //         return @image-url("@ui/images/shield-bottom-alpha-mask.png");
+    //     }
+    //     if (name == "images/shield-top-alpha-mask") {
+    //         return @image-url("@ui/images/shield-top-alpha-mask.png");
+    //     }
+    //     if (name == "images/tap-keycard") {
+    //         return @image-url("@ui/images/tap-keycard.svg");
+    //     }
+    
+       // Default case if no match is found
+    //    return @image-url("@ui/images/logo.png");
+    // }
+    
+    // pure public function nine-slice(name: string) -> image {
+    //     if (name == "images/developers-tile") {
+    //         return @image-url("@ui/images/developers-tile__40-40-48-40.png", nine-slice(40 40 48 40));
+    //     }
+    //     if (name == "images/shadow-l1") {
+    //         return @image-url("@ui/images/shadow-l1__2-4-6-4.png", nine-slice(2 4 6 4));
+    //     }
+    //     if (name == "images/shadow-l2") {
+    //         return @image-url("@ui/images/shadow-l2__3-8-12-8.png", nine-slice(3 8 12 8));
+    //     }
+    //     if (name == "images/shadow-l3") {
+    //         return @image-url("@ui/images/shadow-l3__8-16-24-16.png", nine-slice(8 16 24 16));
+    //     }
+    //     if (name == "images/shadow-l4") {
+    //         return @image-url("@ui/images/shadow-l4__10-20-30-20.png", nine-slice(10 20 30 20));
+    //     }
+    //     if (name == "images/shadow-l5") {
+    //         return @image-url("@ui/images/shadow-l5__12-24-36-24.png", nine-slice(12 24 36 24));
+    //     }
+    //     if (name == "images/shadow-l6") {
+    //         return @image-url("@ui/images/shadow-l6__15-32-48-32.png", nine-slice(15 32 48 32));
+    //     }
+    //     if (name == "images/shield-bg") {
+    //         return @image-url("@ui/images/shield-bg__64-64-96-64.png", nine-slice(64 64 96 64));
+    //     }
+    //     if (name == "images/slide-to-bg-dark") {
+    //         return @image-url("@ui/images/slide-to-bg-dark__27-27-27-27.png", nine-slice(27 27 27 27));
+    //     }
+    //     if (name == "images/slide-to-bg-light") {
+    //         return @image-url("@ui/images/slide-to-bg-light__27-27-27-27.png", nine-slice(27 27 27 27));
+    //     }
+    //     if (name == "images/slide-to-target-dark") {
+    //         return @image-url("@ui/images/slide-to-target-dark__24-24-24-24.png", nine-slice(24 24 24 24));
+    //     }
+    //     if (name == "images/slide-to-target-light") {
+    //         return @image-url("@ui/images/slide-to-target-light__24-24-24-24.png", nine-slice(24 24 24 24));
+    //     }
+    
+    //     return @image-url("@ui/images/logo.png");
+    // }
+    
+    // pure public function icon(name: string, size: length) -> image {
+    //     if (name == "acorn") {
+    //         return @image-url("@ui/icons/acorn.svg");
+    //     }
+    //     if (name == "add") {
+    //         return @image-url("@ui/icons/add.svg");
+    //     }
+    //     if (name == "airlock") {
+    //         return @image-url("@ui/icons/airlock.svg");
+    //     }
+    //     if (name == "alert") {
+    //         return @image-url("@ui/icons/alert.svg");
+    //     }
+    //     if (name == "archive") {
+    //         return @image-url("@ui/icons/archive.svg");
+    //     }
+    //     if (name == "arrow-down-left") {
+    //         return @image-url("@ui/icons/arrow-down-left.svg");
+    //     }
+    //     if (name == "arrow-down-right") {
+    //         return @image-url("@ui/icons/arrow-down-right.svg");
+    //     }
+    //     if (name == "arrow-down") {
+    //         return @image-url("@ui/icons/arrow-down.svg");
+    //     }
+    //     if (name == "arrow-left") {
+    //         return @image-url("@ui/icons/arrow-left.svg");
+    //     }
+    //     if (name == "arrow-right") {
+    //         return @image-url("@ui/icons/arrow-right.svg");
+    //     }
+    //     if (name == "arrow-up-left") {
+    //         return @image-url("@ui/icons/arrow-up-left.svg");
+    //     }
+    //     if (name == "arrow-up-right") {
+    //         return @image-url("@ui/icons/arrow-up-right.svg");
+    //     }
+    //     if (name == "arrow-up") {
+    //         return @image-url("@ui/icons/arrow-up.svg");
+    //     }
+    //     if (name == "arrows-vertical") {
+    //         return @image-url("@ui/icons/arrows-vertical.svg");
+    //     }
+    //     if (name == "backspace") {
+    //         return @image-url("@ui/icons/backspace.svg");
+    //     }
+    //     if (name == "battery-charging") {
+    //         return @image-url("@ui/icons/battery-charging.svg");
+    //     }
+    //     if (name == "battery") {
+    //         return @image-url("@ui/icons/battery.svg");
+    //     }
+    //     if (name == "bell-active") {
+    //         return @image-url("@ui/icons/bell-active.svg");
+    //     }
+    //     if (name == "bell") {
+    //         return @image-url("@ui/icons/bell.svg");
+    //     }
+    //     if (name == "biometrics") {
+    //         return @image-url("@ui/icons/biometrics.svg");
+    //     }
+    //     if (name == "bitcoin-testnet-1") {
+    //         return @image-url("@ui/icons/bitcoin-testnet-1.svg");
+    //     }
+    //     if (name == "bitcoin-testnet-2") {
+    //         return @image-url("@ui/icons/bitcoin-testnet-2.svg");
+    //     }
+    //     if (name == "bitcoin-testnet-3") {
+    //         return @image-url("@ui/icons/bitcoin-testnet-3.svg");
+    //     }
+    //     if (name == "bitcoin-testnet-4") {
+    //         return @image-url("@ui/icons/bitcoin-testnet-4.svg");
+    //     }
+    //     if (name == "bitcoin-testnet-5") {
+    //         return @image-url("@ui/icons/bitcoin-testnet-5.svg");
+    //     }
+    //     if (name == "bitcoin") {
+    //         return @image-url("@ui/icons/bitcoin.svg");
+    //     }
+    //     if (name == "bluetooth-off") {
+    //         return @image-url("@ui/icons/bluetooth-off.svg");
+    //     }
+    //     if (name == "bluetooth") {
+    //         return @image-url("@ui/icons/bluetooth.svg");
+    //     }
+    //     if (name == "brightness-left") {
+    //         return @image-url("@ui/icons/brightness-left.svg");
+    //     }
+    //     if (name == "brightness-right") {
+    //         return @image-url("@ui/icons/brightness-right.svg");
+    //     }
+    //     if (name == "bullet") {
+    //         return @image-url("@ui/icons/bullet.svg");
+    //     }
+    //     if (name == "camera-off") {
+    //         return @image-url("@ui/icons/camera-off.svg");
+    //     }
+    //     if (name == "camera") {
+    //         return @image-url("@ui/icons/camera.svg");
+    //     }
+    //     if (name == "card-view") {
+    //         return @image-url("@ui/icons/card-view.svg");
+    //     }
+    //     if (name == "chain") {
+    //         return @image-url("@ui/icons/chain.svg");
+    //     }
+    //     if (name == "check-circle") {
+    //         return @image-url("@ui/icons/check-circle.svg");
+    //     }
+    //     if (name == "check") {
+    //         return @image-url("@ui/icons/check.svg");
+    //     }
+    //     if (name == "chevron-down-double") {
+    //         return @image-url("@ui/icons/chevron-down-double.svg");
+    //     }
+    //     if (name == "chevron-down") {
+    //         return @image-url("@ui/icons/chevron-down.svg");
+    //     }
+    //     if (name == "chevron-left") {
+    //         return @image-url("@ui/icons/chevron-left.svg");
+    //     }
+    //     if (name == "chevron-right") {
+    //         return @image-url("@ui/icons/chevron-right.svg");
+    //     }
+    //     if (name == "chevron-up") {
+    //         return @image-url("@ui/icons/chevron-up.svg");
+    //     }
+    //     if (name == "clipboard") {
+    //         return @image-url("@ui/icons/clipboard.svg");
+    //     }
+    //     if (name == "close") {
+    //         return @image-url("@ui/icons/close.svg");
+    //     }
+    //     if (name == "coins") {
+    //         return @image-url("@ui/icons/coins.svg");
+    //     }
+    //     if (name == "coins2") {
+    //         return @image-url("@ui/icons/coins2.svg");
+    //     }
+    //     if (name == "community") {
+    //         return @image-url("@ui/icons/community.svg");
+    //     }
+    //     if (name == "copy") {
+    //         return @image-url("@ui/icons/copy.svg");
+    //     }
+    //     if (name == "delete") {
+    //         return @image-url("@ui/icons/delete.svg");
+    //     }
+    //     if (name == "device") {
+    //         return @image-url("@ui/icons/device.svg");
+    //     }
+    //     if (name == "devices") {
+    //         return @image-url("@ui/icons/devices.svg");
+    //     }
+    //     if (name == "double-down-chevrons") {
+    //         return @image-url("@ui/icons/double-down-chevrons.svg");
+    //     }
+    //     if (name == "download") {
+    //         return @image-url("@ui/icons/download.svg");
+    //     }
+    //     if (name == "edit") {
+    //         return @image-url("@ui/icons/edit.svg");
+    //     }
+    //     if (name == "ellipsis") {
+    //         return @image-url("@ui/icons/ellipsis.svg");
+    //     }
+    //     if (name == "email") {
+    //         return @image-url("@ui/icons/email.svg");
+    //     }
+    //     if (name == "erase") {
+    //         return @image-url("@ui/icons/erase.svg");
+    //     }
+    //     if (name == "export") {
+    //         return @image-url("@ui/icons/export.svg");
+    //     }
+    //     if (name == "external-link") {
+    //         return @image-url("@ui/icons/external-link.svg");
+    //     }
+    //     if (name == "eye-off") {
+    //         return @image-url("@ui/icons/eye-off.svg");
+    //     }
+    //     if (name == "eye") {
+    //         return @image-url("@ui/icons/eye.svg");
+    //     }
+    //     if (name == "file") {
+    //         return @image-url("@ui/icons/file.svg");
+    //     }
+    //     if (name == "filter") {
+    //         return @image-url("@ui/icons/filter.svg");
+    //     }
+    //     if (name == "filter2") {
+    //         return @image-url("@ui/icons/filter2.svg");
+    //     }
+    //     if (name == "folder") {
+    //         return @image-url("@ui/icons/folder.svg");
+    //     }
+    //     if (name == "foundation") {
+    //         return @image-url("@ui/icons/foundation.svg");
+    //     }
+    //     if (name == "github") {
+    //         return @image-url("@ui/icons/github.svg");
+    //     }
+    //     if (name == "history") {
+    //         return @image-url("@ui/icons/history.svg");
+    //     }
+    //     if (name == "info") {
+    //         return @image-url("@ui/icons/info.svg");
+    //     }
+    //     if (name == "info2") {
+    //         return @image-url("@ui/icons/info2.svg");
+    //     }
+    //     if (name == "key") {
+    //         return @image-url("@ui/icons/key.svg");
+    //     }
+    //     if (name == "keys") {
+    //         return @image-url("@ui/icons/keys.svg");
+    //     }
+    //     if (name == "learn") {
+    //         return @image-url("@ui/icons/learn.svg");
+    //     }
+    //     if (name == "lightning") {
+    //         return @image-url("@ui/icons/lightning.svg");
+    //     }
+    //     if (name == "list") {
+    //         return @image-url("@ui/icons/list.svg");
+    //     }
+    //     if (name == "live-key") {
+    //         return @image-url("@ui/icons/live-key.svg");
+    //     }
+    //     if (name == "loader") {
+    //         return @image-url("@ui/icons/loader.svg");
+    //     }
+    //     if (name == "locked") {
+    //         return @image-url("@ui/icons/locked.svg");
+    //     }
+    //     if (name == "logs") {
+    //         return @image-url("@ui/icons/logs.svg");
+    //     }
+    //     if (name == "menu-down") {
+    //         return @image-url("@ui/icons/menu-down.svg");
+    //     }
+    //     if (name == "menu-up") {
+    //         return @image-url("@ui/icons/menu-up.svg");
+    //     }
+    //     if (name == "menu") {
+    //         return @image-url("@ui/icons/menu.svg");
+    //     }
+    //     if (name == "moon") {
+    //         return @image-url("@ui/icons/moon.svg");
+    //     }
+    //     if (name == "nfc-1-card-horiz") {
+    //         return @image-url("@ui/icons/nfc-1-card-horiz.svg");
+    //     }
+    //     if (name == "nfc-1-card-vert") {
+    //         return @image-url("@ui/icons/nfc-1-card-vert.svg");
+    //     }
+    //     if (name == "nfc-2-cards-horiz") {
+    //         return @image-url("@ui/icons/nfc-2-cards-horiz.svg");
+    //     }
+    //     if (name == "nfc-2-cards-vert") {
+    //         return @image-url("@ui/icons/nfc-2-cards-vert.svg");
+    //     }
+    //     if (name == "nfc-card") {
+    //         return @image-url("@ui/icons/nfc-card.svg");
+    //     }
+    //     if (name == "nfc-off") {
+    //         return @image-url("@ui/icons/nfc-off.svg");
+    //     }
+    //     if (name == "nfc") {
+    //         return @image-url("@ui/icons/nfc.svg");
+    //     }
+    //     if (name == "node") {
+    //         return @image-url("@ui/icons/node.svg");
+    //     }
+    //     if (name == "nostr") {
+    //         return @image-url("@ui/icons/nostr.svg");
+    //     }
+    //     if (name == "passport-prime") {
+    //         return @image-url("@ui/icons/passport-prime.svg");
+    //     }
+    //     if (name == "passport") {
+    //         return @image-url("@ui/icons/passport.svg");
+    //     }
+    //     if (name == "performance") {
+    //         return @image-url("@ui/icons/performance.svg");
+    //     }
+    //     if (name == "pin-dot-copper") {
+    //         return @image-url("@ui/icons/pin-dot-copper.svg");
+    //     }
+    //     if (name == "pin-dot-empty") {
+    //         return @image-url("@ui/icons/pin-dot-empty.svg");
+    //     }
+    //     if (name == "pin-dot-filled") {
+    //         return @image-url("@ui/icons/pin-dot-filled.svg");
+    //     }
+    //     if (name == "pin-dot-patterned") {
+    //         return @image-url("@ui/icons/pin-dot-patterned.svg");
+    //     }
+    //     if (name == "pin") {
+    //         return @image-url("@ui/icons/pin.svg");
+    //     }
+    //     if (name == "play") {
+    //         return @image-url("@ui/icons/play.svg");
+    //     }
+    //     if (name == "plus") {
+    //         return @image-url("@ui/icons/plus.svg");
+    //     }
+    //     if (name == "postmix") {
+    //         return @image-url("@ui/icons/postmix.svg");
+    //     }
+    //     if (name == "power") {
+    //         return @image-url("@ui/icons/power.svg");
+    //     }
+    //     if (name == "prime") {
+    //         return @image-url("@ui/icons/prime.svg");
+    //     }
+    //     if (name == "privacy") {
+    //         return @image-url("@ui/icons/privacy.svg");
+    //     }
+    //     if (name == "question") {
+    //         return @image-url("@ui/icons/question.svg");
+    //     }
+    //     if (name == "remove") {
+    //         return @image-url("@ui/icons/remove.svg");
+    //     }
+    //     if (name == "return") {
+    //         return @image-url("@ui/icons/return.svg");
+    //     }
+    //     if (name == "sats-testnet-1") {
+    //         return @image-url("@ui/icons/sats-testnet-1.svg");
+    //     }
+    //     if (name == "sats-testnet-2") {
+    //         return @image-url("@ui/icons/sats-testnet-2.svg");
+    //     }
+    //     if (name == "sats-testnet-3") {
+    //         return @image-url("@ui/icons/sats-testnet-3.svg");
+    //     }
+    //     if (name == "sats-testnet-4") {
+    //         return @image-url("@ui/icons/sats-testnet-4.svg");
+    //     }
+    //     if (name == "sats-testnet-5") {
+    //         return @image-url("@ui/icons/sats-testnet-5.svg");
+    //     }
+    //     if (name == "sats") {
+    //         return @image-url("@ui/icons/sats.svg");
+    //     }
+    //     if (name == "scan-qr") {
+    //         return @image-url("@ui/icons/scan-qr.svg");
+    //     }
+    //     if (name == "search") {
+    //         return @image-url("@ui/icons/search.svg");
+    //     }
+    //     if (name == "shield") {
+    //         return @image-url("@ui/icons/shield.svg");
+    //     }
+    //     if (name == "shield2") {
+    //         return @image-url("@ui/icons/shield2.svg");
+    //     }
+    //     if (name == "shifted") {
+    //         return @image-url("@ui/icons/shifted.svg");
+    //     }
+    //     if (name == "show-arrows") {
+    //         return @image-url("@ui/icons/show-arrows.svg");
+    //     }
+    //     if (name == "skip-back") {
+    //         return @image-url("@ui/icons/skip-back.svg");
+    //     }
+    //     if (name == "skip-fwd") {
+    //         return @image-url("@ui/icons/skip-fwd.svg");
+    //     }
+    //     if (name == "smartphone") {
+    //         return @image-url("@ui/icons/smartphone.svg");
+    //     }
+    //     if (name == "sort") {
+    //         return @image-url("@ui/icons/sort.svg");
+    //     }
+    //     if (name == "sort-ascending") {
+    //         return @image-url("@ui/icons/sort-ascending.svg");
+    //     }
+    //     if (name == "sort-descending") {
+    //         return @image-url("@ui/icons/sort-descending.svg");
+    //     }
+    //     if (name == "spinner") {
+    //         return @image-url("@ui/icons/spinner.svg");
+    //     }
+    //     if (name == "sun") {
+    //         return @image-url("@ui/icons/sun.svg");
+    //     }
+    //     if (name == "tablet") {
+    //         return @image-url("@ui/icons/tablet.svg");
+    //     }
+    //     if (name == "tag") {
+    //         return @image-url("@ui/icons/tag.svg");
+    //     }
+    //     if (name == "telegram") {
+    //         return @image-url("@ui/icons/telegram.svg");
+    //     }
+    //     if (name == "tool") {
+    //         return @image-url("@ui/icons/tool.svg");
+    //     }
+    //     if (name == "transfer") {
+    //         return @image-url("@ui/icons/transfer.svg");
+    //     }
+    //     if (name == "two-coins") {
+    //         return @image-url("@ui/icons/two-coins.svg");
+    //     }
+    //     if (name == "unlocked") {
+    //         return @image-url("@ui/icons/unlocked.svg");
+    //     }
+    //     if (name == "unshifted") {
+    //         return @image-url("@ui/icons/unshifted.svg");
+    //     }
+    //     if (name == "usb-off") {
+    //         return @image-url("@ui/icons/usb-off.svg");
+    //     }
+    //     if (name == "usb") {
+    //         return @image-url("@ui/icons/usb.svg");
+    //     }
+    //     if (name == "x-corp") {
+    //         return @image-url("@ui/icons/x-corp.svg");
+    //     }
+    
+    //     return @image-url("@ui/icons/bullet.svg");
+    // }
+    // #ELSE
+    pure callback common(string) -> image;
+    pure callback nine-slice(string) -> image;
+    pure callback icon(string, length) -> image;
+    // #ENDIF
+}

@@ -1,0 +1,119 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    BasePage, 
+    PageBody, 
+    ContentSection,
+    ButtonSection,
+    Button,
+    QrCodeCard,
+    AnimatedQrCode,
+    HeadingSm,
+    TextSm,
+    TitledInput,
+    Dialog
+} from "@ui/widgets.slint";
+
+import { QuantumLinkProps } from "props.slint";
+import { SettingsNavHeader } from "../../widgets/nav-header.slint";
+import { QlGlobal } from "../../globals/ql-global.slint";
+
+component Connected inherits Rectangle {
+    property <bool> show-dialog: false;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.ConnectionDoneTitle);
+        }
+
+        PageBody {
+            ContentSection {
+                TitledInput {
+                    title: TR2.lookup(TrId.ConnectionDonePhone);
+                    text: QlGlobal.paired-device-name;
+                    enabled: false;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.ConnectionDoneDisconnectFromEnvoy);
+                    importance: notice;
+                    clicked => {
+                        show-dialog = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if show-dialog: Rectangle {
+        background: Palette.overlay;
+        Dialog {
+            title: TR2.lookup(TrId.ConnectionDoneModalHeader);
+            message: TR2.lookup(TrId.ConnectionDoneModalSubheader);
+            show-ok: true;
+            show-cancel: true;
+            ok-text: TR2.lookup(TrId.CommonButtonContinue);
+            cancel-text: TR2.lookup(TrId.CommonButtonCancel);
+            width: 352px;
+            on-cancel => {
+                show-dialog = false;
+            }
+            on-ok => {
+                show-dialog = false;
+                QlGlobal.disconnect();
+            }
+        }
+    }
+}
+
+component Disconnected inherits VerticalLayout {
+    property <bool> animate-qr: QlGlobal.bt-connected;
+
+    SettingsNavHeader {
+        title: TR2.lookup(TrId.ConnectionMissingTitle);
+    }
+
+    PageBody {
+        ContentSection {
+            HorizontalLayout {
+                alignment: center;
+                padding-top: Size.sz16;
+                padding-bottom: Size.sz12;
+
+                if !animate-qr: QrCodeCard {
+                    data: QlGlobal.qr-data();
+                }
+
+                if animate-qr: AnimatedQrCode {
+                    parts: QlGlobal.animated-qr-data();
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz6;
+                HeadingSm {
+                    text: TR2.lookup(TrId.ConnectionMissingHeader);
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.ConnectionMissingSubheader);
+                    horizontal-alignment: center;
+                }
+            }
+        }
+    }
+}
+
+export component QuantumLinkPage inherits BasePage {
+    in property <QuantumLinkProps> props;
+    property <bool> is-paired: QlGlobal.ql-paired;
+
+    if is-paired: Connected { }
+    if !is-paired: Disconnected { }
+}

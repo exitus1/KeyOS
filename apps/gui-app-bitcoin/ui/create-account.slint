@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CardColor } from "@ui/theme.slint";
+import { MultiSigView, Network } from "./callbacks.slint";
+
+export struct CreateSingleSigOptions {
+    label: string,
+    network: Network,
+    index: string,
+    color: CardColor,
+}
+
+export struct CreateMultiSigOptions {
+    label: string,
+    network: Network,
+}
+
+export enum CreateAccountState {
+    Idle,
+    Creating,
+    Success,
+    Error,
+}
+
+export global CreateAccount {
+    in property <CreateAccountState> state: CreateAccountState.Idle;
+    in-out property <MultiSigView> pending-multisig-account;
+
+    in property <string> new-account-id;
+
+    in property <bool> prefilled-mode;
+    in property <string> prefilled-index;
+    in property <Network> prefilled-network;
+
+    callback import-multisig();
+    callback create-single-sig(CreateSingleSigOptions);
+    callback create-multi-sig(CreateMultiSigOptions);
+
+    callback validate-new-label(string) -> string;
+    pure callback validate-new-index(string, Network) -> string;
+    callback update-account-name(account-id: string, name: string);
+    pure callback get-next-index(Network) -> string;
+    callback reset-prefilled-mode();
+}

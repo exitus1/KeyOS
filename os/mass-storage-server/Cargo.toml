@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "mass-storage-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = { workspace = true }
+log-server = { workspace = true }
+mass-storage = { workspace = true, features = ["rkyv"] }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+thiserror = { workspace = true }
+usb = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-names = { package = "xous-api-names", path = "../../xous/api/names" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true, default-features = false }
+utralib = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "power-manager-server"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+power-manager = { workspace = true }
+rkyv = { workspace = true }
+server = { path = "../../server" }
+thiserror = "1.0"
+xous = { path = "../../xous/xous-rs" }
+
+[features]
+recovery-os = []
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+bq24157 = { workspace = true }
+bq27421 = { workspace = true }
+gpio = { workspace = true }
+i2c = { workspace = true }
+keyos = { path = "../../keyos" }
+tusb320 = { workspace = true }
+utralib = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

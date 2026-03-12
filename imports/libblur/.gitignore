@@ -1,0 +1,6 @@
+/target
+.idea
+.run
+/blurred.jpg
+.DS_Store
+blurred.png

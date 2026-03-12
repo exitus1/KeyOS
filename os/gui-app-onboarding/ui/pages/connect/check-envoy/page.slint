@@ -1,0 +1,247 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, UISize, Size, Images } from "@ui/theme.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { HeadingMd, TextSm, TextMd, Icon, Shield, Button, ButtonSection } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../../widgets/base-page.slint";
+import { StepLine, StepLineSection } from "@ui/widgets/step-list.slint";
+import { OnboardingCallbacks, SecurityCheckState, FirmwareCheckState } from "../../../onboarding-callbacks.slint";
+import { ShieldSection, ShieldContent, OnboardingShieldPage, OverlayImage } from "../../../widgets/shield-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+
+component Header inherits HeadingMd {
+    vertical-stretch: 0;
+    text: TR2.lookup(TrId.ConnectionHeader);
+    horizontal-alignment: center;
+}
+
+component Connected inherits StepLine {
+    done: true;
+    text: TR2.lookup(TrId.ConnectionConnectedToEnvoy);
+}
+
+component SecurityCheckingView inherits ShieldSection {
+    ShieldContent {
+        Header { }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                loading: true;
+                text: TR2.lookup(TrId.ConnectionCheckingDeviceSecurity);
+            }
+
+            StepLine {
+                text: TR2.lookup(TrId.ConnectionCheckForUpdates);
+            }
+        }
+    }
+}
+
+component SecurityCheckFailedView inherits ShieldSection {
+    ShieldContent {
+        HeadingMd {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.ErrorHeader);
+            horizontal-alignment: center;
+        }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                error: true;
+                text: TR2.lookup(TrId.ErrorSecurityCheckFailedWarning);
+            }
+        }
+
+        TextSm {
+            text: TR2.lookup(TrId.ErrorSecurityCheckFailedContent);
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            importance: primary;
+            clicked => {
+                OnboardingCallbacks.restart-onboarding();
+            }
+        }
+    }
+}
+
+component SecurityCheckPendingView inherits ShieldSection {
+    ShieldContent {
+        HeadingMd {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.ErrorHeader);
+            horizontal-alignment: center;
+        }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                error: true;
+                text: TR2.lookup(TrId.ErrorSecurityCheckPendingWarning);
+            }
+        }
+
+        TextSm {
+            text: TR2.lookup(TrId.ErrorSecurityCheckPendingContent);
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            importance: primary;
+            clicked => {
+                OnboardingCallbacks.restart-onboarding();
+            }
+        }
+    }
+}
+
+component FirmwareCheckingView inherits ShieldSection {
+    ShieldContent {
+        Header { }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                done: true;
+                text: TR2.lookup(TrId.ConnectionCheckedDeviceSecurity);
+            }
+
+            StepLine {
+                loading: true;
+                text: TR2.lookup(TrId.ConnectionCheckingForUpdates);
+            }
+        }
+    }
+}
+
+component FirmwareCheckFailedView inherits ShieldSection {
+    ShieldContent {
+        Header { }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                done: true;
+                text: TR2.lookup(TrId.ConnectionCheckedDeviceSecurity);
+            }
+
+            StepLine {
+                error: true;
+                text: TR2.lookup(TrId.ConnectionCheckingForUpdates);
+            }
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            importance: primary;
+            clicked => {
+                OnboardingCallbacks.check-firmware-update();
+            }
+        }
+    }
+}
+
+component NoUpdateAvailableView inherits ShieldSection {
+    ShieldContent {
+        Header { }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                done: true;
+                text: TR2.lookup(TrId.ConnectionCheckedDeviceSecurity);
+            }
+
+            StepLine {
+                done: true;
+                text: TR2.lookup(TrId.ConnectionNoUpdatesAvailable);
+            }
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonContinue);
+            importance: primary;
+            clicked => {
+                Navigate.set-pin-info({ replace: true });
+            }
+        }
+    }
+}
+
+component UpdateAvailableView inherits ShieldSection {
+    ShieldContent {
+        Header { }
+
+        StepLineSection {
+            Connected { }
+
+            StepLine {
+                done: true;
+                text: TR2.lookup(TrId.ConnectionCheckedDeviceSecurity);
+            }
+
+            StepLine {
+                done: true;
+                text: TR2.lookup(TrId.UpdateAvailableNewUpdatesAvailable);
+            }
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.UpdateAvailableUpdateDevice);
+            importance: primary;
+            clicked => {
+                Navigate.update-device({ replace: true });
+            }
+        }
+    }
+}
+
+export component CheckEnvoyPage inherits OnboardingShieldPage {
+    in property <SecurityCheckState> security-state: OnboardingCallbacks.security-state;
+    in property <FirmwareCheckState> firmware-check-state: OnboardingCallbacks.firmware-check-state;
+
+    // Auto-trigger firmware check when security passes
+    changed security-state => {
+        if (security-state == SecurityCheckState.Passed && firmware-check-state == FirmwareCheckState.Idle) {
+            OnboardingCallbacks.check-firmware-update();
+        }
+    }
+
+    // security check states
+    if security-state == SecurityCheckState.Idle || security-state == SecurityCheckState.Loading: SecurityCheckingView { }
+    if security-state == SecurityCheckState.Failed: SecurityCheckFailedView { }
+    if security-state == SecurityCheckState.Error: SecurityCheckPendingView { }
+
+    // firmware check states
+    if security-state == SecurityCheckState.Passed && (firmware-check-state == FirmwareCheckState.Idle || firmware-check-state == FirmwareCheckState.Loading): FirmwareCheckingView { }
+    if security-state == SecurityCheckState.Passed && firmware-check-state == FirmwareCheckState.Failed: FirmwareCheckFailedView { }
+    if security-state == SecurityCheckState.Passed && firmware-check-state == FirmwareCheckState.NoUpdateAvailable: NoUpdateAvailableView { }
+    if security-state == SecurityCheckState.Passed && firmware-check-state == FirmwareCheckState.UpdateAvailable: UpdateAvailableView { }
+
+    OverlayImage {
+        image: "images/three-d/quantum";
+    }
+}

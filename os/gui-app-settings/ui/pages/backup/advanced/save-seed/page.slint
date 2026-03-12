@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, HeadingMd, Icon, TextXs, TextSm, BasePage, PageBody, ContentSection, ButtonSection, WrappedIcon, 
+    TimerCircularProgress, RadioGroup, RadioButton
+} from "@ui/widgets.slint";
+import { IconSize, Images, Palette, Importance } from "@ui/theme.slint";
+import { Size, UISize } from "@ui/types.slint";
+
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { Navigate, } from "../../../../gen/navigate.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { BackupGlobal } from "../../../../globals/backup-global.slint";
+
+
+export component SaveSeedPage inherits BasePage {
+    VerticalLayout {
+        SettingsNavHeader { }
+
+        PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "nfc-2-cards-vert";
+                    }
+                }
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.SaveSeedtoCardsHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.SaveSeedtoCardsSubheader);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                    wrap: TextWrap.word-wrap;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    rg := RadioGroup {
+                        labels-right: true;
+                        model: [
+                            { name: TR2.format(TrId.SaveSeedtoCardsBackupXofYCards, ["2", "3"]), value: "" },
+                        ];
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    importance: Importance.primary;
+                    label: TR2.lookup(TrId.CommonButtonContinue);
+                    clicked => {
+                        if BackupGlobal.magic-backup-enabled {
+                            Navigate.create-magic-backup({ replace: true });
+                        } else {
+                            Navigate.create-manual-backup({ replace: true });
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

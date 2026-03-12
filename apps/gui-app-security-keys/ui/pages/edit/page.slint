@@ -1,0 +1,164 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SecurityKeyCallbacks as CB } from "../../security-key-callbacks.slint";
+import { EditCaller } from "../../security-key-types.slint";
+import { Palette, Size, Importance, CallbackResult, ResultLevel } from "@ui/theme.slint";
+import { AppHeader, CardColorPicker, IconButton, TitledInput, TextSm, BasePage, ContentSection, PageBody, ConfirmationModal, ErrorModal, SwitchControlled } from "@ui/widgets.slint";
+import { EditButtonSection, EditPageVersion, CardPageVersion } from "@ui/pages.slint";
+import { EditProps } from "./props.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+export component EditPage inherits Rectangle {
+    in property <EditProps> props;
+    property <bool> light-mode: true;
+
+    property <string> new-label: props.key.label;
+    property <bool> new-live: props.key.live;
+    property <int> new-color: props.key.color;
+    property <CallbackResult> result: { level: ResultLevel.info, success: true, text: "", title: "" };
+    property <bool> has-changes: new-label != props.key.label || new-live != props.key.live || new-color != props.key.color;
+    property <bool> has-errors: label-input.has-notice;
+
+    BasePage {
+        VerticalLayout {
+            AppHeader {
+                title: props.version == EditPageVersion.add ? TR2.lookup(TrId.AddTitle) : (props.version == EditPageVersion.edit ? TR2.lookup(TrId.KeyLabelTitle) : TR2.lookup(TrId.ArchivedKeyTitle));
+                title-color: Palette.content-primary;
+                side-padding: Size.sz8;
+
+                IconButton {
+                    icon: "chevron-left";
+                    size: Size.sz8;
+                    importance: Importance.normal;
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+            }
+
+            PageBody {
+                ContentSection {
+                    spacing: Size.sz10;
+
+                    // TODO: add icon selector
+
+                    label-input := TitledInput {
+                        title: TR2.lookup(TrId.AddLabel);
+                        placeholder: TR2.lookup(TrId.AddLabelFillerText);
+                        text: props.version == EditPageVersion.add ? "" : props.key.label;
+                        caps-mode: sentences;
+                        message: props.version == EditPageVersion.add ? TR2.lookup(TrId.AddLabelMissing) : "";
+                        has-notice: props.version == EditPageVersion.add;
+                        enabled: props.version != EditPageVersion.archive;
+                        edited(text) => {
+                            new-label = text;
+                            if (props.version == EditPageVersion.add) {
+                                self.message = CB.validate-new-label(text);
+                                self.has-notice = self.message != "";
+                            } else {
+                                self.message = CB.validate-edit-label(props.key.index, text);
+                                self.has-notice = self.message != "";
+                            }
+                        }
+                    }
+
+                    // TODO: uncomment when the conept of "live" keys is refined
+                    // VerticalLayout {
+                    //     padding-left: Size.sz4;
+                    //     padding-right: Size.sz4;
+                    //     spacing: Size.sz2;
+                    //     HorizontalLayout {
+                    //         alignment: start;
+                    //         TextSm {
+                    //             text: TR2.lookup(TrId.KeyLabelAlwaysActiveText);
+                    //             color: Palette.content-tertiary;
+                    //         }
+                    //     }
+
+                    //     HorizontalLayout {
+                    //         alignment: space-between;
+                    //         TextSm {
+                    //             text: TR2.lookup(TrId.KeyLabelLiveKey);
+                    //         }
+
+                    //         SwitchControlled {
+                    //             checked: props.key.live;
+                    //             enabled: props.version != EditPageVersion.archive;
+
+                    //             changed(checked) => {
+                    //                 new-live = checked;
+                    //                 self.checked = checked;
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    if props.version != EditPageVersion.archive: CardColorPicker {
+                        selected-index: props.key.color;
+                        title: TR2.lookup(TrId.ItemDetailsColor);
+                        changed(index) => {
+                            new-color = index;
+                        }
+                    }
+                }
+
+                EditButtonSection {
+                    version: props.version;
+                    allow-delete: false;
+                    has-changes: has-changes;
+                    has-errors: has-errors;
+
+                    save-label: TR2.lookup(TrId.CommonButtonSave);
+                    archive-text: TR2.lookup(TrId.KeyLabelArchiveKey);
+                    restore-text: TR2.lookup(TrId.ArchivedKeyRestoreKey);
+
+                    save => {
+                        // TODO: add icon support
+                        result = CB.save(new-label, "", new-live, new-color);
+                        if (result.success) {
+                            if (props.caller == EditCaller.add) {
+                                Navigate.backward-animate(Animate.None);
+                                Navigate.main({ version: CardPageVersion.main }, { replace: true, animate: Animate.None });
+                            } else {
+                                Navigate.backward();
+                            }
+                        }
+                    }
+
+                    edit => {
+                        // TODO: add icon support
+                        result = CB.edit(props.key.index, new-label, "", new-live, new-color);
+                        if (result.success) {
+                            Navigate.backward();
+                        }
+                    }
+
+                    archive => {
+                        CB.set-archived(props.key.index, true);
+                        Navigate.backward();
+                    }
+
+                    restore => {
+                        // Assume editing is disabled in archive
+                        CB.set-archived(props.key.index, false);
+                        Navigate.backward();
+                    }
+                }
+            }
+        }
+    }
+
+    if !result.success: ErrorModal {
+        icon: result.level == ResultLevel.info ? "info" : "alert";
+        icon-color: result.level == ResultLevel.info ? Palette.content-brand : Palette.content-notice;
+        title: result.title;
+        text: result.text;
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+
+        confirm-clicked => {
+            result.success = true;
+        }
+    }
+}

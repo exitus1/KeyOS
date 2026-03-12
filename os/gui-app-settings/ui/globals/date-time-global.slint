@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export struct TimeZone {
+    display-full: string,  // Full name with offset - "Eastern Standard Time (-05:00)"
+    display-short: string, // Abbreviation + offset - "EST (-05:00)"
+    id: string,            // Unique identifier for the timezone
+}
+
+export global DateTimeGlobal {
+    in property <[TimeZone]> timezone-search-list;
+    in property <TimeZone> selected-timezone;
+
+    callback timezone-search-text-edited(string);
+    callback timezone-selected(TimeZone);
+
+    // time formatted as string, dependent on time-24
+    in-out property <string> display-time: "";
+
+    in-out property <int> day: 28;
+    in-out property <int> month: 2;
+    in-out property <int> year: 2025;
+    in-out property <int> hour: 22;
+    in-out property <int> minute: 15;
+    in-out property <int> second: 25;
+
+    callback date-changed(int, int, int);
+    callback time-changed(int, int, int);
+
+    in-out property <bool> envoy-time-sync: false;
+    callback set-envoy-time-sync(bool);
+
+    in-out property <bool> time-24: false;
+    callback set-time-24(bool);
+}

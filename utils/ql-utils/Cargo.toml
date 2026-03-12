@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "ql-utils"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+app-manager = { workspace = true }
+bt = { workspace = true }
+futures-lite = { workspace = true }
+power-manager = { workspace = true }
+quantum-link = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+update = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

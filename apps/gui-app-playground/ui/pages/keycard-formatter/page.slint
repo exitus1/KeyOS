@@ -1,0 +1,90 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { HeadingLg, HeadingMd, TextMd, BasePage, IconButton, Icon, JumboIcon, JumboIconPageBody, TimerCircularProgress, IconButton } from "@ui/widgets.slint";
+import { Palette } from "@ui/theme.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { Callbacks } from "../../callbacks.slint";
+
+// Import onboarding widgets to match the backup page visuals
+import { OnboardingContentSection } from "../../../../../os/gui-app-onboarding/ui/widgets/base-page.slint";
+import { StepLine, StepLineSection } from "@ui/widgets/step-list.slint";
+import { KeyCardAnimation } from "@ui/widgets/key-card-animation.slint";
+
+export component KeycardFormatterPagePage inherits BasePage {
+    init => {
+        Callbacks.start-keycard-formatter();
+        // Initialize UI state
+        Callbacks.formatter-formatting = false;
+        Callbacks.formatter-success = false;
+    }
+
+    VerticalLayout {
+        padding-left: 20px;
+        padding-right: 20px;
+        spacing: 10px;
+
+        HorizontalLayout {
+            alignment: space-between;
+            HorizontalLayout {
+                spacing: 10px;
+                IconButton {
+                    icon: "chevron-left";
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+
+                HeadingLg {
+                    text: "Keycard Formatter";
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        // Body styled to closely match the Keycard backup page
+        JumboIconPageBody {
+            OnboardingContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    if (!Callbacks.formatter-success && Callbacks.formatter-formatting): TimerCircularProgress {
+                        indeterminate: true;
+                        Icon {
+                            name: "nfc-1-card-vert";
+                            size: 96px;
+                        }
+                    }
+
+                    if (!Callbacks.formatter-success && !Callbacks.formatter-formatting): Rectangle {
+                        height: 184px;
+                        width: 184px;
+                        KeyCardAnimation { }
+                    }
+
+                    if (Callbacks.formatter-success): JumboIcon {
+                        name: "jumbo-circle";
+                        Icon {
+                            name: "check";
+                            size: 96px;
+                            color: Palette.content-brand;
+                        }
+                    }
+                }
+
+                HeadingMd {
+                    vertical-stretch: 0;
+                    text: "Keycard Formatter";
+                    horizontal-alignment: center;
+                }
+
+                StepLineSection {
+                    StepLine {
+                        done: Callbacks.formatter-success;
+                        loading: Callbacks.formatter-formatting;
+                        text: "Tap a Keycard to format";
+                    }
+                }
+            }
+        }
+    }
+}

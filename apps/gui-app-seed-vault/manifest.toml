@@ -1,0 +1,8 @@
+appId = "0x53656564205661756c74000000000000"
+
+[appName]
+en = "Vault"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/security" = ["GetSeed"]

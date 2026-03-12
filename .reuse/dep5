@@ -1,0 +1,300 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: keyOS
+Upstream-Contact: Foundation Devices, Inc. <hello@foundation.xyz>
+Source: https://foundation.xyz
+
+Files:
+  Cargo.lock
+  **/Cargo.lock
+  package-lock.json
+  **/package-lock.json
+  **/BT_application*.bin
+  **/config.toml
+  flake.lock
+  .cargo/audit.toml
+Copyright: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+License: MIT
+
+Files: .github/actions/rust-toolchain/action.yml
+Copyright: 2021 David Tolnay <dtolnay@gmail.com>
+License: MIT
+
+Files:
+  test-apps/ticktimer-test-client/*
+  tools/src/*
+Copyright: 2020 Sean Cross <sean@xobs.io>
+License: MIT OR Apache-2.0
+
+Files:
+  apps/gui-app-*/assets/*.png
+  os/gui-app-*/assets/*.png
+  apps/gui-app-*/ui/*.png
+  os/gui-app-*/ui/*.png
+  apps/gui-app-*/ui/images/*.svg
+  os/gui-app-*/ui/images/*.svg
+  os/gui-server/assets/device.png
+  api/settings/assets/*.tzif
+  ui/ui/icons/*.svg
+  ui/ui/icons/*.png
+  ui/ui/images/*.svg
+  ui/ui/images/*.png
+  ui/ui/fonts/*.ttf
+Copyright: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+License: MIT OR Apache-2.0
+
+Files:
+  loader/curve25519-dalek-loader/*
+  loader/ed25519-dalek-loader/*
+Copyright: isis lovecruft <isis@patternsinthevoid.net>
+License: BSD-3-Clause
+
+Files:
+  loader/src/murmur3.rs
+  services/xous-susres/src/murmur3.rs
+Copyright: 2020 Stu Small
+License: MIT OR Apache-2.0
+
+Files:
+  locales/*
+  apps/i18n.json
+  os/llio/*
+  loader/sha2-loader/*
+  loader/src/fonts/*
+Copyright: 2021 bunnie <bunnie@kosagi.com>
+License: MIT OR Apache-2.0
+
+Files: loader/README.md
+Copyright:
+    2021 bunnie <bunnie@kosagi.com>
+    2020 hasheddan <georgedanielmangum@gmail.com>
+    2020 Sean Cross <sean@xobs.io>
+License: MIT OR Apache-2.0
+
+Files:
+  .gitattributes
+  .github/workflows/build.yml
+  .gitignore
+  .gitmodules
+  .vscode/settings.json
+  xous/api/log/*
+  xous/api/names/*
+  xous/api/susres/*
+  xous/api/ticktimer/*
+  xous/trng/*
+  devkey/*
+  xous/kernel/*
+  loader/*
+  services/README.md
+  services/kernel-test/*
+  services/log-test-client/*
+  skeleton/*
+  services/test-spawn/*
+  xous/log/*
+  xous/names/*
+  xous/susres/*
+  xous/susres/*
+  xous/ticktimer/*
+  svd2utra/*
+  tools/Cargo.toml
+Copyright:
+  2020 bunnie <bunnie@kosagi.com>
+  2020 Sean Cross <sean@xobs.io>
+License: MIT OR Apache-2.0
+
+Files: utralib/*
+Copyright:
+  2020 bunnie <bunnie@kosagi.com>
+  2020 Sean Cross <sean@xobs.io>
+  2023 Foundation Devices, Inc. <hello@foundation.xyz>
+License: MIT OR Apache-2.0
+
+Files: xous/ipc/*
+Copyright:
+  2021 bunnie <bunnie@kosagi.com>
+  2021 Sean Cross <sean@xobs.io>
+License: MIT OR Apache-2.0
+
+Files: xous/xous-rs/*
+Copyright:
+  2020 bunnie <bunnie@kosagi.com>
+  2021 hasheddan <georgedanielmangum@gmail.com>
+  2020 Sean Cross <sean@xobs.io>
+  2023 Foundation Devices, Inc. <hello@foundation.xyz>
+License: MIT OR Apache-2.0
+
+Files: xtask/* docs/*
+Copyright:
+  2021 bunnie <bunnie@kosagi.com>
+  2020 Sean Cross <sean@xobs.io>
+License: MIT OR Apache-2.0
+
+Files: imports/getrandom/*
+Copyright: 2019 The Rand Project Developers
+License: MIT OR Apache-2.0
+
+Files: **/RobotoMono-Regular.ttf
+Copyright: 2023 Christian Robertson
+License: Apache-2.0
+
+Files: cryptoauthlib/cryptoauthlib/*
+Copyright: 2015-2023 Microchip Technology Inc. and its subsidiaries.
+License: LicenseRef-Microchip
+
+Files: cryptoauthlib/src/inner/bindings.rs
+Copyright: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-only
+
+Files:
+    permission_templates.toml
+    **/manifest.toml
+    sam-ba-cipher/license.txt
+    sam-ba-cipher/license_private.pem
+    sam-ba-cipher/README.md
+    sam-ba-cipher/cert.pem
+    sam-ba-cipher/cust.key
+    sam-ba-cipher/key.pem
+Copyright: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-only
+
+Files: systemview-keyos/lib/*
+Copyright: 1995 - 2023 SEGGER Microcontroller GmbH
+License: BSD-1-Clause
+
+Files:
+    os/process-loader-stub/process-loader-stub.bin
+    test-apps/crypto-client/cosign2_header.bin
+    fat32.dat
+Copyright: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-only
+
+Files:
+  **/*.ttf
+  **/*.fnt
+  **/*.svg
+  **.*.png
+  **/.gitignore
+  utils/localizer/lang/en/translations.json
+  utils/localizer/lang/fr/translations.json
+  utils/localizer/config.json
+  utils/localizer/README.md
+  test-apps/update-test/release.tar
+  utils/secrets-gen2/examples/*
+  utils/secrets-gen2/*.toml
+  utils/secrets-gen2/*.env
+  utils/secrets-gen2/*.md
+Copyright: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-only
+
+Files:
+  imports/securam-manager/*
+  imports/cosign2/*
+  boot/common/assets/*
+  boot/keyos-boot/assets/*
+  imports/bq27421/.gitignore
+  imports/atsama5d27/*
+  imports/bq24295/*
+  imports/bq24157/*
+  imports/ehci/*
+  imports/ft3269/*
+  imports/ltr303/*
+  imports/ovm7690-rs/*
+  imports/mass-storage/*
+Copyright: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-only
+
+Files:
+  localazy.json
+  localizer.json
+  ui/ui/i18n/**.json
+  */gui-app-*/i18n/*.json
+  i18n/icu4x_data.postcard
+Copyright: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-or-later
+
+Files:
+    imports/armv7/*
+Copyright: 2020 by the respective authors
+License: MIT
+
+Files:
+    imports/micro-ecc-sys/*
+Copyright: 2014, Kenneth MacKay
+License: BSD-2-Clause
+
+Files:
+    imports/softbuffer/*
+Copyright: 2022 Kirill Chibisov
+License: MIT or Apache-2.0
+
+Files:
+    boot/at91bootstrap/*
+Copyright: 2006 Microchip Technology, Inc. and its subsidiaries
+License: MIT
+
+Files:
+    imports/rust-fatfs/*
+Copyright: 2017 Rafał Harabień
+License: MIT
+
+Files:
+    imports/tar-rs/*
+Copyright: Alex Crichton
+License: MIT
+
+Files:
+    imports/bsdiff-rs/*
+Copyright: Space Wizards
+License: MIT
+
+Files:
+  imports/libblur/*
+Copyright: 2020 Sean Cross <sean@xobs.io>
+License: Apache-2.0 OR BSD-3-Clause
+
+Files: utils/font-gen/fonts/*.ttf
+Copyright: 2012 Adobe Systems Incorporated
+License: OFL-1.1
+
+Files: utils/font-gen/README.md
+       utils/font-gen/icons/**.png
+       utils/font-gen/requirements.txt
+Copyright: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-only
+
+Files:
+  media/*
+  apps/gui-app-authenticator/media/*
+  sam-ba-cipher/cust.key
+  imports/prepare-release/README.md
+Copyright: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+License: GPL-3.0-or-later
+
+Files:
+  imports/elfloader/*
+Copyright: 2016 Gerd Zellweger <mail@gerdzellweger.com>
+License: MIT or Apache-2.0
+
+
+Files:
+  scripts/secure-sam-ba-cipher-3.7/**
+Copyright:
+  2022 Microchip Technology Inc. and its subsidiaries
+License: LicenseRef-Microchip
+
+Files:
+  imports/qbsdiff/*
+Copyright: 2019-2022 hucsmn <hucsmn@hotmail.com>
+License: MIT
+
+Files:
+  utils/sambuca/app/*
+Copyright: 2015-2016 Atmel Corporation
+License: GPL-2.0-only
+
+Files:
+  utils/shared-fut/*
+Copyright:
+    2016 Alex Crichton
+    2017 The Tokio Authors
+    2025 Foundation Devices, Inc. <hello@foundation.xyz>
+License: MIT OR Apache-2.0

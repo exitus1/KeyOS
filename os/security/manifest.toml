@@ -1,0 +1,24 @@
+appId = "0x73656375726974790000000000000000"
+memory = ["FLEXCOM2", "SECURAM", "SECUMOD", "SFR"]
+syscall = ["ClaimInterrupt", "SetThreadPriority"]
+extends = "../../api/security"
+
+[appName]
+en = "Security"
+
+[servers."os/security"]
+TamperEvent = { id = 64, type = "scalar", cfg = "keyos" }
+
+[permissions]
+template = ["crypto-sha"]
+"os/crypto" = ["Hmac"]
+"os/dma" = [
+    "PeripheralTransferMsg",
+    "ExecuteTransferMsg",
+    "WaitTransferMsg",
+    "StopTransferMsg",
+    "DropTransferMsg",
+    "FlushTransferMsg",
+]
+"os/fs" = ["DiskEncryptionKeysReady"]
+"os/power-manager" = ["SetPeripheralEnabled", "Reboot"]

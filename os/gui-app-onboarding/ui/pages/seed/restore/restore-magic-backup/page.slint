@@ -1,0 +1,150 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size } from "@ui/theme.slint";
+import { Button, ButtonSection, Dialog, HeadingMd, TextSm, TimerCircularProgress, JumboIconPageBody, WrappedIcon } from "@ui/widgets.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { Navigate, Animate } from "../../../../gen/navigate.slint";
+import { OnboardingCallbacks, KeycardRestoreGlobal, SeedGlobal, RestoreBackupState } from "../../../../onboarding-callbacks.slint";
+import { OnboardingBasePage, OnboardingContentSection } from "../../../../widgets/base-page.slint";
+import { RestoreMagicBackupProps } from "props.slint";
+
+component LoadingView inherits JumboIconPageBody {
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+            TimerCircularProgress {
+                indeterminate: true;
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.MagicBackupSearchingHeader);
+            horizontal-alignment: center;
+        }
+    }
+}
+
+component RestoringView inherits JumboIconPageBody {
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+            TimerCircularProgress {
+                indeterminate: true;
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.MagicBackupFoundHeader);
+            horizontal-alignment: center;
+        }
+
+        TextSm {
+            text: TR2.lookup(TrId.MagicBackupFoundContent);
+            color: Palette.content-tertiary;
+            horizontal-alignment: center;
+        }
+    }
+}
+
+component ErrorView inherits JumboIconPageBody {
+    callback retry();
+
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "close";
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.MagicBackupFoundErrorHeader);
+            horizontal-alignment: center;
+        }
+
+        TextSm {
+            text: TR2.lookup(TrId.MagicBackupFoundErrorContent);
+            color: Palette.content-tertiary;
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonContinue);
+            importance: tertiary;
+            clicked => {
+                Navigate.connect-wallet({ })
+            }
+        }
+
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            importance: primary;
+            clicked => {
+                root.retry()
+            }
+        }
+    }
+}
+
+export component RestoreMagicBackupPage inherits OnboardingBasePage {
+    in property <RestoreMagicBackupProps> props;
+    property <RestoreBackupState> state <=> SeedGlobal.restore-backup-state;
+    property <bool> show-dialog: false;
+
+    function next() {
+        if (state == RestoreBackupState.Restored || state == RestoreBackupState.NotFound) {
+            if KeycardRestoreGlobal.different-device-id {
+                show-dialog = true;
+            } else {
+                Navigate.connect-wallet({ replace: true, animate: Animate.None })
+            }
+        }
+    }
+
+    init => {
+        next()
+    }
+
+    changed state => {
+        next();
+    }
+
+    if state == RestoreBackupState.Idle: LoadingView { }
+    if state == RestoreBackupState.Downloading || state == RestoreBackupState.Restoring: RestoringView { }
+    if state == RestoreBackupState.Error: ErrorView {
+        retry => {
+            SeedGlobal.restore-backup-state = RestoreBackupState.Idle;
+            SeedGlobal.retry-restore-magic-backup();
+        }
+    }
+
+    if show-dialog: Rectangle {
+        background: Palette.overlay;
+        Dialog {
+            title: TR2.lookup(TrId.RecoverSuccessModalNewDeviceHeader);
+            message: TR2.lookup(TrId.RecoverSuccessModalNewDeviceSubheader);
+            ok-text: TR2.lookup(TrId.RecoverSuccessModalNewDeviceNewBackup);
+            icon: "info";
+            show-ok: true;
+            cancel-text: TR2.lookup(TrId.CommonButtonSkip);
+            show-cancel: true;
+            show-close-button: true;
+            width: 352px;
+            on-cancel => {
+                Navigate.connect-wallet({ replace: true, animate: Animate.None })
+            }
+            on-ok => {
+                OnboardingCallbacks.navigate-backup();
+            }
+        }
+    }
+}

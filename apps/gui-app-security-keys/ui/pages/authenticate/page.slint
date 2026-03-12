@@ -1,0 +1,438 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SecurityKeyCallbacks as CB } from "../../security-key-callbacks.slint";
+import { AuthenticatingState, EditCaller } from "../../security-key-types.slint";
+import { Palette, Importance, Size, Images, IconSize, Utils } from "@ui/theme.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+import { HeadingMd, TextMd, BasePage, NavHeader, Shield, Pagination, WrappedIcon, Button, TimerCircularProgress, Icon, Dropdown, DropdownModel, DropdownOverlay, ErrorModal } from "@ui/widgets.slint";
+import { CardPageVersion, EditPageVersion } from "@ui/pages.slint";
+import { AuthenticateProps } from "./props.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+component WaitPage inherits VerticalLayout {
+    padding-top: Size.sz16;
+    spacing: Size.sz6;
+
+    property <bool> at-center: false;
+    property <duration> tick-duration: 1400ms;
+    property <duration> animation-duration: 600ms;
+
+    Timer {
+        interval: tick-duration;
+        running: true;
+        triggered() => {
+            at-center = !at-center;
+        }
+    }
+
+    Pagination {
+        total-pages: 2;
+        current-page: CB.is-usb-on() ? 1 : 0;
+
+        VerticalLayout {
+            width: root.width;
+            HorizontalLayout {
+                alignment: center;
+
+                nfc-animation := Rectangle {
+                    width: 424px;
+                    height: 184px;
+
+                    nfc-prime := Image {
+                        property <length> size: 96px;
+                        source: Images.icon("device-nfc", size);
+                        height: size;
+                        colorize: Palette.content-primary;
+
+                        animate x {
+                            duration: animation-duration;
+                            easing: ease-in-out-back;
+                        }
+
+                        animate y {
+                            duration: animation-duration;
+                            easing: ease-in-out;
+                        }
+
+                        animate opacity {
+                            duration: animation-duration;
+                            easing: ease-in-out;
+                        }
+                    }
+
+                    smartphone := Image {
+                        property <length> size: 128px;
+                        source: Images.icon("smartphone-2", size);
+                        height: size;
+                        colorize: Palette.content-primary;
+                        y: 28px;
+
+                        animate x {
+                            duration: animation-duration;
+                            easing: ease-in-out-back;
+                        }
+                    }
+
+                    states [
+                        center when at-center: {
+                            nfc-prime.x: nfc-animation.width / 2 - nfc-prime.width / 2;
+                            nfc-prime.y: 17px;
+                            nfc-prime.opacity: 0.3;
+                            smartphone.x: nfc-animation.width / 2 - smartphone.width / 2;
+                        }
+                        edges when !at-center: {
+                            nfc-prime.x: 104px;
+                            nfc-prime.y: 44px;
+                            nfc-prime.opacity: 1.0;
+                            smartphone.x: 191px;
+                        }
+                    ]
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz5;
+                alignment: start;
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.AuthenticatingWaitHeader);
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: TR2.lookup(TrId.AuthenticatingWaitSubheader);
+                    horizontal-alignment: center;
+                }
+            }
+        }
+
+        VerticalLayout {
+            width: root.width;
+            HorizontalLayout {
+                alignment: center;
+
+                usb-animation := Rectangle {
+                    width: 424px;
+                    height: 184px;
+
+                    usb-prime := Image {
+                        property <length> size: 96px;
+                        source: Images.icon("device-detailed", size);
+                        height: size;
+                        colorize: Palette.content-primary;
+                        y: 44px;
+
+                        animate x {
+                            duration: animation-duration;
+                            easing: ease-in-out-back;
+                        }
+                    }
+
+                    laptop := Image {
+                        property <length> size: 192px;
+                        source: Images.icon("laptop", size);
+                        height: size;
+                        colorize: Palette.content-primary;
+                        y: -18px;
+
+                        animate x {
+                            duration: animation-duration;
+                            easing: ease-in-out-back;
+                        }
+                    }
+
+                    cable := Image {
+                        property <length> size: 172px;
+                        source: Images.icon("usb-cable", size);
+                        height: 31px;
+                        width: size;
+                        x: 95px;
+
+                        colorize: Palette.content-primary;
+
+                        animate x {
+                            duration: animation-duration;
+                            easing: ease-in-out-back;
+                        }
+
+                        animate y {
+                            duration: animation-duration;
+                            easing: ease-in-out;
+                        }
+
+                        animate opacity {
+                            duration: animation-duration;
+                            easing: ease-in-out;
+                        }
+                    }
+
+                    states [
+                        center when at-center: {
+                            usb-prime.x: 51.15px;
+                            laptop.x: 166.9px;
+                            cable.y: 146px;
+                            cable.opacity: 1.0;
+                        }
+                        edges when !at-center: {
+                            usb-prime.x: 24px;
+                            laptop.x: 208px;
+                            cable.y: 150px;
+                            cable.opacity: 0.0;
+                        }
+                    ]
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz5;
+                alignment: start;
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.AuthenticatingWaitHeader);
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: TR2.lookup(TrId.AuthenticatingWaitSubheader);
+                    horizontal-alignment: center;
+                }
+            }
+        }
+    }
+}
+
+component RegistrationConfirmPage inherits Rectangle {
+    VerticalLayout {
+        padding-top: Size.sz16;
+        spacing: Size.sz6;
+        padding-left: Size.sz6;
+        padding-right: Size.sz6;
+
+        HorizontalLayout {
+            alignment: center;
+            TimerCircularProgress {
+                indeterminate: true;
+
+                Icon {
+                    name: "key";
+                    size: IconSize.px96;
+                    color: Palette.content-primary;
+                }
+            }
+        }
+
+        VerticalLayout {
+            spacing: Size.sz5;
+            alignment: start;
+
+            HeadingMd {
+                text: TR2.lookup(TrId.RegistrationUSBHeader);
+                horizontal-alignment: center;
+            }
+
+            TextMd {
+                text: TR2.lookup(TrId.RegistrationUSBSubheader);
+                horizontal-alignment: center;
+            }
+
+            key-picker := Dropdown {
+                placeholder: TR2.lookup(TrId.RegistrationUSBSelectKeyToRegister);
+                selected-index: CB.entries.length == 0 ? -1 : CB.get-dropdown-index(CB.dropdown-model, CB.selected-index);
+                model: CB.dropdown-model;
+            }
+        }
+
+        VerticalLayout {
+            alignment: end;
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonConfirm);
+                importance: primary;
+
+                clicked => {
+                    CB.user-presence-check(true);
+                    CB.auth-state = AuthenticatingState.registration-success;
+                }
+            }
+        }
+    }
+
+    if key-picker.showing: DropdownOverlay {
+        dropdown-x: (parent.width - key-picker.width) / 2;
+        dropdown-y: parent.y + key-picker.y + 272px;
+        dropdown-width: key-picker.width;
+        model: key-picker.model;
+        selected-index: key-picker.selected-index;
+        scrollable: true;
+        scrollable-window-size: 3;
+        open-above: true;
+
+        item-selected(index, value) => {
+            key-picker.selected-index = index;
+            key-picker.selected-value = value;
+            CB.select-key(value.to-float());
+            key-picker.showing = false;
+        }
+
+        touched-off => {
+            key-picker.showing = false;
+        }
+    }
+}
+
+component AuthenticationConfirmPage inherits VerticalLayout {
+    padding-top: Size.sz16;
+    spacing: Size.sz6;
+    padding-left: Size.sz6;
+    padding-right: Size.sz6;
+
+    HorizontalLayout {
+        alignment: center;
+        TimerCircularProgress {
+            indeterminate: true;
+
+            Icon {
+                name: "key";
+                size: IconSize.px96;
+                color: Palette.content-primary;
+            }
+        }
+    }
+
+    VerticalLayout {
+        spacing: Size.sz5;
+        alignment: start;
+
+        HeadingMd {
+            text: TR2.lookup(TrId.AuthenticatingUSBHeader);
+            horizontal-alignment: center;
+        }
+
+        TextMd {
+            text: CB.entries.length == 0 ? "" : TR2.format(TrId.AuthenticatingUSBSubheader, [CB.entries[CB.get-view-index(CB.entries, CB.selected-index)].label]);
+            horizontal-alignment: center;
+        }
+    }
+
+    VerticalLayout {
+        alignment: end;
+
+        Button {
+            label: TR2.lookup(TrId.CommonButtonConfirm);
+            importance: primary;
+
+            clicked => {
+                CB.user-presence-check(true);
+                CB.auth-state = AuthenticatingState.authentication-success;
+            }
+        }
+    }
+}
+
+component SuccessPage inherits VerticalLayout {
+    padding-top: Size.sz16;
+    spacing: Size.sz6;
+    padding-left: Size.sz6;
+    padding-right: Size.sz6;
+
+    property <bool> registration: CB.auth-state == AuthenticatingState.registration-success;
+
+    callback done();
+
+    HorizontalLayout {
+        alignment: center;
+        WrappedIcon {
+            inner-icon: "check";
+        }
+    }
+
+    VerticalLayout {
+        spacing: Size.sz5;
+        alignment: start;
+
+        HeadingMd {
+            text: registration ? TR2.lookup(TrId.RegistrationUSBSuccessfulHeader) : TR2.lookup(TrId.AuthenticatingSuccessHeader);
+            horizontal-alignment: center;
+        }
+
+        TextMd {
+            text: registration ? TR2.lookup(TrId.RegistrationUSBSuccessfulSubheader) : TR2.lookup(TrId.AuthenticatingSuccessSubheader);
+            horizontal-alignment: center;
+        }
+    }
+
+    VerticalLayout {
+        alignment: end;
+
+        Button {
+            label: TR2.lookup(TrId.CommonButtonDone);
+            importance: primary;
+            clicked => {
+                done();
+            }
+        }
+    }
+}
+
+export component AuthenticatePage inherits BasePage {
+    in property <AuthenticateProps> props;
+
+    function back() {
+        if CB.is-outcome-mode {
+            // In outcome mode, navigate_finish was already called immediately,
+            // so just reset state and navigate back
+            CB.dismiss-outcome();
+        } else {
+            CB.user-presence-check(false);
+        }
+        CB.deselect-key();
+
+        if Navigate.has-backward {
+            Navigate.backward();
+        } else {
+            Navigate.main({ version: CardPageVersion.main }, { replace: true, animate: Animate.None });
+        }
+    }
+
+    VerticalLayout {
+        padding-bottom: Size.sz5;
+
+        NavHeader {
+            title: CB.entries.length == 0 ? "" : CB.entries[CB.get-view-index(CB.entries, CB.selected-index)].label;
+            left-icon: "";
+            right-icon: "close";
+
+            right-clicked => {
+                back();
+            }
+        }
+
+        HorizontalLayout {
+            alignment: center;
+            Shield {
+                if CB.auth-state == AuthenticatingState.wait: WaitPage { }
+                if CB.auth-state == AuthenticatingState.registration-confirm: RegistrationConfirmPage { }
+                if CB.auth-state == AuthenticatingState.authentication-confirm: AuthenticationConfirmPage { }
+                if (CB.auth-state == AuthenticatingState.registration-success || CB.auth-state == AuthenticatingState.authentication-success): SuccessPage {
+                    done => {
+                        back();
+                    }
+                }
+            }
+        }
+    }
+
+    if CB.show-no-keys-modal: ErrorModal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.RegisteringModalRegistrationFailedHeader);
+        text: TR2.lookup(TrId.RegisteringModalRegistrationFailedContent);
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+
+        confirm-clicked => {
+            CB.show-no-keys-modal = false;
+            back();
+        }
+    }
+}

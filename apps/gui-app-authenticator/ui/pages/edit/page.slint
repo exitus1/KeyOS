@@ -1,0 +1,187 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AuthenticatorCallbacks as CB } from "../../authenticator-callbacks.slint";
+import { ScanQrCaller } from "../../authenticator-types.slint";
+import { Palette, Size, Importance, CallbackResult, ResultLevel } from "@ui/theme.slint";
+import { AppHeader, CardColorPicker, IconButton, TitledInput, BasePage, ContentSection, PageBody, ConfirmationModal, ErrorModal } from "@ui/widgets.slint";
+import { EditButtonSection, EditPageVersion } from "@ui/pages.slint";
+import { EditProps } from "./props.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+// TODO: could this be BasePage?
+export component EditPage inherits Rectangle {
+    in property <EditProps> props;
+    // TODO: is this still necessary?
+    property <bool> light-mode: true;
+
+    property <string> new-label: props.auth.label;
+    property <string> new-account: props.auth.account;
+    property <string> new-issuer: props.auth.issuer;
+    property <int> new-color: props.auth.color;
+    property <CallbackResult> result: props.result;
+    property <bool> is-delete-modal-open: false;
+    property <bool> is-modal-open: is-delete-modal-open;
+    property <bool> has-changes: new-label != props.auth.label || new-account != props.auth.account || new-issuer != props.auth.issuer || new-color != props.auth.color;
+    property <bool> has-errors: label-input.has-notice || account-input.has-notice || issuer-input.has-notice;
+
+    BasePage {
+        VerticalLayout {
+            AppHeader {
+                title: props.version == EditPageVersion.add ? TR2.lookup(TrId.MainAddCodeTitle) : (props.version == EditPageVersion.edit ? TR2.lookup(TrId.EditCardTitle) : TR2.lookup(TrId.ArchivedEditTitle));
+                title-color: Palette.content-primary;
+                side-padding: Size.sz8;
+
+                IconButton {
+                    icon: props.version == EditPageVersion.edit ? "close" : "chevron-left";
+                    size: Size.sz8;
+                    importance: Importance.normal;
+                    clicked => {
+                        if (props.version == EditPageVersion.add) {
+                            CB.scan-qr(ScanQrCaller.edit);
+                        } else {
+                            Navigate.backward();
+                        }
+                    }
+                }
+            }
+
+            PageBody {
+                ContentSection {
+                    label-input := TitledInput {
+                        title: TR2.lookup(TrId.EditCardLabel);
+                        placeholder: TR2.lookup(TrId.MainAddCodeLabelTextFiller);
+                        text: props.auth.label;
+                        message: props.label-validation;
+                        has-notice: props.label-validation != "";
+                        enabled: props.version != EditPageVersion.archive;
+                        caps-mode: sentences;
+                        edited(text) => {
+                            new-label = text;
+                            if (props.version == EditPageVersion.add) {
+                                self.message = CB.validate-new-label(text);
+                                self.has-notice = self.message != "";
+                            } else {
+                                self.message = CB.validate-edit-label(props.auth.index, text);
+                                self.has-notice = self.message != "";
+                            }
+                        }
+                    }
+
+                    account-input := TitledInput {
+                        title: TR2.lookup(TrId.EditCardAccount);
+                        placeholder: TR2.lookup(TrId.MainAddCodeAccountTextFiller);
+                        text: props.auth.account;
+                        message: "";
+                        enabled: props.version != EditPageVersion.archive;
+                        edited(text) => {
+                            new-account = text;
+                            self.message = CB.validate-edit-account(text);
+                            self.has-notice = self.message != "";
+                        }
+                    }
+
+                    issuer-input := TitledInput {
+                        title: TR2.lookup(TrId.EditCardIssuer);
+                        placeholder: TR2.lookup(TrId.MainAddCodeIssuerTextFiller);
+                        text: props.auth.issuer;
+                        message: "";
+                        enabled: props.version != EditPageVersion.archive;
+                        edited(text) => {
+                            new-issuer = text;
+                            self.message = CB.validate-edit-issuer(text);
+                            self.has-notice = self.message != "";
+                        }
+                    }
+
+                    if props.version != EditPageVersion.archive: CardColorPicker {
+                        selected-index: props.auth.color;
+                        title: TR2.lookup(TrId.EditCardColor);
+                        changed(index) => {
+                            new-color = index;
+                        }
+                    }
+                }
+
+                EditButtonSection {
+                    version: props.version;
+                    allow-delete: true;
+                    has-changes: has-changes;
+                    has-errors: has-errors;
+
+                    save-label: TR2.lookup(TrId.CommonButtonSave);
+                    archive-text: TR2.lookup(TrId.EditCardArchiveCode);
+                    delete-text: TR2.lookup(TrId.ArchivedEditDeleteCode);
+                    restore-text: TR2.lookup(TrId.ArchivedEditRestoreCode);
+
+                    save => {
+                        result = CB.save(new-label, new-account, new-issuer, new-color);
+                    }
+
+                    edit => {
+                        result = CB.edit(props.auth.index, new-label, new-account, new-issuer, new-color);
+                        if (result.success) {
+                            Navigate.backward();
+                            Navigate.opened-card({ view-index: CB.get-view-index(CB.entries, props.auth.index) }, { replace: true, animate: Animate.Backward });
+                        }
+                    }
+
+                    archive => {
+                        CB.set-archived(props.auth.index, true);
+                        Navigate.backward();
+                        Navigate.backward();
+                    }
+
+                    delete => {
+                        is-delete-modal-open = true;
+                    }
+
+                    restore => {
+                        // Assume editing is disabled in archive
+                        CB.set-archived(props.auth.index, false);
+                        Navigate.backward();
+                    }
+                }
+            }
+        }
+    }
+
+    if is-modal-open: ConfirmationModal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.ArchivedEditModalHeader);
+        text: TR2.format(TrId.ArchivedEditModalSubheader, [
+            props.auth.label,
+        ]);
+
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+        cancel-button-label: TR2.lookup(TrId.CommonButtonCancel);
+
+        cancel-clicked => {
+            is-delete-modal-open = false;
+        }
+
+        confirm-clicked => {
+            is-delete-modal-open = false;
+            CB.delete-code(props.auth.index);
+            Navigate.backward();
+        }
+    }
+
+    if !result.success: ErrorModal {
+        icon: result.level == ResultLevel.info ? "info" : "alert";
+        icon-color: result.level == ResultLevel.info ? Palette.content-brand : Palette.content-notice;
+        title: result.title;
+        text: result.text;
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+
+        confirm-clicked => {
+            if !props.result.success && props.version == EditPageVersion.add {
+                CB.scan-qr(ScanQrCaller.edit);
+            } else {
+                result.success = true;
+            }
+        }
+    }
+}

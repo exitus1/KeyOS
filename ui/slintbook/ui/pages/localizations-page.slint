@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Size} from "@ui/theme.slint";
+import {HeadingMd} from "@ui/widgets.slint";
+
+export component LocalizationsPage inherits Page {
+    VerticalLayout {
+        spacing: Size.sz3;
+        VerticalLayout {
+            spacing: Size.sz3;
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "TRANSLATIONS";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "French: Puis-je avoir une autre bière, s'il vous plaît ?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Spanish: ¿Puedo tomar otra cerveza, por favor?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Portuguese: A que horas chega o ônibus?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "German: Könnte ich bitte noch ein Bier haben?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Italian: Una volta ho ventitré uova in una sola seduta!";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Chinese: 我可以再喝一杯啤酒吗?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Chinese (Pinyin): Wǒ kěyǐ zài hè yībēi píjiǔ ma?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Japanese: ビールをもう一杯いただけますか";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Korean: 맥주 한 잔 더 주시겠어요?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Russian: Можно мне еще пива, пожалуйста?";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Arabic: هل أستطيع الحصول على بيرة أخرى، من فضلك؟";
+            }
+
+            HeadingMd {
+                height: Size.sz12;
+                text: "Hindi: क्या मुझे कृपया एक और बियर मिल सकती है?";
+            }
+
+            HeadingMd {
+                height: 150px;
+                width: 530px;
+                text: "Emoji:\n😀😂😍🤪☠💩🙈💯🤟👍🧠🙎‍♀️🤦‍♂️🤷‍♂️🛌🐶🦄🌎🍺🍹🍩🦀🎂🔥🔫🔒🔑🔔🔍🔋📥📣💾💰💘👑";
+            }
+        }
+    }
+}

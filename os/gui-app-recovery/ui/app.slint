@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Router } from "gen/router.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+
+import { Images, CurrentTheme, Palettes, Utils, UISize } from "@ui/theme.slint";
+import { BaseWindow } from "@ui/widgets.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { Callbacks } from "callbacks.slint";
+import { InfoGlobal } from "globals/info-global.slint";
+import { RecoveryGlobal } from "globals/recovery-global.slint";
+import { EraseGlobal } from "globals/erase-global.slint";
+
+export component AppWindow inherits BaseWindow {
+    Router { }
+}
+
+export { Callbacks, InfoGlobal, RecoveryGlobal, EraseGlobal, TR, Utils, Images, StepModel, CurrentTheme }
+export * from "gen/exports.slint";

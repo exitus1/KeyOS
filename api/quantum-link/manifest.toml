@@ -1,0 +1,35 @@
+[servers."os/ql-prestart"]
+StartWithoutFilesystem = { id = 64, type = "blockingScalar" }
+
+[servers."os/quantum-link"]
+PublishPsbt = { id = 1, type = "archive" }
+SendAccountUpdate = { id = 2, type = "archive" }
+GetXidDocument = { id = 3, type = "archive" }
+SubscribeExchangeRate = { id = 10, type = "archiveEvent" }
+SubscribeFirmwareFetch = { id = 11, type = "archiveEvent" }
+SubscribeEnvoyStatus = { id = 12, type = "archiveEvent" }
+SubscribeSignPsbt = { id = 14, type = "archiveEvent" }
+SubscribeAccountUpdate = { id = 15, type = "archiveEvent" }
+SubscribePairingEvent = { id = 16, type = "archiveEvent" }
+SubscribeOnboardingState = { id = 18, type = "archiveEvent" }
+SubscribeSecurityCheckState = { id = 19, type = "archiveEvent" }
+CheckFirmwareUpdate = { id = 20, type = "archive" }
+StartFirmwareUpdate = { id = 21, type = "archive" }
+BackupShard = { id = 22, type = "archive" }
+RestoreShard = { id = 23, type = "archive" }
+NotifyOnboardingState = { id = 24, type = "archive" }
+EnvoyMagicBackupEnabled = { id = 27, type = "archive" }
+SubscribePublishedAccountUpdate = { id = 28, type = "archiveEvent" }
+SubscribeExchangeRateHistory = { id = 29, type = "archiveEvent" }
+SendMagicBackupEvent = { id = 30, type = "archive" }
+SubscribeRestoreMagicBackup = { id = 31, type = "archiveEvent" }
+SendRestoreMagicBackupResult = { id = 32, type = "archive" }
+AwaitCreateMagicBackupResult = { id = 34, type = "archive" }
+StartRestoreMagicBackup = { id = 35, type = "archive" }
+MagicBackupStatus = { id = 37, type = "archive" }
+ClearPairedDevice = { id = 38, type = "archive" }
+NotifyFirmwareInstall = { id = 39, type = "archive" }
+SendApplyPassphrase = { id = 40, type = "archive" }
+SendPrimeMagicBackupEnabled = { id = 42, type = "archive" }
+SubscribeConnectionStatus = { id = 43, type = "scalarEvent" }
+EnvoyTimezone = { id = 44, type = "archive" }

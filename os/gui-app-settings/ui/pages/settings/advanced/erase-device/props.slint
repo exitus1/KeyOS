@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+@rust-attr(derive(serde::Serialize, serde::Deserialize))
+export enum EraseStatus { 
+    start, 
+    prompt-backup,
+    confirmation, 
+    progress, 
+    success,
+}
+
+@rust-attr(route(path = "/erase-device?{status}"))
+export struct EraseDeviceProps {
+    status: EraseStatus,
+}

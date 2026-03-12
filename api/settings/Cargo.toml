@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "settings"
+version = "0.1.0"
+edition = "2021"
+description = "Settings Server API crate"
+publish = false
+
+[dependencies]
+fs = { workspace = true }
+jiff = { workspace = true }
+log = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+paste = { version = "1" }
+rkyv = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+server = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

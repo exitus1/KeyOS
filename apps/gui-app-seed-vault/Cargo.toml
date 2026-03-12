@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-seed-vault"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+bip39 = "2.2"
+fs = { workspace = true }
+fuzzy-filter = "0.1.0"
+i18n = { path = "../../i18n" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+ngwallet = { workspace = true }
+nostr = { version = "=0.43.1", features = ["nip06"] }
+ordered-table = { path = "../../utils/ordered-table" }
+security = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+server = { path = "../../server" }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+thiserror = "1.0"
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }

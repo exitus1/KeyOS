@@ -1,0 +1,5 @@
+[servers."os/spi"]
+ClaimPeripheral = { id = 0, type = "blockingScalar" }
+SpiXfer = { id = 1, type = "lendMut" }
+St25r95ReadData = { id = 5, type = "lendMut" }
+NrfReadData = { id = 6, type = "lendMut" }

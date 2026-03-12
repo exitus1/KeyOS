@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global BatteryGlobal {
+    // Battery level in percent
+    in property <int> battery-level: 98;
+    in property <int> remaining-capacity-mah: 1200;
+    in property <int> current-capacity-mah: 1200;
+    in property <int> voltage-mv: 4200;
+    in property <int> current-ma: 0;
+    in property <bool> has-fault: false;
+    in property <int> num-reported-faults: 0;
+    in property <string> last-fault: "";
+
+    callback clear-battery-fault();
+}

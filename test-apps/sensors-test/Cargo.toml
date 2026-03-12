@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "sensors-test"
+version = "0.1.0"
+edition = "2021"
+description = "Sensors test"
+
+[features]
+default = []
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+accelerometer = { path = "../../os/accelerometer" }
+ambient-light = { path = "../../os/ambient-light" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+server = { path = "../../server/" }
+xous = { path = "../../xous/xous-rs" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

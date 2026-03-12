@@ -1,0 +1,132 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSection,
+    MenuActionItem,
+    HLine, MenuSectionLayout, MenuItemLayout, ItemTextPreview, ItemTextSm,
+    BasePage,
+    PageBody,
+    ContentSection
+} from "@ui/widgets.slint";
+
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { AboutGlobal } from "../../../globals/about-global.slint";
+
+import { AboutProps } from "props.slint";
+
+export component AboutPage inherits BasePage {
+    in property <AboutProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.AboutTitle);
+        }
+
+        Flickable {
+            PageBody {
+                ContentSection {
+                    MenuSection {
+                        title: "";
+                        MenuSectionLayout {
+                            MenuActionItem {
+                                first: true;
+                                label: TR2.lookup(TrId.AboutSupport);
+                                clicked => {
+                                    Navigate.support({ });
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuActionItem {
+                                last: true;
+                                label: TR2.lookup(TrId.AboutLegal);
+                                clicked => {
+                                    Navigate.legal({ });
+                                }
+                            }
+                        }
+                    }
+
+                    MenuSection {
+                        title: TR2.lookup(TrId.AboutDevice);
+                        MenuSectionLayout {
+                            MenuItemLayout {
+                                first: true;
+                                label: TR2.lookup(TrId.AboutSerialNumber);
+                                ItemTextSm {
+                                    text: AboutGlobal.serial-number;
+                                    color: Palette.content-tertiary;
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                label: TR2.lookup(TrId.AboutMasterFingerprint);
+                                ItemTextPreview {
+                                    text: AboutGlobal.master-fingerprint;
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                last: true;
+                                label: TR2.lookup(TrId.AboutReversedFingerprint);
+                                ItemTextPreview {
+                                    text: AboutGlobal.reversed-fingerprint;
+                                }
+                            }
+                        }
+                    }
+
+                    MenuSection {
+                        title: TR2.lookup(TrId.AboutSoftware);
+                        MenuSectionLayout {
+                            MenuItemLayout {
+                                first: true;
+                                label: TR2.lookup(TrId.AboutKeyOs);
+                                ItemTextPreview {
+                                    text: AboutGlobal.keyos-version;
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                label: TR2.lookup(TrId.AboutBootloader);
+                                ItemTextPreview {
+                                    text: AboutGlobal.bootloader-version;
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                label: TR2.lookup(TrId.AboutBleFirmware);
+                                ItemTextPreview {
+                                    text: AboutGlobal.ble-firmware-version;
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                last: true;
+                                label: TR2.lookup(TrId.AboutBleBootloader);
+                                ItemTextPreview {
+                                    text: AboutGlobal.ble-bootloader-version;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

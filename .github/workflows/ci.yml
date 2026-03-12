@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: CI
+on: [push]
+concurrency:
+  group: ci-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  nix-cache:
+    name: cache nix build shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Check if nix files changed
+        id: check
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -E '\.nix$|flake\.lock$'; then
+            echo "Nix files changed, continuing with cache build"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No nix files changed, skipping cache build"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Setup nix
+        if: steps.check.outputs.changed == 'true'
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Setup nix cache
+        if: steps.check.outputs.changed == 'true'
+        uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Build nix shell
+        if: steps.check.outputs.changed == 'true'
+        run: nix build .#devShells.x86_64-linux.build --no-link
+
+  # no-wait
+  lint:
+    uses: ./.github/workflows/lint.yml
+    secrets: inherit
+
+  keyos-image-nix:
+    uses: ./.github/workflows/keyos-image-nix.yml
+    secrets: inherit
+
+  # wait
+  check:
+    needs: nix-cache
+    uses: ./.github/workflows/check.yml
+    secrets: inherit
+    
+  dependencies:
+    needs: nix-cache
+    uses: ./.github/workflows/dependencies.yml
+    secrets: inherit
+  
+  hosted:
+    needs: nix-cache
+    uses: ./.github/workflows/hosted.yml
+    secrets: inherit
+  

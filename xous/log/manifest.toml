@@ -1,0 +1,5 @@
+appId = "0x786f75732d6c6f670000000000000000"
+syscall = ["SetThreadPriority", "GetPanicMessage"]
+
+[appName]
+en = "Log Server"

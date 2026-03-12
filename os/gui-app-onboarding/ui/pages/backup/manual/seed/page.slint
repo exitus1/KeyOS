@@ -1,0 +1,68 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, SeedWords, NavHeader, ButtonSection, QrPages } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../../../widgets/base-page.slint";
+import { Size } from "@ui/theme.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+import { ManualBackupSeedProps } from "./props.slint";
+import { SeedGlobal } from "../../../../onboarding-callbacks.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+export component ManualBackupSeedPage inherits OnboardingBasePage {
+    in property <ManualBackupSeedProps> props;
+
+    property <bool> qr-view: false;
+
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.RecoverWordsTitle);
+            right-icon: qr-view ? "list" : "scan-qr";
+
+            clicked => {
+                Navigate.backward();
+            }
+
+            right-clicked => {
+                qr-view = !qr-view;
+            }
+        }
+
+        VerticalLayout {
+            padding-top: qr-view ? Size.sz2 : Size.sz10;
+            padding-bottom: Size.sz4;
+
+            if !qr-view: SeedWords {
+                words: SeedGlobal.get-seed-words();
+            }
+
+            if qr-view: QrPages {
+                model: [
+                    {
+                        code: SeedGlobal.get-standard-seed-qr(),
+                        header: TR2.lookup(TrId.BackupManualSeedQrStandard),
+                    },
+                    {
+                        code: SeedGlobal.get-compact-seed-qr(),
+                        header: TR2.lookup(TrId.BackupManualSeedQrCompact),
+                    },
+                ];
+            }
+
+            ButtonSection {
+                padding: Size.sz6;
+                padding-left: Size.sz6;
+                padding-right: Size.sz6;
+
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonVerify);
+                    importance: primary;
+
+                    clicked => {
+                        Navigate.verify-seed-words({ });
+                    }
+                }
+            }
+        }
+    }
+}

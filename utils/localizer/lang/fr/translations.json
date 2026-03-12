@@ -1,0 +1,62 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "goodbye": "Au revoir"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenue sur Passport Prime",
+      "subtitle": "Votre voyage commence ici"
+    },
+    "setup": {
+      "instruction": "Veuillez suivre les étapes pour configurer votre appareil",
+      "button": "Commencer"
+    }
+  },
+  "settings": {
+    "home": {
+      "title": "Accueil",
+      "description": "Gérez les paramètres de votre appareil"
+    },
+    "settings": {
+      "brightness": "Luminosité de l'écran",
+      "volume": "Volume",
+      "language": "Langue",
+      "title": "Paramètres"
+    },
+    "profile": {
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe"
+    }
+  },
+  "control-center": {
+    "network": {
+      "wifi": "Wi-Fi",
+      "bluetooth": "Bluetooth",
+      "airplane_mode": "Mode avion"
+    },
+    "system": {
+      "update": "Mise à jour système",
+      "about": "À propos de l'appareil",
+      "restart": "Redémarrer"
+    }
+  },
+  "bitcoin": {
+    "wallet": {
+      "balance": "Solde",
+      "send": "Envoyer",
+      "receive": "Recevoir",
+      "address": "Adresse du portefeuille"
+    },
+    "transactions": {
+      "history": "Historique des transactions",
+      "details": "Détails de la transaction",
+      "pending": "Transactions en attente"
+    },
+    "security": {
+      "backup": "Sauvegarder le portefeuille",
+      "passphrase": "Phrase secrète",
+      "pin": "Code PIN"
+    }
+  }
+}

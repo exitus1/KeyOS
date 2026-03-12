@@ -1,0 +1,60 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSectionContainer, 
+    MenuSectionLayout,
+    MenuActionItem, 
+    HLine, MenuItemLayout, ItemTextPreview, BasePage, PageBody, RadioItem, NavHeader
+} from "@ui/widgets.slint";
+
+import { Settings, ImportPolicy } from "../../../settings.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+
+component ImportPolicyItem inherits RadioItem {
+    in property <ImportPolicy> policy;
+
+    label: Settings.import-policy-to-string(policy);
+    checked: Settings.import-policy == policy;
+
+    clicked => {
+        Settings.set-import-policy(policy);
+    }
+}
+
+export component SettingsImportPolicyPage inherits BasePage {
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.SettingsPolicyHeader);
+            clicked => {
+                Navigate.backward();
+            }
+        }
+
+        PageBody {
+            MenuSectionContainer {
+                MenuSectionLayout {
+                    ImportPolicyItem {
+                        first: true;
+                        policy: ImportPolicy.AskToImport;
+                    }
+
+                    HLine { }
+
+                    ImportPolicyItem {
+                        policy: ImportPolicy.RequireExisting;
+                    }
+
+                    HLine { }
+
+                    ImportPolicyItem {
+                        last: true;
+                        policy: ImportPolicy.SkipVerification;
+                    }
+                }
+            }
+        }
+    }
+}

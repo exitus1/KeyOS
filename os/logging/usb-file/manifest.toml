@@ -1,0 +1,12 @@
+appId = "0x6c6f672d7573622d66696c6500000000"
+syscall = [ "SetThreadPriority",]
+
+[appName]
+en = "Log to USB files"
+
+[permissions]
+template = [ "fs-generic" ]
+"os/fs" = [
+    "GetUsbReadAccess",
+    "GetUsbWriteAccess",
+]

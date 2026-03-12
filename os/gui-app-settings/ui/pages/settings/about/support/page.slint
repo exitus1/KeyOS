@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    TextMd, TextSm, TextLg, TextXl, 
+    HeadingMd,
+    MenuSection,
+    MenuSectionLayout,
+    MenuItemRightLayout,
+    MenuActionItem,
+    HLine,
+    Qrcode,
+    Panel,
+    Icon,
+    MenuItemLayout,
+    BasePage,
+    PageBody,
+    ButtonSection
+} from "@ui/widgets.slint";
+
+import { SupportProps } from "props.slint";
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { QrOverlay } from "../../../../widgets/qr-code.slint";
+
+component SupportItem inherits MenuItemLayout {
+    in property <string> text: "";
+
+    MenuItemRightLayout {
+        icon: "external-link";
+        text: root.text;
+        text-width: 220px;
+    }
+}
+
+export component SupportPage inherits BasePage {
+    in property <SupportProps> props;
+    private property <string> qrcode-url: "";
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: "Support";
+        }
+
+        PageBody {
+            MenuSection {
+                title: "";
+                MenuSectionLayout {
+                    SupportItem {
+                        first: true;
+                        label: TR2.lookup(TrId.SupportDocumentation);
+                        icon: "learn";
+                        clicked => {
+                            qrcode-url = "https://docs.foundation.xyz/prime/home/";
+                        }
+                    }
+
+                    HLine { }
+
+                    SupportItem {
+                        label: TR2.lookup(TrId.SupportSupportCenter);
+                        text: "/support";
+                        icon: "email";
+                        clicked => {
+                            qrcode-url = "https://foundation.xyz/support/#contactForm";
+                        }
+                    }
+
+                    HLine { }
+
+                    SupportItem {
+                        label: TR2.lookup(TrId.SupportCommunity);
+                        icon: "community";
+                        clicked => {
+                            qrcode-url = "https://community.foundation.xyz";
+                        }
+                    }
+
+                    HLine { }
+
+                    SupportItem {
+                        label: TR2.lookup(TrId.SupportGithub);
+                        text: TR2.lookup(TrId.SupportFoundationDevices);
+                        icon: "github";
+                        clicked => {
+                            qrcode-url = "https://github.com/Foundation-Devices";
+                        }
+                    }
+
+                    HLine { }
+
+                    SupportItem {
+                        last: true;
+                        label: TR2.lookup(TrId.SupportX);
+                        text: TR2.lookup(TrId.SupportAtFoundationDvcs);
+                        icon: "x-corp";
+                        clicked => {
+                            qrcode-url = "https://x.com/FOUNDATIONdvcs";
+                        }
+                    }
+                }
+            }
+
+            ButtonSection {
+                TextLg {
+                    color: Palette.content-primary;
+                    text: TR2.lookup(TrId.SupportVisitUs);
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TextLg {
+                    color: Palette.content-brand;
+                    text: "foundation.xyz";
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+            }
+        }
+    }
+
+    // QR code overlay
+    if qrcode-url != "": QrOverlay {
+        url <=> qrcode-url;
+    }
+}

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "keycard-scan"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+backup-shard = { workspace = true }
+haptics = { workspace = true }
+keycard = { workspace = true }
+log = { workspace = true }
+nfc = { path = "../../os/nfc" }
+quantum-link = { workspace = true }
+slint-keyos-platform = { workspace = true }
+thiserror = { workspace = true }
+whence = { workspace = true }
+xous = { workspace = true }

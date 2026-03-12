@@ -1,0 +1,12 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SAM-BA cipher tool output files
+*.cip
+
+# Temporary files
+*.tmp
+*.bak

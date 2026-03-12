@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "ipc-test"
+version = "0.1.0"
+edition = "2021"
+description = "IPC test app"
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+log = "0.4.14"
+log-server = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+xous = { workspace = true }

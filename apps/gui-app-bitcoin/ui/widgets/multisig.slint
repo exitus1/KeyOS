@@ -1,0 +1,134 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { PageBody, ContentSection, TitledInput, MenuSection, MenuSectionLayout, MenuItemLayout, ItemTextPreview, HLine, CollapsibleMenu, MenuSectionContainer, TitledItem, TextSm, Icon } from "@ui/widgets.slint";
+import { Size, Palette } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+import { MultiSigView, Callbacks } from "../callbacks.slint";
+
+export component ViewMultiSig inherits ContentSection {
+    in property <MultiSigView> multisig;
+    in property <bool> initial-open: false;
+
+    padding-bottom: Size.sz10;
+
+    @children
+
+    MenuSection {
+        title: TR2.lookup(TrId.DetailsMultisigDetails);
+        MenuSectionLayout {
+            policy := MenuItemLayout {
+                first: true;
+                label: TR2.lookup(TrId.DetailsMultisigPolicy);
+
+                property <bool> show-policy: false;
+
+                clicked => {
+                    show-policy = !show-policy;
+                }
+
+                HorizontalLayout {
+                    spacing: Size.sz2;
+                    ItemTextPreview {
+                        text: TR2.format(TrId.DetailsMultisigXOfY, [multisig.policy-threshold, multisig.policy-total-keys]);
+                    }
+
+                    Icon {
+                        name: show-policy ? "chevron-up" : "chevron-down";
+                        color: Palette.content-tertiary;
+                    }
+                }
+            }
+
+            if policy.show-policy: HLine { }
+
+            if policy.show-policy: HorizontalLayout {
+                padding: Size.sz4;
+                TextSm {
+                    text: TR2.format(TrId.DetailsMultisigPolicyContent, [multisig.policy-threshold, multisig.policy-total-keys]);
+                    color: Palette.content-tertiary;
+                }
+            }
+
+            HLine { }
+
+            MenuItemLayout {
+                last: true;
+                label: TR2.lookup(TrId.DetailsMultisigAddresses);
+                ItemTextPreview {
+                    text: Callbacks.address-type-to-string(multisig.addresses);
+                    text-width: 200px;
+                }
+            }
+        }
+    }
+
+    TitledItem {
+        title: TR2.lookup(TrId.DetailsMultisigAssociatedSigners);
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz4;
+
+            for signer[index] in multisig.signers: MenuSectionContainer {
+                card-background: menu.is-open ? Palette.background-primary : Palette.background-disabled;
+                menu := CollapsibleMenu {
+                    initial-open: initial-open;
+                    title: TR2.format(TrId.DetailsMultisigSignerX, [index + 1]);
+
+                    if menu.is-open: VerticalLayout {
+                        alignment: start;
+                        spacing: Size.sz8;
+
+                        padding-top: Size.sz8;
+                        padding-bottom: Size.sz8;
+
+                        padding-left: Size.sz4;
+                        padding-right: Size.sz4;
+
+                        VerticalLayout {
+                            alignment: start;
+                            spacing: Size.sz3;
+
+                            HorizontalLayout {
+                                TextSm {
+                                    text: TR2.lookup(TrId.DetailsMultisigFingerprint);
+                                    color: Palette.content-tertiary;
+                                }
+
+                                TextSm {
+                                    text: signer.fingerprint;
+                                }
+                            }
+
+                            HorizontalLayout {
+                                TextSm {
+                                    text: TR2.lookup(TrId.DetailsMultisigDerivationPath);
+                                    color: Palette.content-tertiary;
+                                }
+
+                                TextSm {
+                                    text: signer.derivation-path;
+                                }
+                            }
+                        }
+
+                        VerticalLayout {
+                            alignment: start;
+                            spacing: Size.sz3;
+
+                            TextSm {
+                                text: "XPUB";
+                                color: Palette.content-tertiary;
+                            }
+
+                            TextSm {
+                                text: signer.public-key;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

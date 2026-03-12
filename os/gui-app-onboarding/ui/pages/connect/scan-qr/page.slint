@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, UISize, Importance } from "@ui/theme.slint";
+import { HeadingMd, TextLg, TextMd, Shield, Button, QrCodeCard, AnimatedQrCode, NavHeader, ContentSection } from "@ui/widgets.slint";
+
+import { OnboardingCallbacks as CB } from "../../../onboarding-callbacks.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingBasePage } from "../../../widgets/base-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+
+component Body inherits VerticalLayout {
+    padding-top: Size.sz16;
+    spacing: Size.sz12;
+    alignment: start;
+}
+
+export component ScanQrPage inherits OnboardingBasePage {
+    property <bool> bt-connected: CB.bt-connected;
+
+    if !bt-connected: Shield {
+        VerticalLayout {
+            NavHeader {
+                title: TR2.lookup(TrId.ScanToStartTitle);
+
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+
+            Body {
+                HorizontalLayout {
+                    alignment: center;
+                    QrCodeCard {
+                        data: CB.qr-data();
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz6;
+
+                    HeadingMd {
+                        text: TR2.lookup(TrId.ScanToStartHeader);
+                        horizontal-alignment: center;
+                    }
+
+                    TextMd {
+                        vertical-alignment: TextVerticalAlignment.bottom;
+                        text: TR2.lookup(TrId.ScanToStartSubheader);
+                        horizontal-alignment: center;
+                        color: Palette.content-tertiary;
+                    }
+                }
+            }
+        }
+    }
+
+    if bt-connected: Shield {
+        VerticalLayout {
+            NavHeader {
+                title: TR2.lookup(TrId.ScanToContinueTitle);
+
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+
+            Body {
+                HorizontalLayout {
+                    alignment: center;
+                    AnimatedQrCode {
+                        parts: CB.animated-qr-data();
+                    }
+                }
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.ScanToContinueHeader);
+                    horizontal-alignment: center;
+                }
+            }
+        }
+    }
+}

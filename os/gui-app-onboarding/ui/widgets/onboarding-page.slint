@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, TextLg, Icon, JumboIcon, Shield, HeadingMd, TextMd } from "@ui/widgets.slint";
+import { Font } from "@ui/fonts.slint";
+import { Palette, Size, Utils, UISize } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+export component OnboardingPage inherits Rectangle {
+    in property <string> jumbo-icon;
+    in property <bool> jumbo-icon-has-inner;
+    in property <string> jumbo-icon-inner;
+    in property <string> heading;
+    in property <string> subheading;
+    in property <string> button-label:TR2.lookup(TrId.CommonButtonContinue);
+    callback on-button-click();
+
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+    background: Palette.background-primary;
+
+    VerticalLayout {
+        Rectangle {
+            height: UISize.control-center-status-bar-height;
+        }
+
+        VerticalLayout {
+            alignment: stretch;
+            spacing: Size.sz10;
+            padding-top: Size.sz16;
+            padding-left: Size.sz6;
+            padding-right: Size.sz6;
+            padding-bottom: Size.sz10;
+
+            HorizontalLayout {
+                alignment: center;
+                JumboIcon {
+                    name: jumbo-icon;
+                    if jumbo-icon-has-inner: Icon {
+                        name: jumbo-icon-inner;
+                        size: 96px;
+                        color: Palette.content-brand;
+                    }
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz5;
+                HeadingMd {
+                    vertical-stretch: 0;
+                    text: heading;
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: subheading;
+                    horizontal-alignment: center;
+                    color: Palette.content-tertiary;
+                    vertical-stretch: 0;
+                }
+            }
+
+            Rectangle { }
+
+            button := HorizontalLayout {
+                vertical-stretch: 0;
+                alignment: center;
+                Button {
+                    width: 424px;
+                    icon: "";
+                    label: button-label;
+                    importance: primary;
+                    clicked => {
+                        on-button-click();
+                    }
+                }
+            }
+        }
+    }
+}

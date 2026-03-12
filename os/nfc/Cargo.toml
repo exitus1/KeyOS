@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "nfc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+getrandom = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+fido = { path = "../fido" }
+gpio = { workspace = true }
+iso7816 = { version = "0.1", features = ["std"] }
+once_cell = "1.20.3"
+rfal = { workspace = true }
+spi = { workspace = true }
+st25r95 = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

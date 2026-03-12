@@ -1,0 +1,29 @@
+appId = "0x6775692d6170702d7265636f76657279"
+memory = ["SECURAM"]
+
+[appName]
+en = "Recovery Launcher"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/fs" = [
+    "SubscribeFilesystemEvent",
+    "GetSystemReadAccess",
+    "GetSystemWriteAccess",
+]
+"os/gui-server" = ["Shutdown"]
+"os/power-manager" = ["GetStatus", "Reboot", "SetOtgPriority"]
+"os/recovery-worker" = [
+    "CopyArchive",
+    "GetAppBinVerificationState",
+    "GetArchiveState",
+    "GetBootloaderInfo",
+    "GetKeyOsInfo",
+    "GetRecoveryInfo",
+    "ReadArchive",
+    "StartRecovery",
+    "SubscribeProgress",
+    "GetLastError",
+]
+"os/security" = ["Lockout"]
+"os/usb" = ["IsEnabled", "SetEnabled"]

@@ -1,0 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { KeycardBackupError } from "@ui/pages/keycard-backup/keycard-backup-error.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+
+export global KeycardBackupGlobal {
+    callback start-manual-keycard-backup();
+    callback start-magic-backup();
+
+    in property <[StepModel]> steps;
+    // whether a keycards has been detected and we are writing to it
+    in property <bool> saving-to-keycard: false;
+
+    in property <KeycardBackupError> error;
+    callback error-clicked(bool);
+}

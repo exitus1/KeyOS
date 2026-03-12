@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: 'Setup Nix'
+inputs:
+  use-cache:
+    description: 'Enable magic nix cache'
+    required: false
+    default: 'true'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check if Nix is installed
+      id: check-nix
+      shell: bash
+      run: |
+        if [ -d "/nix/var/nix/profiles/default/bin" ]; then
+          echo "installed=true" >> $GITHUB_OUTPUT
+        else
+          echo "installed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Install Nix
+      if: steps.check-nix.outputs.installed == 'false'
+      uses: DeterminateSystems/determinate-nix-action@v3.11.1
+
+    - name: Setup existing Nix daemon
+      if: steps.check-nix.outputs.installed == 'true'
+      shell: bash
+      run: |
+        echo "PATH=/nix/var/nix/profiles/default/bin:$PATH" >> $GITHUB_ENV
+        echo "Using existing Nix installation"
+
+    - name: Setup nix cache
+      if: inputs.use-cache == 'true' && steps.check-nix.outputs.installed == 'false'
+      uses: DeterminateSystems/magic-nix-cache-action@main

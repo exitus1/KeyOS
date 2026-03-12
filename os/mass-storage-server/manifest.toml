@@ -1,0 +1,20 @@
+appId = "0x6f732f6d6173732d73746f7261676500"
+syscall = ["SetThreadPriority"]
+
+[appName]
+en = "Mass storage server"
+
+[servers."os/mass-storage"]
+ReadBlocks = { id = 0, type = "lendMut" }
+WriteBlocks = { id = 1, type = "lendMut" }
+Subscribe = { id = 3, type = "scalarEvent" }
+BlockCount = { id = 4, type = "blockingScalar" }
+
+[permissions]
+"os/usb" = [
+    "Subscribe",
+    "BulkIn",
+    "BulkOut",
+    "Claim",
+    "OpenEndpoint",
+]

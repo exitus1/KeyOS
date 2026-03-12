@@ -1,0 +1,29 @@
+appId = "0x426974636f696e2057616c6c65740000"
+
+[appName]
+en = "Bitcoin Wallet"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/gui-server" = ["GetPendingNavRequest", "SwitchToLauncher"]
+"os/security" = ["GetSeed", "GetDeviceId", "GetOsVersionInfo"]
+"os/settings" = ["GetDeviceName", "GetLocale", "GetPrimeColor"]
+"os/quantum-link" = [
+    "SendAccountUpdate",
+    "PublishPsbt",
+    "SendApplyPassphrase",
+
+    "SubscribeExchangeRate",
+    "SubscribeSignPsbt",
+    "SubscribeAccountUpdate",
+    "SubscribePairingEvent",
+    "SubscribeConnectionStatus",
+]
+"os/fs" = [
+    "GetAirlockReadAccess",
+    "GetAirlockWriteAccess",
+    "GetUserReadAccess",
+    "GetUserWriteAccess",
+    "GetUsbReadAccess",
+    "GetUsbWriteAccess",
+]

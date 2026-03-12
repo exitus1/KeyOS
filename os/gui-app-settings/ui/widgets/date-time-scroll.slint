@@ -1,0 +1,254 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { GradientDirection, GradientStop, Palette, Utils, Timings } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+component Txt inherits Text {
+    font-size: 24px;
+    horizontal-alignment: center;
+    font-weight: 900;
+    color: Palette.content-primary;
+}
+
+component PartSelector {
+    in-out property <int> value;
+    in property <int> max-value: 24;
+    in property <int> min-value: 0;
+    in property <[string]> labels: [];
+    in property <length> item-size: 30px;
+    in property <color> selected-color: red;
+    in-out property <color> background: transparent;
+
+    height: 4 * item-size;
+
+    callback changed(int);
+
+    function to-string(v: int) -> string {
+        if labels.length > 0 {
+            labels[v]
+        } else if v < 10 {
+            return "0\{v}";
+        } else {
+            return "\{v}";
+        }
+    }
+
+    Rectangle {
+        height: root.height;
+        background: root.background;
+        border-radius: item-size / 6;
+        clip: true;
+
+        function get-y() -> length {
+            (min-value - value) * item-size - item-size / 2
+        }
+
+        Flickable {
+            viewport-y: get-y();
+            viewport-height: (5 + max-value - min-value) * item-size;
+
+            VerticalLayout {
+                padding-left: item-size / 4;
+                padding-right: item-size / 4;
+                Rectangle {
+                    height: 2 * item-size;
+                }
+
+                private property <int> num: 1 + max-value - min-value;
+                for n in num: Rectangle {
+                    height: item-size;
+                    Txt {
+                        width: parent.width;
+                        text: to-string(n + min-value);
+                        font-size: item-size * 0.6;
+                    }
+                }
+                Rectangle {
+                    height: 2 * item-size;
+                }
+            }
+
+            private property <length> old-y;
+            flicked => {
+                if self.viewport-y == old-y {
+                    self.viewport-y = item-size * (min-value - value - 1 / 2);
+                } else {
+                    old-y = self.viewport-y;
+                    root.value = min-value + Math.floor(-self.viewport-y / item-size);
+                    root.changed(root.value);
+                }
+            }
+            animate viewport-y { duration: Timings.prop-change; }
+        }
+
+        private property <color> g0: Palette.content-secondary-inverse.transparentize(0.06);
+        private property <color> g1: Palette.content-primary-inverse.transparentize(0.6);
+
+        Image {
+            y: 0;
+            height: 1.5 * item-size;
+            width: parent.width;
+            source: Utils.frame(self.width, self.height, root.item-size / 6, [], GradientDirection.vertical, [
+                { color: #000.transparentize(0.5), stop: 0% },
+                { color: g0, stop: 15% },
+                { color: g1, stop: 100% }
+            ], 0, g0);
+        }
+
+        Image {
+            y: 2.5 * item-size;
+            height: 1.5 * item-size;
+            width: parent.width;
+            source: Utils.frame(self.width, self.height, root.item-size / 6, [], GradientDirection.vertical, [{ color: g1, stop: 0% }, { color: g0, stop: 100% }], 0, g0);
+        }
+    }
+}
+
+component PartsSelector {
+    in property <length> item-size: 30px;
+    in property <color> selected-color: Palette.content-brand;
+
+    callback changed(int, int, int);
+
+    HorizontalLayout {
+        alignment: stretch;
+        spacing: item-size / 4;
+        padding-left: item-size / 4;
+        padding-right: item-size / 4;
+
+        @children
+    }
+
+    Rectangle {
+        y: item-size * 1.5;
+        height: item-size;
+        border-color: selected-color;
+        border-radius: item-size / 6;
+        border-width: 2px;
+        background: transparent;
+    }
+}
+
+export component TimeSelector24 inherits PartsSelector {
+    in-out property <int> hours <=> h.value;
+    in-out property <int> minutes <=> m.value;
+    in property <color> background: Palette.background-primary;
+
+    h := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        max-value: 23;
+        changed(vv) => {
+            root.changed(vv, m.value, 0);
+        }
+    }
+
+    m := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        max-value: 59;
+        changed(vv) => {
+            root.changed(h.value, vv, 0);
+        }
+    }
+}
+
+export component TimeSelector12 inherits PartsSelector {
+    in-out property <int> hours <=> h.value;
+    in-out property <int> minutes <=> m.value;
+    in-out property <int> am-pm <=> aa.value;
+    in-out property <int> am-pm-value <=> aa.value;
+    in-out property <[string]> am-pm-labels: ["am", "pm"];
+    in property <color> background: Palette.background-primary;
+
+    h := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        max-value: 11;
+        changed(vv) => {
+            root.changed(vv, m.value, aa.value);
+        }
+    }
+
+    m := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        max-value: 59;
+        changed(vv) => {
+            root.changed(h.value, vv, aa.value);
+        }
+    }
+
+    aa := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        max-value: 1;
+        labels: root.am-pm-labels;
+        changed(vv) => {
+            root.changed(h.value, m.value,  vv);
+        }
+    }
+}
+
+export component DateSelector inherits PartsSelector {
+    in property <int> min-year: 2000;
+    in-out property <int> year <=> yy.value;
+    in-out property <int> month <=> mm.value;
+    in-out property <int> day <=> dd.value;
+    in property <color> background: Palette.background-primary;
+    in property <bool> long-form: false;
+
+    yy := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        min-value: root.min-year;
+        max-value: 2100;
+        changed(vv) => {
+            root.changed(vv, mm.value, dd.value);
+        }
+    }
+
+    mm := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        min-value: 1;
+        max-value: 12;
+        labels: [
+            "",
+            TR2.lookup(root.long-form ? TrId.CommonMonthJanuaryFull : TrId.CommonMonthJanuaryShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthFebruaryFull : TrId.CommonMonthFebruaryShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthMarchFull : TrId.CommonMonthMarchShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthAprilFull : TrId.CommonMonthAprilShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthMayFull : TrId.CommonMonthMayShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthJuneFull : TrId.CommonMonthJuneShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthJulyFull : TrId.CommonMonthJulyShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthAugustFull : TrId.CommonMonthAugustShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthSeptemberFull : TrId.CommonMonthSeptemberShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthOctoberFull : TrId.CommonMonthOctoberShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthNovemberFull : TrId.CommonMonthNovemberShort),
+            TR2.lookup(root.long-form ? TrId.CommonMonthDecemberFull : TrId.CommonMonthDecemberShort),
+        ];
+        changed(vv) => {
+            root.changed(yy.value, vv, dd.value);
+        }
+    }
+
+    dd := PartSelector {
+        selected-color: root.selected-color;
+        background: root.background;
+        item-size: root.item-size;
+        min-value: 1;
+        max-value: 31;
+        changed(vv) => {
+            root.changed(yy.value, mm.value, vv);
+        }
+    }
+}

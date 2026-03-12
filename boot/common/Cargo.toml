@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundationdevices.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+authors = ["Foundation Devices <hello@foundationdevices.com>"]
+license = "GPL-3.0-or-later"
+edition = "2021"
+name = "boot-common"
+version = "0.1.1"
+publish = false
+
+[dependencies]
+arrayvec = { version = "0.7.6", default-features = false }
+atsama5d27 = { workspace = true, features = ["lcd-console", "eh-1"] }
+embedded-graphics = "0.8.1"
+enum_dispatch = "0.3.13"
+ft3269 = { workspace = true }
+fuse = { path = "../../utils/fuse" }
+keyos = { path = "../../keyos" }
+
+[features]
+default = []
+production = []

@@ -1,0 +1,2051 @@
+{
+  "Label": "BlueWallet",
+  "Registration": "Registration",
+  "Time": "15",
+  "Value": "m/48’/0’/0’/2’",
+  "_": "Note to devs: Note the different titles\nplural and singular in this flow and the\none below, these are different\ntextIDs as well",
+  "authenticator": {
+    "archivedCodes": {
+      "noArchivedCodes": "No archived codes",
+      "title": "Archive"
+    },
+    "archivedEdit": {
+      "deleteCode": "Delete 2FA Code",
+      "restoreCode": "Restore 2FA Code",
+      "title": "Details"
+    },
+    "archivedEditModal": {
+      "header": "Eliminar Código 2FA",
+      "subheader": "Are you sure you want to delete  “{0}”? \nThere is no way to restore a deleted 2FA Code."
+    },
+    "editCard": {
+      "account": "Cuenta",
+      "archiveCode": "Archivar Código 2FA",
+      "color": "Color",
+      "issuer": "Emisor",
+      "label": "Etiqueta",
+      "title": "Details"
+    },
+    "editCardModal": {
+      "header": "Archive 2FA Code",
+      "subheader": "Are you sure you want to archive\n”{0}”? "
+    },
+    "editCardModalLabelInUse": {
+      "content": "The label is already in use. Please choose another label for this code.",
+      "title": "Label is already in use"
+    },
+    "main": {
+      "import": "[Import]",
+      "searchTextFiller": "Search...",
+      "title": "Códigos 2FA"
+    },
+    "mainAdd2FA": {
+      "header": "Añade tu primer código 2FA",
+      "scanQrCode": "Add 2FA Code",
+      "subheader": "Protege tus cuentas en línea con códigos de autenticación \n(2FA) de 6 dígitos. Escanea el código QR que aparece en tu cuenta online para añadir tu primer código."
+    },
+    "mainAdd2FAModalAlreadyUsed": {
+      "content": "This 2FA code is already saved as \"{0}\"",
+      "title": "Code is already in use"
+    },
+    "mainAdd2FAModalInvalidSecret": {
+      "content": "The provided secret is not valid and can’t be added to Passport. \nPlease review, try again or contact the issuer if needed.",
+      "title": "Secret is invalid"
+    },
+    "mainAdd2FAModalInvalidTimer": {
+      "content": "This 2FA code uses a non-standard time period that is currently not supported on Passport. ",
+      "title": "Time is Unsupported"
+    },
+    "mainAddCode": {
+      "accountMissing": "Missing field, please add an Account.",
+      "accountTextFiller": "Add the associated account",
+      "issuerTextFiller": "Add the code issuer (optional)",
+      "label": "Etiqueta",
+      "labelAlreadyInUse": "Label already in use.",
+      "labelMissing": "Missing field, please add a Label.",
+      "labelTextFiller": "Etiqueta tu Código 2FA",
+      "specialCharacter": "This field cannot contain \":\".",
+      "title": "Add 2FA Code"
+    },
+    "mainEdit": {
+      "done": "Done"
+    },
+    "mainEmpty": {
+      "newCode": "New Code",
+      "noCodes": "No codes"
+    },
+    "mainModalImportMultipleAccounts": {
+      "content": "This QR code will import {0} accounts. ",
+      "header": "Import multiple Accounts?"
+    },
+    "mainThreeDots": {
+      "addCode": "Add 2FA Code",
+      "codeArchive": "Ver Archivo",
+      "reorder": "Reorder",
+      "search": "Search"
+    },
+    "openedCard": {
+      "account": "Cuenta",
+      "edit": "Edit",
+      "issuer": "Emisor"
+    },
+    "reorder": {
+      "alphabetical": "Alphabetical",
+      "custom": "Custom",
+      "date": "Date"
+    },
+    "scan": {
+      "title": "Scan QR"
+    }
+  },
+  "boot": {
+    "errorMessage": {
+      "content": "KeyOS se cerró debido a un error.",
+      "title": "Support"
+    },
+    "firmwareError": {
+      "content": "KeyOS is unable to verify the signature of the installed firmware.  \n\nUse Recovery mode to install\nFoundation-signed firmware.",
+      "title": "Firmware Error"
+    },
+    "invalidFirmware": {
+      "title": "KeyOS is Invalid"
+    },
+    "menu": {
+      "recovery": "Recovery",
+      "systemInfo": "System Information",
+      "title": "Boot Menu"
+    },
+    "qrCode": {
+      "content": "Visit by scanning with\nyour phone camera."
+    },
+    "recoveryError": {
+      "content": "Unable to verify the signature of the Recovery firmware.  \n\nContact support using the\nbutton below.",
+      "title": "Recovery Firmware Error"
+    },
+    "signedDevKey": {
+      "content": "Esta versión de KeyOS está firmada por una clave de desarrollador de terceros.\n\n¿Quieres seguir iniciando KeyOS?"
+    },
+    "systemError": {
+      "message": "KeyOS restarted due to an unexpected system error.\n\nthread 'main' panicked at  apps/gui-app-system-actions/src/main.rs:72:9:\nThis application has crashed with a test panic message",
+      "title": "Error"
+    },
+    "tamperError": {
+      "content": "KeyOS has detected a tamper event.\n\n\nFor security, the master key\nhas been erased from the \ndevice. To proceed, restore \na backup or perform a \nfactory reset.  ",
+      "title": "Tamper Detected"
+    },
+    "watchdog": {
+      "content": "KeyOS restarted due to\na system error.\n\nIt is safe to continue\nusing Passport.\n\nYour data remains secure.",
+      "title": "Error"
+    }
+  },
+  "camera": {
+    "disabled": {
+      "content": "The camera is disabled.",
+      "enableCamera": "Enable Camera"
+    },
+    "scan": {
+      "title": "Scan QR"
+    }
+  },
+  "common": {
+    "backup": {
+      "backedUpXAgo": "Backed up {0} ago",
+      "neverBackedUp": "Never backed up"
+    },
+    "button": {
+      "apply": "Apply",
+      "back": "Back",
+      "beginFirmwareRecovery": "Begin Firmware Recovery",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "create": "Create",
+      "creating": "Creating...",
+      "delete": "Delete",
+      "dismiss": "Dismiss",
+      "done": "Done",
+      "dontShowAgain": "Don't show again",
+      "erasing": "Erasing...",
+      "finish": "Finish",
+      "getStarted": "Get Started",
+      "iUnderstand": "I Understand",
+      "ignore": "Ignore",
+      "learnMore": "Learn more",
+      "next": "Next",
+      "recover": "Recover",
+      "restore": "Restore",
+      "retry": "Retry",
+      "return": "Back",
+      "save": "Save",
+      "saveToFile": "Save to File",
+      "shutDown": "Shut Down",
+      "skip": "Skip",
+      "skipVerification": "Skip Verification",
+      "startKeyos": "Start KeyOS",
+      "support": "Support",
+      "verify": "Verify",
+      "verifyAddress": "Verify Address",
+      "verifying": "Verifying..."
+    },
+    "changePin": {
+      "1FailedAttempt": "1 failed attempt",
+      "XFailedAttempts": "{0} failed attempts",
+      "xFailedAttemptsFactoryWarning1Remaining": "{0} failed attempts\n\nPassport will erase its Master Key after 1 more attempt",
+      "xFailedAttemptsFactoryWarningXRemaining": "{0} failed attempts\n\nPassport will erase its Master Key after {1} more attempts",
+      "xFailedAttemptsXRemaining": "{0} failed attempts\n\nYou have {1} attempts remaining"
+    },
+    "createAccount": {
+      "indexArchived": "Index already in use and in archive.",
+      "indexUsed": "Index already in use."
+    },
+    "createAccountsanitized": {
+      "emptyLabel": "Label cannot be empty.",
+      "repeatedLabel": "Label already exists.",
+      "specialCharsRemoved": "Special Characters were automatically removed."
+    },
+    "fillerText": {
+      "search": "Search..."
+    },
+    "month": {
+      "aprilFull": "April",
+      "aprilShort": "Apr",
+      "augustFull": "August",
+      "augustShort": "Aug",
+      "decemberFull": "December",
+      "decemberShort": "Dec",
+      "februaryFull": "February",
+      "februaryShort": "Feb",
+      "januaryFull": "January",
+      "januaryShort": "Jan",
+      "julyFull": "July",
+      "julyShort": "Jul",
+      "juneFull": "June",
+      "juneShort": "Jun",
+      "marchFull": "March",
+      "marchShort": "Mar",
+      "mayFull": "May",
+      "mayShort": "May",
+      "novemberFull": "November",
+      "novemberShort": "Nov",
+      "octoberFull": "October",
+      "octoberShort": "Oct",
+      "septemberFull": "September",
+      "septemberShort": "Sep"
+    },
+    "recoverRestoreCardKeycard": {
+      "readingKeycard": "Reading Keycard"
+    },
+    "slideToSign": {
+      "helper": "Slide to sign",
+      "sign": "Sign",
+      "signed": "Signed",
+      "signing": "Signing"
+    },
+    "time": {
+      "dayFull": "day",
+      "dayMed": "day",
+      "dayShort": "d",
+      "daysFull": "days",
+      "daysMed": "days",
+      "hourFull": "hour",
+      "hourMed": "hr",
+      "hourShort": "h",
+      "hoursFull": "hours",
+      "hoursMed": "hrs",
+      "minuteFull": "minute",
+      "minuteMed": "min",
+      "minuteShort": "m",
+      "minutesFull": "minutes",
+      "minutesMed": "mins",
+      "secondFull": "second",
+      "secondMed": "sec",
+      "secondShort": "s",
+      "secondsFull": "seconds",
+      "secondsMed": "secs",
+      "weekFull": "week",
+      "weekMed": "wk",
+      "weekShort": "w",
+      "weeksFull": "weeks",
+      "weeksMed": "wks"
+    },
+    "toast": {
+      "keyAuthenticationAttempt": "Key Authentication Attempt",
+      "keyRegistrationAttempt": "Key Registration Attempt"
+    },
+    "update": {
+      "chargeBattery": "Battery level must be above 20%.",
+      "currentVersion": "Current Version: {0}",
+      "installUpdate": "Install Update",
+      "newVersion": "New Version: {0}",
+      "updateAvailableHeader": "Update Available",
+      "updatedTo": "will be updated to"
+    },
+    "updateDownload": {
+      "downloading": "Downloading Update",
+      "header": "Downloading on Envoy",
+      "receive": "Receive Update",
+      "subheader": "Keep both devices nearby."
+    },
+    "updateError": {
+      "download": "Failed to Download",
+      "header": "Update Failed",
+      "install": "Failed to Install",
+      "installExternal": "Install from External",
+      "transfer": "Failed to Transfer",
+      "verify": "Failed to Verify"
+    },
+    "updateProgress": {
+      "eta": "Estimated Time Remaining {0}",
+      "header": "Updating",
+      "install": "Install Update",
+      "installed": "Update Installed",
+      "installing": "Installing Update",
+      "restart": "Restart Passport",
+      "restarting": "Restarting Passport",
+      "subheader": "Keep both devices nearby.",
+      "verified": "Update Verified",
+      "verifying": "Verifying Update"
+    },
+    "updateReceive": {
+      "downloaded": "Update Downloaded",
+      "header": "Receiving Update",
+      "receiving": "Receiving Update",
+      "subheader": "Keep both devices nearby."
+    },
+    "updateSuccess": {
+      "header": "Update Successful",
+      "subheader": "Passport was successfully \nupdated to {0}"
+    },
+    "weekday": {
+      "fridayFull": "Friday",
+      "fridayShort": "Fri",
+      "mondayFull": "Monday",
+      "mondayShort": "Mon",
+      "saturdayFull": "Saturday",
+      "saturdayShort": "Sat",
+      "sundayFull": "Sunday",
+      "sundayShort": "Sun",
+      "thursdayFull": "Thursday",
+      "thursdayShort": "Thu",
+      "tuesdayFull": "Tuesday",
+      "tuesdayShort": "Tue",
+      "wednesdayFull": "Wednesday",
+      "wednesdayShort": "Wed"
+    }
+  },
+  "component": {
+    "message": {
+      "content": "Apps are coming soon.",
+      "header": "Developers Welcome"
+    }
+  },
+  "controlcenter": {
+    "button": {
+      "bluetooth": "Bluetooth",
+      "camera": "Cámara",
+      "markAllAsRead": "Mark all as read",
+      "nfc": "NFC",
+      "usb": "USB"
+    },
+    "slideToShutDown": {
+      "shuttingDown": "Shutting Down"
+    }
+  },
+  "files": {
+    "airlockMenu": {
+      "airlockReadOnly": "Airlock Read Only",
+      "airlockReadWrite": "Airlock Read & Write",
+      "quickTip": "Quick Tip",
+      "searchSort": "Search & Sort",
+      "select": "Select",
+      "tapAndHold": "Tap and hold a file or folder to select it quickly."
+    },
+    "airlockUSB": {
+      "header": "Connected by USB",
+      "unmountAirlock": "Unmount Airlock"
+    },
+    "empty": {
+      "filesFiltered": " {0} files were filtered.",
+      "folderEmpty": "Folder is empty.",
+      "oneFileFiltered": " 1 file was filtered."
+    },
+    "error": {
+      "content": "Couldn’t load files. \nPlease try again or contact support."
+    },
+    "external": {
+      "header": "Connect USB Device"
+    },
+    "main": {
+      "airlock": "Esclusa",
+      "copy": "Copiar",
+      "delete": "Eliminar",
+      "done": "Done",
+      "external": "Externo",
+      "hideFiles": "Hide hidden files",
+      "internal": "Interno",
+      "lock": "Bloquear",
+      "move": "Mover",
+      "moveHere": "Mover aquí",
+      "movingData": "Moving Data",
+      "pasteHere": "Copy Here",
+      "pastingData": "Copying Data",
+      "rename": "Renombrar",
+      "showFiles": "Show hidden files",
+      "unlock": "Unlock"
+    },
+    "mainModalAddFolder": {
+      "content": "Enter a name.",
+      "title": "Add Folder"
+    },
+    "mainModalCaution": {
+      "connectInternalStorage": "Connect Internal Storage",
+      "content": "The connected device will be able to read all files and folders contained within the internal storage of Prime.\nUse the Airlock feature when connecting Prime to non-trusted devices. ",
+      "title": "Caution!"
+    },
+    "mainModalDeleteAreYouSure": {
+      "content": "There is no way to recover files after deletion.",
+      "title": "Are you sure?"
+    },
+    "mainModalRename": {
+      "content": "Enter a new name.",
+      "title": "Rename"
+    },
+    "mainSortBy": {
+      "alphabetical": "Orden alfabético",
+      "fileSize": "Tamaño"
+    },
+    "menu": {
+      "addFolder": "Add Folder",
+      "connectReadOnly": "Connect Read Only",
+      "connectReadWrite": "Eject Internal Storage",
+      "quickTip": "Sugerencia",
+      "searchSort": "Search & Sort",
+      "select": "Seleccionar",
+      "tapAndHold": "Mantén pulsado un archivo o una carpeta para seleccionarlos rápidamente."
+    },
+    "sortBy": {
+      "alphabetical": "Alphabetical",
+      "fileSize": "File Size",
+      "modificationDate": "Modification Date"
+    }
+  },
+  "keycardBackup": {
+    "createIntro": {
+      "content": "Passport uses short-range NFC for secure communication. For the best connection, center the Keycard over the camera to form a \"T\" shape as shown above.\n\nPassport will vibrate when the Keycard is in the correct position. ",
+      "header": "Positioning the Keycard",
+      "title": "NFC Tip"
+    },
+    "magic": {
+      "createContent": "To restore from your Magic Backup, you will need any two parts:\n\n1 Keycard + Envoy\nor\n2 Keycards\n\nWe recommend storing your Keycards in separate locations for resilient security.",
+      "createHeader": "Create Magic Backup",
+      "createdHeader": "Magic Backup created ",
+      "creatingHeader": "Creating Magic Backup",
+      "eraseThirdKeycardContent": "Your third Keycard no longer contains valid backup data. \n\nPassport will erase this card for future use. ",
+      "eraseThirdKeycardHeader": "Erase Third Keycard",
+      "erasingKeycard": "Erasing Keycard",
+      "firstPartStoredEnvoy": "Part 1 stored on Envoy",
+      "modalDataDetectedContentMasterKey": "This Keycard is part of a backup from a different Master Key.\n\nBy continuing, all data will be overwritten.\n\nAre you sure you want to continue?",
+      "modalDataDetectedContentPrime": "This Keycard is part of a backup from a different Passport Prime.\n\nBy continuing, all data will be overwritten.\n\nAre you sure you want to continue?",
+      "modalDataDetectedContentThisPrime": "This Keycard is part of an existing backup set for this Passport Prime.\n\nBy continuing, all data will be overwritten.\n\nAre you sure you want to continue?",
+      "modalDataDetectedHeader": "Keycard Data Detected",
+      "modalEnvoyErrorContent": "Passport was unable to successfully save to Envoy.\n\nPlease try again or contact support if the issue persists.",
+      "modalEnvoyErrorHeader": "Error Saving to Envoy",
+      "modalErrorContent": "Passport was unable to successfully save to this Keycard.\n\nPlease try again.",
+      "modalErrorHeader": "Error Saving to Keycard",
+      "modalInvalidDataDetectedContent": "This Keycard contains invalid data. Ensure you are using a Foundation Keycard.\n\nPassport will attempt to overwrite the data on this card.",
+      "modalInvalidDataDetectedHeader": "Invalid Data Detected",
+      "modalInvalidDataDetectedOverwrite": "Overwrite Data",
+      "modalInvalidThirdPartyKeycardContent": "Backup data from a third-party device detected. \nFoundation cannot guarantee the integrity of this backup.   Do you understand the risks and want to continue?",
+      "modalInvalidThirdPartyKeycardHeader": "Unauthenticated  Keycard",
+      "recreatingHeader": "Recreating Magic Backup",
+      "recreatingUploadingEnvoy": "Recreating & uploading to Envoy",
+      "savingToKeycard": "Saving to Keycard",
+      "secondPartStoredKeycard": "Part 2 stored on Keycard ",
+      "sendingFirstPart": "Sending Part 1 to Envoy...",
+      "tapAKeycard": "Hold a Keycard to Passport",
+      "tapAnotherKeycard": "Hold another Keycard to Passport",
+      "tapthirdKeycard": "Hold third Keycard to Passport",
+      "thirdPartStoredKeycard": "Part 3 stored on Keycard "
+    },
+    "manual": {
+      "createdHeader": "Keycard Backup Created",
+      "creatingHeader": "Creating Keycard Backup",
+      "firstPartStoredKeycard": "Part 1 stored on Keycard",
+      "modalBewareContent": "Write down these words on the backup sheet provided. Store the sheet securely and never take a photo of it.\n\nAnyone requesting you expose these words outside of this device will gain full control over your funds. Take care.",
+      "modalBewareHeader": "Beware of revealing sensitive information"
+    }
+  },
+  "launcher": {
+    "appCrash": {
+      "content": "{0} has crashed with the following exit code: {1}.",
+      "header": "App Crashed"
+    },
+    "crash": {
+      "errorMessage": "Error Log"
+    },
+    "launcherCrash": {
+      "content": "The launcher has encountered an error with the following message.",
+      "header": "Launcher Error"
+    },
+    "main": {
+      "2FaCodes": "Códigos\n2FA",
+      "appsAreComing": "Las aplicaciones llegarán pronto.",
+      "developersWelcome": "Desarrolladores Bienvenidos",
+      "disconnected": "Disconnected",
+      "fileBrowser": "Explorar\nArchivos",
+      "lastUpdate": "Last Update",
+      "loadingData": "Loading Data…",
+      "securityKeys": "Keys",
+      "seedVault": "Vault",
+      "wallet": "Wallet",
+      "xAgo": "{0} ago"
+    },
+    "mainDevs": {
+      "content1": "Por primera vez, KeyOS permite ampliar la funcionalidad de Passport Prime con aplicaciones de terceros.",
+      "content2": "Las aplicaciones de KeyOS pueden ser cualquier cosa: añadir una cartera fría a tu cartera móvil, integrarlas con tu administrador de contraseñas... incorpora tu logotipo y tu interfaz de usuario para ofrecer la mejor experiencia de usuario.  El SDK para desarrolladores estará disponible más adelante, en 2025. ¡Compártelo con tus aplicaciones y servicios favoritos!",
+      "content3": "The Developer SDK is coming later in 2026. Please share with your favorite apps and services!",
+      "header": "Desarrolladores Bienvenidos",
+      "subheader": "¿Echas algo en falta? ¡Constrúyelo!",
+      "url": "https://foundation.xyz/dev",
+      "visitForInfo": "Aprende más en:"
+    },
+    "mainTemp": {
+      "temporarySeed": "Temporary Seed"
+    }
+  },
+  "lock": {
+    "main": {
+      "enterPassword": "Enter Password",
+      "enterPin": "Enter PIN",
+      "securityWords": "Your Security Words",
+      "swipeup": "Swipe up to unlock"
+    }
+  },
+  "onboarding": {
+    "MasterKeyCreated": {
+      "dataEncrypted": "Data encrypted"
+    },
+    "backupMagicMain1": {
+      "advanced": "Advanced",
+      "subheader": "Create a secure and resilient backup of your Passport Master Key.\n\nYour Master Key will be split into three parts. Two will be stored on Keycards.\n\nThe third will be stored on Envoy, encrypted, and backed up to your Apple or Google account."
+    },
+    "backupManual2Of3Keycard": {
+      "header": "Creating Keycard Backup"
+    },
+    "backupManualMain": {
+      "header": "Create Backup",
+      "manualSeedBackup": "View Seed Words",
+      "subheader": "Create a {0} out of {1} backup with the three Keycards or save your seed words by writing them down.\n\nAdditional backups can be created later in Settings.",
+      "xOfYKeycardBackup": "{0} of {1} Keycard Backup"
+    },
+    "backupManualSeedQr": {
+      "compact": "Compact SeedQR",
+      "standard": "SeedQR",
+      "title": "SeedQR"
+    },
+    "backupManualSuccess": {
+      "header": "Backup Created Successfully"
+    },
+    "backupManualVerify": {
+      "chooseWord": "Tap on the correct word",
+      "correct": "Correct",
+      "incorrectRestart": "Incorrect selection. Restart verification.",
+      "restartVerification": "Restart Verification",
+      "subheader": "#5",
+      "tapOnWord": "Tap on Word",
+      "title": "Verify Seed Words"
+    },
+    "changePinNew": {
+      "upToTwelveDigits": "Enter up to 12 digits"
+    },
+    "connection": {
+      "checkForUpdates": "Check for Updates",
+      "checkedDeviceSecurity": "Security Check Passed",
+      "checkingDeviceSecurity": "Checking Device Security",
+      "checkingForUpdates": "Checking for Updates",
+      "connectedToEnvoy": "Connected to Envoy",
+      "header": "Inicializando",
+      "noUpdatesAvailable": "No Updates Available"
+    },
+    "connectionMain": {
+      "header": "Connecting Account..."
+    },
+    "connectionSuccess": {
+      "header": "Account Connected Successfully"
+    },
+    "creatingMasterKey": {
+      "encryptData": "Encrypt Data",
+      "encryptingData": "Encrypting Data",
+      "header": "Creating Master Key",
+      "masterKeyGenerated": "Master Key Generated",
+      "masterKeySaved": "Master Key Saved",
+      "savingMasterKey": "Saving Master Key"
+    },
+    "enterPin": {
+      "content": "Introduce​•​al​•​menos​•​6​•​dígitos",
+      "switchToPassword": "Switch to Password",
+      "title": "Create PIN"
+    },
+    "enterPinMax": {
+      "content": "Máximo de 12 dígitos alcanzado"
+    },
+    "error": {
+      "header": "Error",
+      "reconnect": "Reconnect"
+    },
+    "errorConnectionLost": {
+      "content": "Ensure your Passport is powered on and near your phone.",
+      "restartSetup": "Restart Setup",
+      "warning": "Device Connection Lost"
+    },
+    "errorSecurityCheckFailed": {
+      "content": "This device may not be genuine or may have been tampered with during shipping. Please contact support.",
+      "warning": "Security Check Failed"
+    },
+    "errorSecurityCheckPending": {
+      "content": "Envoy failed to connect to Foundation servers. Please retry the check on Envoy. ",
+      "warning": "Security Check Pending"
+    },
+    "importSettings": {
+      "content": "Would you like to restore an existing Settings & Data Backup File from a Passport Prime?",
+      "header": "Restore Settings & Data",
+      "importBackupFile": "Import Backup File"
+    },
+    "importSettingsModalWrongBackupFile": {
+      "content": "The provided Settings & Data Backup File does not correspond to the restored Master Key.",
+      "header": "Unable to Restore File"
+    },
+    "inititatedPrime": {
+      "content": "Envoy detected that this Passport has already been initiated.\n\nHow would you like to proceed?",
+      "header": "Initiated Device Detected",
+      "setUpAsNewDevice": "Set Up as New Device"
+    },
+    "magicBackupFound": {
+      "content": "Restoring your encrypted settings and data from the Foundation server",
+      "header": "Encrypted Backup Found"
+    },
+    "magicBackupFoundError": {
+      "content": "There was an error when trying to communicate with the Foundation server to restore your encrypted settings and data. ",
+      "header": "Connection Error"
+    },
+    "magicBackupSearching": {
+      "header": "Locating Settings & \nData Backup"
+    },
+    "main": {
+      "header": "Bienvenido a Passport Prime",
+      "subheader": "Protege toda tu vida digital.\nContinuando, reconoces y aceptas los Términos de uso.",
+      "termsOfUse": "Terms of Use"
+    },
+    "masterKeyDeleted": {
+      "content": "To ensure your security, Passport has erased its Master Key. Your data is still preserved in an encrypted state. \n\nRestore access by providing the Master Key, or erase all data from this device.",
+      "eraseDevice": "Erase Device",
+      "header": "Master Key Erased",
+      "provideMasterKey": "Provide Master Key"
+    },
+    "masterKeyDeletedErase": {
+      "content": "Are you sure you want to delete all data on this device?",
+      "header": "Erase Device",
+      "iHaveMasterKey": "I have the Master Key",
+      "proceedFactoryReset": "Erase All Data"
+    },
+    "masterKeyDeletedErasing": {
+      "erasingPassport": "Erasing Passport...",
+      "passportErased": "Passport erased",
+      "title": "Erase Device"
+    },
+    "masterKeyDeletedErasingSuccess": {
+      "restarting": "Restarting"
+    },
+    "masterKeyDeletedRestore": {
+      "content": "Choose a method to provide the Master Key.",
+      "header": "Provide Master Key"
+    },
+    "masterKeyDeletedRestoreModalWrongKey": {
+      "content": "The provided Master Key does not match this device’s previous key.",
+      "header": "Incorrect Master Key"
+    },
+    "masterKeyDeletedRestorePairingFirst": {
+      "connectToEnvoy": "Connect to Envoy",
+      "content": "To retrieve the Envoy part of your Master Key backup, Passport needs to reconnect with Envoy.",
+      "header": "Connect to Envoy"
+    },
+    "password": {
+      "fillerText": "Enter new password",
+      "switchToPin": "Switch to PIN",
+      "title": "Create Password"
+    },
+    "passwordSuccess": {
+      "header": "Contraseña Establecida Correctamente"
+    },
+    "pinSuccess": {
+      "header": "PIN Establecido Correctamente"
+    },
+    "recoverEncryptedBackupDetected": {
+      "content": "Passport found an encrypted settings and data backup stored on the Foundation server.\n\nDo you want to restore it? ",
+      "header": "Encrypted Backup Detected"
+    },
+    "recoverFileBackupCode": {
+      "switchToBackupWords": "Switch to Backup Words",
+      "title": "Enter Backup Code"
+    },
+    "recoverFileBackupCodeError": {
+      "subheader": "Backup code incorrect. Please try again."
+    },
+    "recoverFileBackupReady": {
+      "continueRestoring": "Continue"
+    },
+    "recoverFileBackupRestoring": {
+      "header": "Migrating",
+      "subheader": "Migrating your Passport Backup"
+    },
+    "recoverFileBackupWords": {
+      "switchToBackupCode": "Switch to Backup Code",
+      "title": "Enter Backup Words"
+    },
+    "recoverFileNavigate": {
+      "header": "Backup Files Found",
+      "subheader": "Choose a backup to restore"
+    },
+    "recoverMain": {
+      "content": "Restore an existing backup",
+      "enterSeedWords": "Enter Seed Words",
+      "header": "Restore",
+      "restorePassportBackup": "Migrate from Passport Core",
+      "scanSeedQr": "Scan Seed QR",
+      "seedFromKeycards": "Restore from Keycards"
+    },
+    "recoverRestoreCard": {
+      "header": "Restoring from Keycards",
+      "restoring": "Restoring..."
+    },
+    "recoverRestoreCardEnvoy": {
+      "firstPartRestoredKeycard": "Part 1 restored from Keycard",
+      "readingFromEnvoy": "Reading Envoy Backup",
+      "secondPartRestoredKeycard": "Part 2 restored from Keycard"
+    },
+    "recoverRestoreCardKeycard": {
+      "noEnvoyBackup": "No Envoy Backup Found",
+      "tapAKeycard": "Hold a Keycard to Passport",
+      "tapAnotherKeycard": "Hold another Keycard to Passport",
+      "writingToKeycard": "Saving to Keycard"
+    },
+    "recoverRestoreCardModalEmptyKeycard": {
+      "content": "This Keycard has no data stored. Please try a different one.",
+      "header": "Empty Keycard"
+    },
+    "recoverRestoreCardModalKeycardDoesNotMatch": {
+      "content": "This Keycard belongs to a different master key backup than the first Keycard presented.\n\nPlease try again with a different Keycard.",
+      "header": "Keycard Does Not Match"
+    },
+    "recoverRestoreMagicBackup": {
+      "header": "Restoring from Magic Backups"
+    },
+    "recoverSuccess": {
+      "header": "Master Key Restored Successfully"
+    },
+    "recoverSuccessEnvoy": {
+      "secondRestoredEnvoy": "Part 2 restored from Envoy"
+    },
+    "recoverSuccessManual": {
+      "noEnvoyBackup": "No Envoy Backup Found"
+    },
+    "recoverSuccessModalNewDevice": {
+      "header": "New Keycard Backup?",
+      "newBackup": "Create New Backup",
+      "subheader": "The backup used to restore came from a different Passport Prime.\n\nFor maximum redundancy, we strongly suggest you create a new backup now."
+    },
+    "recoverSuccessSingleSeed": {
+      "seedRestoredKeycard": "Seed restored from Keycard"
+    },
+    "recoverWords": {
+      "expandTo24Word": "Expand to 24 Word Seed",
+      "fillerText": "Enter word {0}",
+      "incorrectTryAgain": "One or more of your seed words are incorrect. Please review and try again.",
+      "suggest": "Suggest",
+      "tilte": "Seed Words",
+      "title": "Seed Words"
+    },
+    "savingMasterKey": {
+      "header": "Saving Master Key"
+    },
+    "scanModalEnvoyCanceled": {
+      "content": "Onboarding canceled by Envoy. Tap below to start again.",
+      "header": "Onboarding Canceled"
+    },
+    "scanModalPassportDisconnected": {
+      "content": "Move Passport and your phone closer to each other to attempt  reconnection from Envoy. If that fails, tap below to start over.",
+      "header": "Passport Disconnected",
+      "restartOnboarding": "Restart Onboarding"
+    },
+    "scanToContinue": {
+      "header": "Scan to establish \nQuantumLink connection",
+      "title": "Scan to Continue"
+    },
+    "scanToStart": {
+      "header": "Escanea para inicializar",
+      "subheader": "Escanea con la cámara de tu teléfono o con Envoy",
+      "title": "Scan to Start"
+    },
+    "seedIntro": {
+      "content": "The Master Key is the primary secret that protects everything on Passport.\n\nHave Passport create a new one, or restore an existing backup using Keycards or seed words.",
+      "createMasterKey": "Create Master Key",
+      "header": "Master Key Set Up",
+      "restore": "Restore from Backup"
+    },
+    "seedMain": {
+      "content": "The Master Key protects your money and all personal data stored on Passport.\n\nNever share the Master Key or backup outside of Passport. Doing so can result in total loss of funds and data.",
+      "header": "Create Master Key"
+    },
+    "seedMasterKeyCreated": {
+      "header": "Master Key Created"
+    },
+    "seedQr": {
+      "title": "Scan Seed QR"
+    },
+    "seedRecoverModal": {
+      "content1": "Are you sure you want to restore an existing backup or seed?\nPassport will create a secure Master Key to safeguard your entire digital life.",
+      "content2": "Warning: we recommend creating a new Master Key and migrating your funds to Passport.",
+      "continueRecovering": "Restore",
+      "header": "We Recommend a New Master Key"
+    },
+    "setPin": {
+      "content": "Asegura​•tu Passport con​•​un​•​PIN​•​de​•​6​-​12​•​dígitos.↵\n↵\nPor​•​favor,​•​guarda​ tu​•​PIN​•​ en​•​un​•​lugar​•​seguro.",
+      "header": "Crear PIN"
+    },
+    "termsOfUse": {
+      "title": "Terms of Use"
+    },
+    "tutorial": {
+      "slideFromTop": "Slide from top",
+      "tapHomeButton": "Tap Home Button"
+    },
+    "updateAvailable": {
+      "newUpdatesAvailable": "New Update Available",
+      "updateDevice": "Update"
+    },
+    "updateDevice": {
+      "chargeBattery": "Battery level must be above 20%.",
+      "currentVersion": "Versión Actual: {0}",
+      "header": "Actualización Disponible",
+      "installUpdate": "Install Update",
+      "newVersion": "Nueva Versión: {0}",
+      "updatedTo": "se actualizará a"
+    },
+    "verifyPassword": {
+      "fillerText": "Re-enter new password",
+      "title": "Verify Password"
+    },
+    "verifyPasswordMismatch": {
+      "content": "La contraseña no coincide.\nPor favor, vuelve a intentarlo o retrocede."
+    },
+    "verifyPin": {
+      "title": "Verify PIN"
+    },
+    "verifyPinMismatch": {
+      "content": "El PIN no coincide.\nPor favor, vuelve a intentarlo o retrocede."
+    }
+  },
+  "recovery": {
+    "advanced": {
+      "eraseAllDataButton": "Erase All Data + Settings",
+      "eraseAllDataContent": "Permanently erase all data and settings. This action cannot be undone.",
+      "firmwareRecoveryButton": "Firmware Recovery",
+      "firmwareRecoveryContent": "Recover from an official firmware version. Your personal data will not be affected.",
+      "title": "Recovery"
+    },
+    "advancedModalCriticalRecovery": {
+      "content": "The recovery archive contains components such as bootloader or the Recovery OS itself.\nDo not reboot or shut down the device during recovery process.",
+      "header": "Core System Update",
+      "startRecovery": "Start Recovery"
+    },
+    "advancedModalLowBattery": {
+      "content": "Please connect the device to a charger and ensure it has at least 50% charge before proceeding with the recovery.",
+      "header": "Low Battery"
+    },
+    "controlcenter": {
+      "backedUp": "Backed up {0} ago"
+    },
+    "erase": {
+      "erasingEncryptedDrive": "Erasing Encrypted Drive",
+      "title": "Erase Device"
+    },
+    "eraseEncryptedModal": {
+      "content": "This will completely erase all user files stored on the encrypted drive and Airlock.",
+      "eraseEncryptedDrive": "Erase Encrypted Drive",
+      "header": "Erase Encrypted Drive?"
+    },
+    "failed": {
+      "copyingFailed": "Installation failed",
+      "header": "Error en la Restauración",
+      "rebootFailed": "Unable to Reboot"
+    },
+    "formattingAirlock": {
+      "content": "The Airlock file system is corrupt and needs to be formatted. This will permanently erase all data inside the Airlock.\n\nDo not format the Airlock if you want to attempt data recovery by connecting to an external device via USB.",
+      "doNotFormat": "Do Not Format",
+      "formatAirlock": "Format Airlock",
+      "header": "Airlock Error"
+    },
+    "formattingDevice": {
+      "content": "Formatting the encrypted storage, this may take a few moments.\n\nPlease don't power off your device",
+      "formatting": "Formatting…",
+      "header": "Formatting Device"
+    },
+    "formattingRequired": {
+      "content": "The encrypted storage is unformatted.\nPerhaps it was previously encrypted using a different Master Key.\n\nFormatting the encrypted storage using the current Master Key will permanently erase all data previously stored, including the airlock.",
+      "formatEncryptedStorage": "Format Encrypted Storage",
+      "header": "Formatting Required"
+    },
+    "main": {
+      "header": "Conectar dispositivo USB",
+      "title": "Recovery"
+    },
+    "progress": {
+      "copyFile": "Copy file to Prime",
+      "copyingFile": "Copying file to Prime",
+      "fileCopied": "File copied to Prime",
+      "fileRead": "File read",
+      "header": "Restaurando KeyOS...",
+      "installingFirmware": "Installing firmware",
+      "keyosInstalled": "Installation successful",
+      "readingFile": "Reading File",
+      "reboot": "Reboot",
+      "rebooting": "Rebooting",
+      "subheader": "No apagues el dispositivo.",
+      "verifyFile": "Verify file",
+      "verifyingFile": "Verifying file"
+    },
+    "recovery": {
+      "title": "Firmware Recovery"
+    },
+    "success": {
+      "header": "KeyOS Restaurado"
+    },
+    "summary": {
+      "buildDate": "Fecha de Compilación: {0}",
+      "header": "¿Restaurar KeyOS?",
+      "including": "Including: {0} apps, {1} assets",
+      "keyosHash": "KeyOS Hash",
+      "keyosVersion": "Versión: {0}",
+      "modalHeader": "KeyOS Hash",
+      "selectedFile": "Selected file:"
+    },
+    "sysInfo": {
+      "bootloader": "Bootloader",
+      "buildDate": "Build Date",
+      "keyos": "KeyOS",
+      "recovery": "Recovery",
+      "sha256Hash": "SHA256 Hash",
+      "title": "System Information",
+      "version": "Version"
+    },
+    "verificationFailed": {
+      "firmwareDevKey": "We cannot recover from firmware signed by a custom Developer Pubkey.",
+      "firmwareInvalid": "Firmware update is invalid.",
+      "firmwareLarge": "Firmware is too large.",
+      "firmwareSmall": "Firmware is too small.",
+      "header": "Verification Failed",
+      "readFirmware": "Could not read firmware file."
+    }
+  },
+  "securitykey": {
+    "accounts": {
+      "live": "LIVE",
+      "nfc": "NFC",
+      "usb": "USB"
+    },
+    "accountsReorder": {
+      "alphabetical": "Alphabetical",
+      "custom": "Custom",
+      "date": "Date"
+    },
+    "add": {
+      "label": "Label",
+      "labelAlreadyInUse": "Label already in use.",
+      "labelFillerText": "Label your key",
+      "labelMissing": "Missing field, please add a Label.",
+      "title": "New Security Key"
+    },
+    "archiveKeyModal": {
+      "content": "Are you sure you want to archive   ”{0}”? ",
+      "header": "Archive Security Key"
+    },
+    "archivedKey": {
+      "restoreKey": "Restore Key",
+      "title": "Details"
+    },
+    "authenticatingModalEnableComms": {
+      "content": "USB or NFC connectivity must be enabled to register or use a key.\nOpen the Control Center by swiping down from the top of the screen.",
+      "header": "Enable Communications"
+    },
+    "authenticatingSuccess": {
+      "header": "Authentication Submitted",
+      "subheader": "Please confirm successful authentication on the connected platform."
+    },
+    "authenticatingUSB": {
+      "header": "Confirm Authentication",
+      "subheader": "Authenticate with key “{0}”"
+    },
+    "authenticatingWait": {
+      "header": "Authenticating...",
+      "subheader": "Hold Passport to your \nphone or connect with USB."
+    },
+    "edit": {
+      "done": "Done",
+      "newKey": "New Key"
+    },
+    "itemDetails": {
+      "color": "Color"
+    },
+    "keyArchive": {
+      "noArchivedKeys": "No archived keys",
+      "title": "Archive"
+    },
+    "keyLabel": {
+      "addToHome": "Add to Home",
+      "addedToHome": "Added to Home",
+      "archiveKey": "Archive Key",
+      "icon": "Icon",
+      "label": "Label",
+      "removeFromHome": "Remove from Home",
+      "removedFromHome": "Removed from Home",
+      "restrictKey": "Restrict key visibility",
+      "restrictKeyText": "Key must be selected before use.",
+      "title": "Details"
+    },
+    "main": {
+      "searchFillerText": "Search...",
+      "tapKeyToActivate": "Tap key to use",
+      "title": "Security Keys"
+    },
+    "mainEmpty": {
+      "noKeys": "No keys"
+    },
+    "mainMenu": {
+      "edit": "Edit",
+      "editDragAndDrop": "Edit and drag and drop a key as a live key.",
+      "keyArchive": "View Archive",
+      "newKey": "New Security Key",
+      "quickTip": "Quick Tip",
+      "reorder": "Reorder",
+      "search": "Search"
+    },
+    "new": {
+      "header": "Create your first Security Key",
+      "newSecurityKey": "New Security Key",
+      "subheader": "Secure your online accounts with FIDO1 Security Keys"
+    },
+    "registeringModalRegistrationFailed": {
+      "content": "There are no keys to choose from.\n\nCreate a key first, then retry the registration.",
+      "header": "Registration Failed"
+    },
+    "registrationUSB": {
+      "header": "Confirm Registration",
+      "newSecurityKey": "New Security Key",
+      "selectKeyToRegister": "Select key to register",
+      "subheader": "Register this Security Key?"
+    },
+    "registrationUSBSuccessful": {
+      "header": "Registration Submitted",
+      "subheader": "Please confirm successful registration on the connected platform."
+    }
+  },
+  "seedvault": {
+    "accounts": {
+      "title": "Vault"
+    },
+    "seedDeleteModal": {
+      "content2": "Beware, this can’t be undone and you should have a backup."
+    }
+  },
+  "settinga": {
+    "backupManualMain": {
+      "subheader": "Create a {0} out of {1} Backup with Keycards or save the seed words by writing them down. "
+    }
+  },
+  "settings": {
+    "about": {
+      "bleBootloader": "BLE Bootloader",
+      "bleFirmware": "BLE Firmware",
+      "bootloader": "Bootloader",
+      "device": "Device",
+      "keyOs": "KeyOS",
+      "legal": "Legal",
+      "masterFingerprint": "Master Fingerprint",
+      "reversedFingerprint": "Reversed Fingerprint",
+      "serialNumber": "Serial Number",
+      "software": "Software",
+      "support": "Support",
+      "title": "About"
+    },
+    "advancedBackups": {
+      "saveSeed": "Back Up to Keycards",
+      "settingsAndDataBackup": "Settings & Data Backup",
+      "title": "Advanced Backups",
+      "viewSeedWords": "View Seed Words"
+    },
+    "advancedMenu": {
+      "eraseDevice": "Borrar Dispositivo",
+      "header": "Advanced",
+      "viewLogs": "Ver Registros"
+    },
+    "autoShutdown": {
+      "never": "Never",
+      "title": "Auto Lock"
+    },
+    "backUpToKeycards": {
+      "title": "Back Up to Keycards"
+    },
+    "backUpToOneKeycard": {
+      "title": "Back Up to Keycard"
+    },
+    "backup": {
+      "advancedBackups": "Advanced Backups",
+      "backUpNow": "Back up now",
+      "backingUp": "Backing up...",
+      "content": "Se podrán realizar cambios cuando Passport esté conectada a Envoy y la conexión esté activa.",
+      "lastUpdatedXAgo": "Hace {0} a los Servidores de Foundation",
+      "magicBackups": "Copias de Seguridad Mágicas",
+      "restoreBackup": "Restaurar Copia de Seguridad",
+      "title": "Backups",
+      "verifyKeycards": "Verify Keycards"
+    },
+    "backupMagic": {
+      "noBackup": "No Backup Created"
+    },
+    "backupMagic2Of3KeycardWiping": {
+      "erasingKeycard": "Erasing Keycard",
+      "header": "Erasing Keycard"
+    },
+    "backupMagic2Of3KeycardWipingModalTapAnotherCardContent": "The Keycard is part of the recently created Magic Backup. Hold the redundant Keycard to Passport.",
+    "backupMagic2Of3KeycardWipingModalTapAnotherCardHeader": "Hold Another Keycard",
+    "backupMagic2Of3KeycardWipingSuccess": {
+      "content": "This Keycard can be reused for additional backups any time in the future. ",
+      "header": "Keycard Erased Successfully",
+      "keycardErased": "Keycard erased"
+    },
+    "backupMagicDeactivated": {
+      "header": "Magic Backups Deactivated",
+      "subheader": "Your Passport Magic Backup was successfully deleted."
+    },
+    "backupManualMain": {
+      "header": "Create Backup",
+      "manualSeedBackup": "Manual Seed Backup",
+      "xOfYKeycardBackup": "{0} of {1} Keycard Backup"
+    },
+    "backupManualMainModal": {
+      "subheader": "The next screen will show your seed words.\nAnyone requesting you expose these words outside of this device will gain full control over your funds. Take care."
+    },
+    "backupManualSeedQr": {
+      "compact": "Compact SeedQR",
+      "standard": "Standard SeedQR",
+      "title": "SeedQR"
+    },
+    "backupManualSeedWords": {
+      "title": "Seed Words"
+    },
+    "backupManualSuccess": {
+      "header": "Backup Created Successfully"
+    },
+    "backupModalDisableMagic": {
+      "createNewBackup": "Create New Backup",
+      "header": "Disable Magic Backups",
+      "subheader": "This will delete the Master Key part stored on Envoy and backed up to your Apple or Google account.\n\nYour Settings & Data Backup will also be erased from Foundation servers.\n\nCreate a new backup of this data before it is deleted."
+    },
+    "backupModalEnableMagic": {
+      "enableMagicBackups": "Enable Magic Backups",
+      "header": "Enable Magic Backups",
+      "subheader": "Create a secure and resilient backup of your Passport Master Key.\n\nYour Master Key will be split into three parts. Two will be stored on physical Keycards.\n\nThe third will be stored on Envoy, encrypted, and backed up to your Apple or Google account."
+    },
+    "backupModalEnvoyDisabled": {
+      "content": "Magic Backups must be enabled on Envoy before creating a Magic Backup on Passport.\n\nOpen the Envoy menu, then tap Backups.",
+      "header": "Envoy Magic Backups"
+    },
+    "backupModalEraseDevice": {
+      "eraseDevice": "Erase Device",
+      "header": "Erase Device",
+      "subheader": "To restore a backup, this device first needs to be erased.\n\nAre you sure you want to continue?"
+    },
+    "battery": {
+      "battery": "Battery",
+      "current": "Current",
+      "currentCapacity": "Current Capacity",
+      "electricalStatus": "Electrical Status",
+      "remainingCapacity": "Remaining Capacity",
+      "stateOfCharge": "State of Charge",
+      "title": "Battery",
+      "voltage": "Voltage"
+    },
+    "changeCurrentPassword": {
+      "header": "●●●●●●●●●●●●●●●"
+    },
+    "changePassword": {
+      "header": "Introduce contraseña nueva",
+      "switchToPin": "Switch to PIN"
+    },
+    "changePin": {
+      "header": "Introduce el PIN actual",
+      "switchToPassword": "Switch to Password",
+      "title": "Change PIN"
+    },
+    "changePinNew": {
+      "header": "Introduce PIN nuevo",
+      "maxDigitsReached": "Máximo de 12 dígitos alcanzado",
+      "sixDigitsRequired": "Se requieren al menos 6 dígitos",
+      "upToTwelveDigits": "Introduce hasta 12 dígitos"
+    },
+    "connectionDone": {
+      "active": "Active",
+      "disconnectFromEnvoy": "Disconnect from Envoy",
+      "inactive": "Inactive",
+      "lastBackupXAgo": "Última Copia de Seguridad: hace {0}",
+      "pairedTo": "Paired to",
+      "phone": "Conectado con QuantumLink",
+      "quantumLink": "QuantumLink",
+      "title": "Envoy Connection",
+      "unpairFromEnvoy": "Unpair from Envoy"
+    },
+    "connectionDoneModal": {
+      "header": "Desconectar Passport",
+      "subheader": "¿Estás seguro de que deseas desconectar la conexión de QuantumLink a Envoy?\n\nSi lo haces, impedirás que algunas aplicaciones y funciones de Passport funcionen correctamente."
+    },
+    "connectionMissing": {
+      "header": "Escanea el código QR",
+      "subheader": "Escanea con la cámara de tu teléfono o con Envoy",
+      "title": "Connect Envoy"
+    },
+    "createBackupFile": {
+      "content": "The Device Backup is encrypted by your Master Key and contains a copy of all settings and data.",
+      "iSavedMySeed": "I have saved my Master Key",
+      "saveDeviceBackup": "Save Device Backup",
+      "saveExternalBackup": "Save External Backup",
+      "title": "Create Backup File"
+    },
+    "createBackupFileError": {
+      "contactSupport": "Contact Support",
+      "content": "Try again or contact support.",
+      "header": "Failed to Save Backup File"
+    },
+    "createBackupFileSuccess": {
+      "content": "File saved at {0}",
+      "header": "Backup File Saved"
+    },
+    "createBackupSaving": {
+      "header": "Saving…"
+    },
+    "dateTime": {
+      "24Hour": "24-Hour",
+      "customize": "Customize",
+      "date": "Date",
+      "setAutomatically": "Set by Envoy",
+      "time": "Time",
+      "timeZone": "Time Zone",
+      "title": "Date & Time"
+    },
+    "deviceName": {
+      "textFiller": "Nombra tu Passport",
+      "title": "Device Name"
+    },
+    "display": {
+      "appearance": "Appearance",
+      "automaticBrightness": "Automatic Brightness",
+      "dark": "Dark",
+      "light": "Light",
+      "title": "Display"
+    },
+    "eraseDevice": {
+      "erase": "Borrar",
+      "header": "¿Borrar todos los datos de Passport?",
+      "subheader": "¿Estás seguro de que quieres borrar todos los datos de este dispositivo? Esto incluye la Clave Maestra, el PIN del dispositivo y todos los datos de las aplicaciones.",
+      "title": "Erase Device"
+    },
+    "eraseDeviceAreYouSure": {
+      "header": "¿Estás seguro?",
+      "subheader": "Tu Passport será borrado."
+    },
+    "eraseDeviceAreYouSureSettingsData": {
+      "subheader": "You are about to erase your Passport and the encrypted Settings & Data Backup from the Foundation server. \n\nContinuing without a recent external backup could result in loss of funds and critical app data."
+    },
+    "eraseDeviceBackup": {
+      "createBackup": "Create External Backup",
+      "header": "Copia de Seguridad Final",
+      "removeSettingsData": "Remove Settings & Data Backup \nfrom the Foundation server",
+      "subheader": "Sin una copia de seguridad reciente, borrar este dispositivo podría provocar la pérdida de fondos o de datos críticos de aplicaciones.\n"
+    },
+    "eraseDeviceCreatingMagicBackup": {
+      "connectedToEnvoy": "Connected to Envoy",
+      "creatingMagicBackup": "Creating Magic Backup...",
+      "encryptedCloudErased": "Encrypted cloud backup erased",
+      "erasingPassport": "Erasing Passport...",
+      "reconnectingToEnvoy": "Reconnecting to Envoy",
+      "restarting": "Restarting",
+      "sendBackupEnvoy": "Send Backup to Envoy",
+      "sendingBackupEnvoy": "Sending Backup to Envoy"
+    },
+    "eraseDeviceErasing": {
+      "erasingPassport": "Erasing Passport...",
+      "restartDevice": "Restart Device"
+    },
+    "eraseDeviceErasingSettingsData": {
+      "erasePassport": "Erase Passport...",
+      "erasingEncryptedCloudBackup": "Erasing encrypted Cloud backup",
+      "restartDevice": "Restart Device"
+    },
+    "eraseDeviceSuccess": {
+      "passportErased": "Passport erased",
+      "restarting": "Restarting"
+    },
+    "legal": {
+      "osLicences": "Open Source Licenses",
+      "regulatory": "Regulatory",
+      "termsOfUse": "Terms of Use",
+      "title": "Legal",
+      "warranty": "Warranty"
+    },
+    "licenses": {
+      "title": "Open Source Licenses"
+    },
+    "logs": {
+      "saveFile": "Save Log File",
+      "title": "Logs"
+    },
+    "magicVerifyBackup": {
+      "firstPartVerifiedEnvoy": "Part 1 verified on Keycard",
+      "firstPartVerifiedKeycard": "Part 1 verified on Keycard",
+      "secondPartVerifiedEnvoy": "Part 2 verified on Envoy",
+      "secondPartVerifiedKeycard": "Part 2 verified on Keycard",
+      "secondPartVerifiyngEnvoy": "Verifying Part 2 on Envoy",
+      "thirdPartVerifiedKeycard": "Part 3 verified on Keycard"
+    },
+    "magicVerifyBackupError": {
+      "header": "Verification Failed",
+      "keycardDifferentBackup": "Keycard from different Backup",
+      "keycardEmpty": "Keycard is empty",
+      "noConnectionToEnvoy": "No Connection to Envoy",
+      "noEnvoyBackupFound": "No Envoy Backup found",
+      "readingKeycardFailed": "Reading Keycard failed"
+    },
+    "main": {
+      "backedUpXAgo": "Copia de Seguridad realizada hace un momento.",
+      "backup": "Backups",
+      "envoyConnected": "Connected to Envoy",
+      "envoyNotConnected": "No Connection to Envoy",
+      "general": "General",
+      "settings": "Settings",
+      "title": "Settings",
+      "update": "Update"
+    },
+    "mainNoEnvoy": {
+      "NotPaired": "Not paired",
+      "connect": "Connect",
+      "envoyNotConnected": "Envoy not connected",
+      "pair": "Pair to Envoy"
+    },
+    "modalMagicBackupStatus": {
+      "content": "Magic Backups must be re-enabled on Envoy to ensure your data is secure. Once complete, tap retry.\n\nAlternatively, Magic Backups on Passport can be disabled by creating an advanced backup.",
+      "createAdvancedBackup": "Create Advanced Backup",
+      "header": "Magic Backup Status"
+    },
+    "noConnection": {
+      "lastCommunication": "Last Communication",
+      "message": "Make sure Bluetooth is enabled on Passport and your phone, and both devices are nearby."
+    },
+    "recoverRestoreCardKeycard": {
+      "tapAKeycard": "Hold a Keycard to Passport",
+      "tapAnotherKeycard": "Hold another Keycard to Passport"
+    },
+    "regulatory": {
+      "fccID": "FCC ID",
+      "isedCN": "ISED CN",
+      "passportPrime": "Passport Prime",
+      "title": "Regulatory"
+    },
+    "saveSeedtoCards": {
+      "backupTo1Card": "Back up Key to 1 Keycard",
+      "backupXofYCards": "Split Key to {0} of {1} Keycards",
+      "header": "Hacer Copia de Seguridad en Tarjetas",
+      "subheader": "This will save your Master Key and overwrite any existing data on your Keycards.  "
+    },
+    "saveTo1CardSuccess": {
+      "masterKeySavedKeycard": "Master Key saved to Keycard"
+    },
+    "security": {
+      "changePIN": "Change PIN",
+      "securityWords": "Show Security Words",
+      "title": "Security"
+    },
+    "securityWords": {
+      "content": "Write down these words and store them securely.",
+      "disable": "Disable Security Words",
+      "enable": "Enable Security Words",
+      "introduction": "Security Words act as an early warning for device tampering. \n\nUpon entering the first four digits of your PIN, Passport will display two unique words. If you see words that you do not recognize, do not enter the remainder of your PIN.\n\nWe recommend you write them down and store them securely.",
+      "securityWords": "Your Security Words",
+      "title": "Security Words"
+    },
+    "setDateTime": {
+      "title": "Set Date & Time"
+    },
+    "settings": {
+      "about": "About",
+      "advancedMenu": "Advanced",
+      "autoShutdown": "Auto Lock",
+      "battery": "Battery",
+      "deviceName": "Device Name",
+      "screenBrigthness": "Display",
+      "security": "Security",
+      "title": "Settings"
+    },
+    "settingsDataBackup": {
+      "content": "The Settings & Data Backup is encrypted by your Master Key and contains a copy of all settings and data.",
+      "createBackupFile": "Create Backup File",
+      "title": "Settings & Data Backup",
+      "verifyBackupFile": "Verify Backup File"
+    },
+    "support": {
+      "atFoundationDvcs": "@FOUNDATIONdvcs",
+      "community": "Comunidad",
+      "documentation": "Documentación",
+      "foundationDevices": "/Foundation-Devices",
+      "github": "Github",
+      "supportCenter": "Support Center",
+      "title": "Support",
+      "visitUs": "Visítanos para obtener más información",
+      "x": "X"
+    },
+    "supportModalDocumentation": {
+      "header": "Visita escaneando con la cámara de tu teléfono "
+    },
+    "termsOfUse": {
+      "LastUpdated": "Última actualización: {0}",
+      "title": "Terms of use"
+    },
+    "update": {
+      "envoyCheck": "Check for New Version",
+      "envoyUpdate": "Update with Envoy",
+      "installUpdateFile": "Install Update",
+      "manualUpdate": "Manual Update",
+      "primeUpdated": "Passport actualizada",
+      "restart": "Restart",
+      "restarting": "Restarting",
+      "title": "Update",
+      "updatingPrime": "Actualizando Passport"
+    },
+    "updateAvailable": {
+      "header": "Actualización Disponible",
+      "manuallySelectedFile": "Archivo seleccionado:",
+      "willBeUpdatedTo": "se actualizará a"
+    },
+    "updateDevice": {
+      "currentVersion": "Current Version: {0}",
+      "newVersion": "New Version: {0}",
+      "updatedTo": "will be updated to"
+    },
+    "updateUpToDate": {
+      "subheader": "Última comprobación el {0}"
+    },
+    "verifyBackupFileSuccess": {
+      "content": "Backup file appears to be valid.\n\nPlease note this is only a check to ensure the file has not been modified or damaged.",
+      "header": "Backup File is Valid",
+      "title": "Verify Backup File"
+    },
+    "verifyKeycards": {
+      "content": "To verify a Keycard backup, begin by holding any card to the back of Passport.",
+      "header": "Hold a Keycard"
+    },
+    "verifyKeycardsOneCard": {
+      "header": "1 of 1 Keycard Verified",
+      "masterKeyVerified": "Master Key verified on Keycard"
+    },
+    "verifyKeycardsTwoOfThreeMagic": {
+      "header": "2 of 3 Magic Backup"
+    },
+    "verifyKeycardsTwoOfThreeMagic2": {
+      "keycardAlreadyUsedWarning": "Keycard already verified.  Hold another Keycard to continue."
+    },
+    "verifyKeycardsTwoOfThreeMagicSuccess": {
+      "header": "2 of 3 Magic Backup Verified"
+    },
+    "verifyKeycardsTwoOfThreeManual": {
+      "header": "2 of 3 Keycards"
+    },
+    "verifyKeycardsTwoOfThreeManualSuccess": {
+      "header": "2 of 3 Keycards Verified"
+    },
+    "verifyPassword": {
+      "header": "Verifica contraseña nueva",
+      "reenterNewPasswordAgain": "Re-enter new password again "
+    },
+    "verifyPasswordMismatch": {
+      "content": "Incorrect password.\nPlease try again."
+    },
+    "verifyPasswordSuccess": {
+      "header": "Contraseña nueva establecida correctamente"
+    },
+    "verifyPin": {
+      "header": "Verifica PIN nuevo"
+    },
+    "verifyPinMismatch": {
+      "content": "Incorrect PIN.\nPlease try again."
+    },
+    "verifyPinSuccess": {
+      "header": "PIN nuevo establecido correctamente"
+    },
+    "verifySettingsFile": {
+      "title": "Create Backup File"
+    },
+    "viewSeedWords": {
+      "compactSeedQr": "SeedQR Compacto",
+      "enterPin": "Enter PIN",
+      "enterPinToUnlock": "Introduce el PIN para desbloquear",
+      "next12Words": "Next 12 Words",
+      "standardSeedQr": "SeedQR Estándar",
+      "title": "View Seed Words"
+    },
+    "warranty": {
+      "title": "Warranty"
+    }
+  },
+  "switcher": {
+    "button": {
+      "closeAll": "Close All"
+    }
+  },
+  "vault": {
+    "Archive": {
+      "title": "Archive"
+    },
+    "accounts": {
+      "newItem": "New Item",
+      "title": "Vault"
+    },
+    "accountsEmpty": {
+      "noItems": "No items"
+    },
+    "accountsMenu": {
+      "newItem": "New Item",
+      "reorder": "Reorder",
+      "search": "Search",
+      "viewArchive": "View Archive"
+    },
+    "archive": {
+      "noArchivedItems": "No archived items"
+    },
+    "archivedItem": {
+      "title": "Archived Item"
+    },
+    "archivedItemNostrKey": {
+      "privateKey": "Private Key",
+      "publicKey": "Public Key",
+      "restoreKey": "Restore Key"
+    },
+    "archivedItemNostrKeyModalReveal": {
+      "content1": "The next screen will show your Nostr Private Key.",
+      "content2": "Anyone who knows this key can control your Nostr identity."
+    },
+    "archivedItemPassword": {
+      "restorePassword": "Restore Password"
+    },
+    "archivedItemSeed": {
+      "deleteSeed": "Delete Seed",
+      "displayKey": "View Key",
+      "restoreSeed": "Restore Seed",
+      "viewSeed": "View Seed"
+    },
+    "archivedItemSeedModalReveal": {
+      "content1": "The next screen will show your seed words.",
+      "content2": "Anyone who knows these words can control your funds.",
+      "header": "Beware of revealing sensitive information"
+    },
+    "createItem": {
+      "12WordSeed": "12 Word Seed",
+      "24WordSeed": "24 Word Seed",
+      "account": "Account (optional)",
+      "accountFillerText": "Enter associated Username",
+      "advancedOptions": "Advanced Options",
+      "index": "Index",
+      "itemLabel": "Label",
+      "itemLabelFillerText": "Wallet",
+      "nostrKey": "Nostr Key",
+      "password": "Password",
+      "passwordFillerText": "Enter password",
+      "title": "Create New Item",
+      "type": "Type",
+      "typeTextFiller": "Select Type"
+    },
+    "createItemSeedErrors": {
+      "indexAlreadyInUse": "Index is already in use",
+      "missingField": "Missing field, please add a Label",
+      "walletAlreadyInUse": "Label is already in use"
+    },
+    "createSeed": {
+      "12WordSeed": "12 Word Seed"
+    },
+    "itemDetails": {
+      "archive": "Archive",
+      "color": "Color",
+      "icon": "Icon",
+      "information": "Information",
+      "title": "Item Details"
+    },
+    "itemDetailsIcon": {
+      "searchTextFiller": "Search..."
+    },
+    "itemDetailsNostrKey": {
+      "exportKey": "Export Keys",
+      "viewKey": "View Key"
+    },
+    "itemDetailsSeed": {
+      "exportSeed": "Export Seed",
+      "viewSeed": "View Seed"
+    },
+    "keyDeleteModal": {
+      "content1": "Are you sure you want to delete the Nostr Key “{0}”?",
+      "header": "Delete Key"
+    },
+    "main": {
+      "header": "Create New Item",
+      "newItem": "New Item",
+      "subheader": "Create and store your seeds, passwords, and more."
+    },
+    "passwordDeleteModal": {
+      "content1": "Are you sure you want to delete the password for “{0}”?",
+      "header": "Delete Password"
+    },
+    "reorder": {
+      "alphabetical": "Alphabetical",
+      "custom": "Custom",
+      "date": "Date"
+    },
+    "seedDeleteModal": {
+      "content1": "Are you sure you want to delete the seed “{0}”?",
+      "content2": "Beware, this can’t be undone and you should have a backup.",
+      "header": "Delete Seed"
+    },
+    "viewNostrKey": {
+      "title": "View Key"
+    },
+    "viewSeedWords": {
+      "compactSeedQr": "Compact SeedQR",
+      "standardSeedQr": "Standard SeedQR",
+      "title": "Display Seed Words"
+    },
+    "viewSeedWordsPIN": {
+      "enterPinToUnlock": "Enter PIN to unlock"
+    },
+    "viewSeedWordsPassword": {
+      "fillerText": "Enter current password",
+      "header": "Enter current Password"
+    }
+  },
+  "version": {
+    "keyos": "KeyOS"
+  },
+  "wallet": {
+    "PassphraseModal": {
+      "content": "A passphrase acts as a second layer of security to protect your Bitcoin.\n\nTo access Bitcoin protected by a passphrase, you must reenter the exact same characters.\n\nIt is crucial to back up your passphrase to avoid loss of funds.",
+      "header": "Using a Passphrase"
+    },
+    "accountArchive": {
+      "noArchivedAccounts": "No archived accounts",
+      "title": "Archive"
+    },
+    "accountModalNotSaved": {
+      "cancelSigning": "Cancel Signing",
+      "content": "The Account #{0} is not saved on Passport. Would you like to save it before signing?",
+      "header": "Account #{0} not saved",
+      "saveThenSign": "Save then Sign"
+    },
+    "accountModalRestoreSign": {
+      "cancelSign": "Cancel Signing",
+      "content": "This account is archived and must be restored before Passport can sign this transaction.",
+      "header": "Account #{0} Archived",
+      "restoreSign": "Restore then Sign "
+    },
+    "accountModalRestoreSignMultisig": {
+      "content": "This multisig account is archived and must be restored before Passport can sign this transaction.",
+      "header": "Multisig Archived"
+    },
+    "accounts": {
+      "accountDetails": "Account Details",
+      "exportConfig": "Export Config",
+      "signMessage": "Sign Message",
+      "signet": "Signet",
+      "testnet": "Testnet",
+      "title": "Accounts",
+      "verifyAddress": "Verify Address"
+    },
+    "accountsMenu": {
+      "applyPassphrase": "Apply Passphrase",
+      "applyTemporarySeed": "Apply Temporary Seed",
+      "clearPassphrase": "Clear Passphrase",
+      "clearTemporarySeed": "Clear Temporary Seed",
+      "createAccount": "Create Account",
+      "importMultisig": "Import Multisig",
+      "settings": "Settings",
+      "viewArchive": "View Archive",
+      "viewSeedWords": "View Seed Words"
+    },
+    "addressTypeNotSupported": {
+      "content1": "The address provided does not match this account. \n\nPlease check the details and try again.",
+      "header": "Unable to Sign"
+    },
+    "archivedAccount": {
+      "deleteAccount": "Delete Account",
+      "restoreAccount": "Restore Account",
+      "title": "Account Details"
+    },
+    "archivedMultisig": {
+      "title": "Multisig Details"
+    },
+    "confirmPassphrase": {
+      "content": "Your passphrase will be erased upon shutdown, or can be manually cleared by returning to this screen.",
+      "fingerprint": "Fingerprint",
+      "labelAccount0": "Label Account #0",
+      "labelExplainer": "Enter a label for this passphrase account. This label can be changed at any time in the Account Details screen.",
+      "passphrase": "Passphrase"
+    },
+    "connect": {
+      "multisig": "Use as part of Multisig",
+      "singleSig": "Connect as Single Sig",
+      "title": "Connect Wallet"
+    },
+    "connectMultiSig": {
+      "title": "Multisig Overview"
+    },
+    "connectMultiSigFailed": {
+      "content": "Check that the configuration file format is valid and try again.",
+      "title": "Import Failed"
+    },
+    "connectMultiSigFailedExists": {
+      "content": "Multisig configuration already exists on this Passport."
+    },
+    "connectMultiSigFailedWrongSeed": {
+      "content": "The seed active on Passport is not part of the configuration being imported.\n\nCheck the configuration details and try again."
+    },
+    "connectMultiSigImport": {
+      "label": "Label",
+      "title": "Import Multisig",
+      "walletFillerText": "Label this wallet..."
+    },
+    "connectMultiSigLoader": {
+      "header": "Importing…"
+    },
+    "connectMultiSigSave": {
+      "title": "Save Multisig"
+    },
+    "connectMultiSigSuccess": {
+      "title": "Import Complete"
+    },
+    "connectScan": {
+      "subheader": "Use {0} to scan this code.",
+      "title": "Scan this Code"
+    },
+    "connectScanSaveFile": {
+      "content": "Save a file containing the wallet connection information.",
+      "title": "Export Connection Info"
+    },
+    "createAccount": {
+      "advancedOptions": "Advanced Options",
+      "index": "Index",
+      "label": "Label",
+      "labelFillerText": "Label your account",
+      "network": "Network",
+      "title": "Create Account"
+    },
+    "creatingAccount": {
+      "header": "Creating Account..."
+    },
+    "creatingAccountFailed": {
+      "header": "Account Creation Failed ",
+      "subheader": "Please try again or contact support."
+    },
+    "creatingAccountSuccess": {
+      "header": "Account Created Successfully"
+    },
+    "currency": {
+      "search": "Search...",
+      "title": "Currency"
+    },
+    "deleteAccountModal": {
+      "header": "Delete Account",
+      "subheader": "Are you sure you want to delete  “{0}”?"
+    },
+    "details": {
+      "fingerprint": "Fingerprint",
+      "publicKey": "Public Key",
+      "set": "Set",
+      "type": "Type\n"
+    },
+    "detailsMultisig": {
+      "addresses": "Addresses",
+      "associatedSigners": "Associated Signers",
+      "derivationPath": "Derivation Path",
+      "details": "Details",
+      "fingerprint": "Fingerprint",
+      "label": "Label",
+      "policy": "Policy",
+      "policyContent": "{0} signatures, from {1} possible co-signers, will be required to approve transactions.",
+      "signerX": "Signer {0}",
+      "title": "Multisig Details",
+      "xOfY": "{0} of {1}"
+    },
+    "detailsMultisigMenu": {
+      "exportConfig": "Export Config"
+    },
+    "detailsSinglesig": {
+      "accountNumber": "Account Number",
+      "archiveAccount": "Archive Account",
+      "archiveCode": "Archive Account",
+      "derivationPath": "Derivation Path",
+      "details": "Details",
+      "fingerprint": "Fingerprint",
+      "label": "Label",
+      "title": "Account Details"
+    },
+    "detailsSinglesigMenu": {
+      "archiveAccount": "Archive Account",
+      "connedctWallet": "Connect Wallet",
+      "showPublicKey": "Show Public Key"
+    },
+    "detailsSinglesigPublicKey": {
+      "title": "Public Key"
+    },
+    "detailsSinglesigWarningViewSeed": {
+      "content1": "The next screen will show your seed words and, if defined, your passphrase. ",
+      "content2": "Anyone who knows these words can control your funds.",
+      "header": "Beware of revealing sensitive information"
+    },
+    "enterPassphrase": {
+      "content": "Type with care. All passphrases are valid. Ensure you back up your passphrase.",
+      "fillerText": "Enter passphrase...",
+      "title": "Enter Passphrase"
+    },
+    "exploreAddresses": {
+      "title": "Explore Addresses"
+    },
+    "exploreAddressesDetail": {
+      "content": "Passport doesn’t know if an address was already used. ",
+      "title": "Address {0}"
+    },
+    "exploreAddressesMenu": {
+      "address": "Address",
+      "change": "Change",
+      "legacy": "Legacy",
+      "receive": "Receive",
+      "segwit": "Segwit",
+      "taproot": "Taproot",
+      "type": "Type",
+      "wrappedSegwit": "Wrapped Segwit"
+    },
+    "exportMultisig": {
+      "subheader": "Scan this QR or save to a file.",
+      "title": "Export Multisig Config"
+    },
+    "exportMultisigModalSaved": {
+      "configSavedtoAirlock": "Configuration file saved to Airlock as:\n{0}",
+      "multisigConfigSaved": "Multisig Config saved"
+    },
+    "exportMultisigModalunabletoSave": {
+      "content": "Failed to save configuration file.\nPlease try again or contact support.",
+      "header": "Unable to Save"
+    },
+    "exportMultisigSaved": {
+      "saved": "Saved"
+    },
+    "fileSaved": {
+      "content": "File saved to Airlock as: {0}",
+      "header": "File Saved"
+    },
+    "fileUnableSaved": {
+      "content": "Please try again or contact support.",
+      "header": "Unable to Save"
+    },
+    "importConfig": {
+      "importFile": "Import from File",
+      "title": "Import Config"
+    },
+    "importConfigMenuModalSkip": {
+      "content": "Are you sure? You won’t see a multisig account card in your Bitcoin wallet app.",
+      "skipImport": "Skip Import",
+      "title": "Skip Import"
+    },
+    "invalidAddress": {
+      "content": "Scanned QR is not a valid address.",
+      "title": "Invalid Address"
+    },
+    "invalidFile": {
+      "header": "Invalid File",
+      "subheader": "File does not contain a valid Bitcoin transaction (PSBT).\n\nPlease check and try again.\n\nIf the problem persists, contact support for guidance."
+    },
+    "invalidQr": {
+      "header": "No Transaction Found",
+      "subheader": "QR code does not contain a valid Bitcoin transaction (PSBT).\n\nPlease check and try again.\n\nIf the problem persists, contact support for guidance."
+    },
+    "multisigModalNotSaved": {
+      "cancelSigning": "Cancel Signing",
+      "content": "This Multisig configuration is not saved to Passport. Would you like to save it before signing?",
+      "header": "Multisig Configuration not saved",
+      "saveThenSign": "Save then Sign"
+    },
+    "passphrase": {
+      "default": "Default",
+      "passphrase": "Passphrase"
+    },
+    "passphraseDetails": {
+      "clearPassphrase": "Clear Passphrase",
+      "content": "Your passphrase will be erased upon shutdown, or can be manually cleared by returning to this screen.",
+      "details": "Details",
+      "fingerprint": "Fingerprint",
+      "title": "Passphrase"
+    },
+    "passphraseTemp": {
+      "temporary": "Temporary"
+    },
+    "scan": {
+      "content": "Scan any QR code,\nPassport will take care of it.",
+      "title": "Scan QR"
+    },
+    "scanModalIncorrectKeyMultisig": {
+      "content": "None of the keys involved in this transaction belong to this Passport (need {0}, found {1}, {2}, {3}).\n\nCheck the active key or passphrase and try again."
+    },
+    "scanModalIncorrectKeySinglesig": {
+      "content": "The key involved in this transaction does not belong to this wallet (need {0}, found {1}).\n\nCheck the active key or passphrase and try again.",
+      "header": "Incorrect Active Key"
+    },
+    "scanModalLargeTx": {
+      "Qr": "Continue with QR",
+      "content": "This is a large transaction and may take some time to scan. How would you like to proceed?",
+      "header": "Large Transaction",
+      "signFile": "Sign with a file",
+      "signQuantum": "Sign with QuantumLink"
+    },
+    "seedWords": {
+      "expandTo24Word": "Expand to 24 Word Seed",
+      "incorrectTryAgain": "One or more of your seed words are incorrect. Please review and try again.",
+      "suggest": "Suggest",
+      "title": "Seed Words"
+    },
+    "settings": {
+      "displayAmountDisplay": "Amount Display",
+      "displayAmountDisplayAuto": "Auto",
+      "displayCurrency": "Currency",
+      "displayShowFiatValue": "Show Fiat Value",
+      "subtitleDisplay": "Display",
+      "subtitleMultisig": "Multisig",
+      "subtitleMultisigPolicy": "Policy",
+      "subtitleMultisigPolicyAsk": "Ask to Import",
+      "title": "Settings"
+    },
+    "settingsDisplayAmount": {
+      "auto": "Auto",
+      "btc": "BTC",
+      "sats": "Sats"
+    },
+    "settingsPolicy": {
+      "askToImport": "Ask to Import",
+      "header": "Policy",
+      "requireExisting": "Require Existing",
+      "skipVerification": "Skip Verification"
+    },
+    "signMessage": {
+      "message": "Message",
+      "signWithFile": "Sign with File",
+      "title": "Sign Message",
+      "usedAddress": "Used Address"
+    },
+    "signMessageSuccess": {
+      "content": "Message was signed successfully.\nScan this Code to proceed.",
+      "title": "Sign Message"
+    },
+    "signingTransaction": {
+      "amountToSend": "Amount to send",
+      "destination": "Destination",
+      "destinationNumberX": "Destination #{0}",
+      "fee": "Fee",
+      "feePercentage": "Fee is {0}% of total amount",
+      "selfSend": "Self-Send",
+      "subheader": "Confirm the transaction details are correct before signing.",
+      "subheaderThreeLines": "Confirm the transaction details are correct before signing from",
+      "subheaderTwoLines": "Confirm the transaction details are correct before signing from “{0}”.",
+      "suspicious": "Suspicious",
+      "title": "Sign Transaction",
+      "total": "Total"
+    },
+    "signingTransactionMenu": {
+      "mainnet": "Network Mainnet",
+      "signet": "Network Signet",
+      "testnet": "Network Testnet"
+    },
+    "signingTransactionModalSelectNetwork": {
+      "content": "To sign with Testnet or Signet, select the desired network from the top right menu.",
+      "title": "Select Network"
+    },
+    "signingTransactionSuccessBT": {
+      "content": "Your signed transaction was sent to Envoy to be broadcast to the Bitcoin network!",
+      "title": "Successfully Signed"
+    },
+    "signingTransactionSuccessQR": {
+      "subheader": "Transaction was signed successfully.",
+      "title": "Scan this Code"
+    },
+    "signingTransactionSuccessSD": {
+      "title": "Signed Transaction saved"
+    },
+    "tempSeed": {
+      "content": "Temporarily load a wallet from an existing seed.",
+      "enterWords": "Enter 12 or 24 words",
+      "loadFromVault": "Load from Vault",
+      "scanSeedQr": "Scan Seed QR",
+      "title": "Temporary Seed"
+    },
+    "tempSeedDetails": {
+      "clearTempSeed": "Clear Temporary Seed",
+      "content": "Your passphrase will be erased upon shutdown, or can be manually cleared by returning to this screen.",
+      "details": "Details",
+      "fingerprint": "Fingerprint",
+      "title": "Temporary Seed"
+    },
+    "tempSeedImport": {
+      "content": "Select the seed you want to load.",
+      "loadSeed": "Load Seed",
+      "title": "Select Seed"
+    },
+    "tempSeedQr": {
+      "title": "Scan Seed QR"
+    },
+    "tempSeedWords": {
+      "enterWordX": "Enter word {0}"
+    },
+    "validatingTransaction": {
+      "title": "Validating Transaction"
+    },
+    "verifyAddress": {
+      "exploreAllAddresses": "Explore Addresses",
+      "title": "Verify Address"
+    },
+    "verifyAddressFailed": {
+      "content": "Passport could not verify the scanned address. Continue searching?",
+      "continueSearching": "Continue Searching",
+      "rangesChecked": "Ranges Checked",
+      "title": "Verification Failed"
+    },
+    "verifyAddressLoading": {
+      "content": "Searching address list...",
+      "title": "Verifying Address"
+    },
+    "verifyAddressSkipVerification": {
+      "content": "Completing address verification helps ensure the integrity of your software wallet. \n\nAre you sure you want to skip this step?",
+      "title": "Skip Address Verification?"
+    },
+    "verifyAddressSuccess": {
+      "changeAddresses": "Change addresses",
+      "receiveAddress": "Receive Address",
+      "receiveAddresses": "Receive addresses",
+      "title": "Address Verified"
+    },
+    "wallet": {
+      "settingsDisplayAmount": {
+        "header": "Amount Display"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundationdevices.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "bq27421"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Driver for the bq27421 fuel gauge chip"
+
+[dependencies]
+embedded-hal = { version = "1.0" }
+bitfield = "0.15.0"

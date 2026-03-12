@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "gui-server-api"
+version = "0.1.0"
+edition = "2021"
+description = "GUI server API crate"
+publish = false
+
+[dependencies]
+hex-literal = "0.4.1"
+keyos = { path = "../../keyos" }
+log = "0.4.14"
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+rkyv = { workspace = true }
+server = { path = "../../server" }
+thiserror = "1.0"
+xous = { path = "../../xous/xous-rs" }
+xous-ipc = { path = "../../xous/ipc" }
+xous-names = { package = "xous-api-names", path = "../../xous/api/names" }
+
+[target.'cfg(not(keyos))'.dependencies]
+shared_memory = { version = "0.12.4", features = ["logging"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

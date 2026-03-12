@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CardColor } from "@ui/theme.slint";
+import { Network, NetworkKind } from "./callbacks.slint";
+import { PsbtView, PsbtOutputView, PsbtOutputKind } from "./widgets/transaction-card.slint";
+import { Navigate, Animate } from "gen/navigate.slint";
+
+export enum SignPsbtState {
+    Idle,
+    Verifying,
+    Sign,
+    Signing,
+    Success,
+    Error,
+}
+
+export enum FileSaveState {
+    Idle,
+    Saved,
+    Error,
+}
+
+export enum PsbtOriginView {
+    Qr,
+    Quantum,
+    File,
+}
+
+export global SignPsbt {
+    in property <SignPsbtState> state;
+    in property <PsbtOriginView> origin;
+    in property <PsbtView> pending-psbt;
+
+    in-out property <bool> show-account-not-found-modal;
+    in property <bool> is-multisig-account;
+    in property <string> account-index;
+
+    in-out property <bool> show-account-archived-modal;
+    in-out property <FileSaveState> file-save-state: FileSaveState.Idle;
+    in property <string> saved-file-path;
+
+    in-out property <bool> show-cant-sign-modal;
+    in property <string> needed-fingerprint;
+    in property <string> found-fingerprints;
+
+    callback cancel-signing();
+    callback sign-psbt();
+    pure callback get-signed-ur(int) -> [string];
+    callback save-signed-psbt-to-file();
+    callback confirm-create-account();
+    callback confirm-restore-account();
+
+    public function done() {
+        self.cancel-signing();
+        self.file-save-state = FileSaveState.Idle;
+        Navigate.backward();
+    }
+}

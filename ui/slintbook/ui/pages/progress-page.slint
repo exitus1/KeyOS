@@ -1,0 +1,252 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Palette, Size, Timings, UISize, Utils} from "@ui/theme.slint";
+import {HeadingMd, TextMd, TextSm, ProgressBar, TimerCircularProgress, Button, Slider, SliderBrightness, Icon} from "@ui/widgets.slint";
+
+export component ProgressPage inherits Page {
+    VerticalLayout {
+        alignment: start;
+        spacing: Size.sz6;
+        HeadingMd {
+            text: "Progress";
+            height: Size.sz12;
+        }
+
+        TextMd {
+            text: "Circular Progress";
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            progress := TimerCircularProgress {
+                percent: 33%;
+                width: 200px;
+                height: 200px;
+            }
+
+            TimerCircularProgress {
+                indeterminate: true;    // donno what value is 100%, just spin around
+                width: 200px;
+                height: 200px;
+            }
+
+            TimerCircularProgress {
+                indeterminate: true;    // donno what value is 100%, just spin around
+                width: 200px;
+                height: 200px;
+
+                Icon {
+                    name: "passport";
+                    size: 96px;
+                    color: Palette.content-primary;
+                }
+            }
+        }
+
+        slider := Slider {
+            value: 33;
+            maximum: 100;
+            changed(value) => {
+                slider.value = value;
+                progress.percent = value * 1%;
+            }
+            controlled: true;
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            Button {
+                label: "Set 0%";
+                width: 150px;
+                clicked(id) => {
+                    slider.value = 0.0;
+                    progress.percent = 0%;
+                }
+            }
+
+            Button {
+                label: "Set 25%";
+                width: 150px;
+                clicked(id) => {
+                    slider.value = 25.0;
+                    progress.percent = 25%;
+                }
+            }
+
+            Button {
+                label: "Set 50%";
+                width: 150px;
+                clicked(id) => {
+                    slider.value = 50.0;
+                    progress.percent = 50%;
+                }
+            }
+
+            Button {
+                label: "Set 75%";
+                width: 150px;
+                clicked(id) => {
+                    slider.value = 75.0;
+                    progress.percent = 75%;
+                }
+            }
+
+            Button {
+                label: "Set 100%";
+                width: 150px;
+                clicked(id) => {
+                    slider.value = 100.0;
+                    progress.percent = 100%;
+                }
+            }
+        }
+
+        TextSm {
+            text: "Indeterminate Progress";
+        }
+
+        ProgressBar {
+            indeterminate: true;
+            width: 400px;
+        }
+
+        TextSm {
+            text: "Percent Progress";
+        }
+
+        pb := ProgressBar {
+            percent: 100%;
+            width: 200px;
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            Button {
+                label: "Set 0%";
+                width: 150px;
+                clicked(id) => {
+                    pb.percent = 0%;
+                }
+            }
+
+            Button {
+                label: "Set 25%";
+                width: 150px;
+                clicked(id) => {
+                    pb.percent = 25%;
+                }
+            }
+
+            Button {
+                label: "Set 50%";
+                width: 150px;
+                clicked(id) => {
+                    pb.percent = 50%;
+                }
+            }
+
+            Button {
+                label: "Set 75%";
+                width: 150px;
+                clicked(id) => {
+                    pb.percent = 75%;
+                }
+            }
+
+            Button {
+                label: "Set 100%";
+                width: 150px;
+                clicked(id) => {
+                    pb.percent = 100%;
+                }
+            }
+        }
+
+        TextSm {
+            text: "Brightness Progress";
+        }
+
+        brightness := SliderBrightness {
+            value: 50%;
+            width: 428px;
+            changed => {
+                // popup.selected = "\{Math.round(self.value)}%";
+            }
+        }
+
+        Rectangle {
+            width: 428px;
+
+            HorizontalLayout {
+                spacing: Size.sz16;
+                TextSm {
+                    horizontal-stretch: 2;
+                    text: "Brightness:";
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1;
+                    HorizontalLayout {
+                        spacing: Size.sz4;
+                        alignment: end;
+                        value := TextSm {
+                            text: "\{Math.round(brightness.value)}%";
+                        }
+
+                        Icon {
+                            name: "chevron-down";
+                            size: Size.sz6;
+                            color: Palette.content-primary;
+                        }
+                    }
+
+                    TouchArea {
+                        clicked => {
+                            //debug("show popup clicked");
+                            // show-popup = true;
+                            //debug("bap.y: \{brightness.absolute-position.y/1px}; b.y: \{brightness.y/1px}; pp.h: \{popup.height/1px}");
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            height: 500px;
+        }
+    }
+
+    // private property <bool> show-popup: false;
+
+    // popup := PopupBox {
+    //     x: 3000px;
+    //     y: 3000px;
+    //     width: 150px;
+    //     height: 580px;
+
+    //     opacity: 0;
+    //     //visible: false;
+    //     animate opacity { duration: Timings.prop-change; }
+    //     items: ["100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%"];
+
+    //     private property <float> pct;
+
+    //     clicked(s) => {
+    //         popup.selected = s;
+    //         root.show-popup = false;
+    //         pct = Utils.string_to_percent(s);
+    //         brightness.value = pct * 100.0;
+    //         s
+    //     }
+    // }
+
+    // states [
+    //     menu when root.show-popup: {
+    //         popup.opacity: 1;
+    //         popup.y: brightness.absolute-position.y + popup.height < root.height ? brightness.y : root.height - popup.height;
+    //         popup.x: brightness.x + brightness.width - popup.width;
+    //     }
+    // ]
+}

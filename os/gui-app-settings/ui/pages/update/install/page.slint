@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { Button, TextMd, Icon, TextSm, TextLg, TextXl, JumboIcon, BasePage, PageBody, ContentSection, ButtonSection, WrappedIcon } from "@ui/widgets.slint";
+import { Importance, Palette } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { SettingGlobal } from "../../../globals/setting-global.slint";
+import { UpdateGlobal } from "../../../globals/update-global.slint";
+
+import { UpdateInstallProps } from "props.slint";
+
+export component UpdateInstallPage inherits BasePage {
+    in property <UpdateInstallProps> props;
+
+    private property <string> current-version: SettingGlobal.current-keyos-version;
+    private property <string> new-version: UpdateGlobal.new-keyos-version;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: "Update";
+        }
+
+        PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    // not using WrappedIcon because underbar is not the right size.
+                    JumboIcon {
+                        name: "jumbo-download";
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz3;
+                    TextMd {
+                        text: "Current KeyOS Version \{current-version}";
+                        color: Palette.content-primary;
+                        horizontal-alignment: center;
+                    }
+
+                    TextSm {
+                        text: "will be updated to";
+                        color: Palette.content-tertiary;
+                        horizontal-alignment: center;
+                    }
+
+                    TextMd {
+                        text: "New KeyOS Version \{new-version}";
+                        color: Palette.content-primary;
+                        horizontal-alignment: center;
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz3;
+                    TextSm {
+                        text: "Manually selected file:";
+                        color: Palette.content-tertiary;
+                        horizontal-alignment: center;
+                    }
+
+                    TextMd {
+                        text: UpdateGlobal.firmware-file-name;
+                        color: Palette.content-primary;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    importance: Importance.primary;
+                    label: "Install Update File";
+                    clicked => {
+                        // TODO: need manual install
+                        debug("Install Update File clicked");
+                    }
+                }
+            }
+        }
+    }
+}

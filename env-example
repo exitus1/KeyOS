@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# this serial port will be used by `scripts/uart-console.sh`
+export KEYOS_CONSOLE_DEV="/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_42a67587e798ed11a795a1b7a7669f5d-if00-port0"
+
+# this gdb client will be used by many scripts
+export KEYOS_GDB="arm-none-eabi-gdb"
+
+# this gdb server will be used by `scripts/start-gdb-server.sh`
+# if not specified, it will be autodetected
+# export JLINK_GDB_SERVER_PATH="/nix/store/rs9fds5w8bkam34wwn161zwj8phlk2hh-segger-jlink-810/bin/JLinkGDBServer"
+
+# this jlink serial number will be used by `scripts/start-gdb-server.sh`
+export KEYOS_JLINK_SN="000506000000"

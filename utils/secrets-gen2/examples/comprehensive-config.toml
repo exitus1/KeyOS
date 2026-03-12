@@ -1,0 +1,90 @@
+# Comprehensive example configuration for secrets-gen2
+
+[keys]
+# P256 keypair
+P256Key = { type = "P256" }
+
+# secp256k1 keypair
+Secp256k1Key = { type = "secp256k1" }
+
+# AES-256 key
+AesKey = { type = "AES", params = { bits = 256 } }
+
+# Random 32-byte key
+RandomKey = { type = "random", params = { length = 32 } }
+
+# Multiple random values
+MultipleRandomValues = { type = "random", params = { length = 16, count = 3 } }
+
+[injectors]
+# TOML file with kebab-case naming
+[[injectors.files]]
+file = "examples/config-kebab.toml"
+type = "toml"
+injections = [
+  # Default naming (kebab-case)
+  { key = "P256Key", format = "private-hex" },
+  # Explicit kebab-case naming
+  { key = "Secp256k1Key", format = "public-hex", name = "$kebab" },
+  # Custom naming
+  { key = "AesKey", format = "hex", name = "custom-aes-key" },
+]
+
+# .env file with SCREAMING_SNAKE_CASE naming
+[[injectors.files]]
+file = "examples/config.env"
+type = "env"
+injections = [
+  # Default naming (SCREAMING_SNAKE_CASE)
+  { key = "P256Key", format = "public-hex" },
+  # Explicit SCREAMING_SNAKE_CASE naming
+  { key = "Secp256k1Key", format = "private-hex", name = "$screaming-snake" },
+  # Custom naming
+  { key = "RandomKey", format = "hex", name = "CUSTOM_RANDOM_KEY" },
+]
+
+# JSON file (treated as raw)
+[[injectors.files]]
+file = "examples/config.json"
+type = "raw"
+injections = [{ key = "P256Key", format = "public-hex" }]
+
+# Rust file with snake_case naming and different formats
+[[injectors.files]]
+file = "examples/comprehensive_constants.rs"
+type = "rs"
+injections = [
+  # Hex array format
+  { key = "RandomKey", format = "hex-array", inject = "RandomKey" },
+  # Public key in uncompressed hex format (130 hex characters)
+  { key = "P256Key", format = "public-hex", inject = "P256PublicKey" },
+  # Public key in compressed hex format (66 hex characters)
+  { key = "P256Key", format = "public-compressed-hex", inject = "P256CompressedPublicKey" },
+  # Private key in hex format
+  { key = "Secp256k1Key", format = "private-hex", inject = "Secp256k1PrivateKey" },
+  # AES key in hex format
+  { key = "AesKey", format = "hex", inject = "AesKey" },
+  # Multiple random values as a string array
+  { key = "MultipleRandomValues", format = "string-array", inject = "MultipleRandomValues" },
+]
+
+# Save keys to individual files in different PEM formats
+[[injectors.files]]
+file = "examples/generated-keys/p256-private-key.pem"
+type = "raw"
+injections = [{ key = "P256Key", format = "private-pem" }]
+
+[[injectors.files]]
+file = "examples/generated-keys/p256-ec-private-key.pem"
+type = "raw"
+injections = [{ key = "P256Key", format = "ec-private-pem" }]
+
+[[injectors.files]]
+file = "examples/generated-keys/secp256k1-private-key.pem"
+type = "raw"
+injections = [{ key = "Secp256k1Key", format = "private-pem" }]
+
+[[injectors.files]]
+file = "examples/generated-keys/secp256k1-ec-private-key.pem"
+type = "raw"
+injections = [{ key = "Secp256k1Key", format = "ec-private-pem" }]

@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { ErrorProps } from "./props.slint";
+import { LauncherCallbacks as CB } from "../../launcher-callbacks.slint";
+import { BasePage, HeadingMd, TextMd, Button, WrappedIcon } from "@ui/widgets.slint";
+import { Font, Importance, CardColor, IconSize, Images, Size, Palette, CurrentTheme, Utils, UISize } from "@ui/theme.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+export component ErrorPage inherits BasePage {
+    property <bool> error-log-expanded;
+    in property <ErrorProps> props;
+
+    VerticalLayout {
+        spacing: Size.sz10;
+        alignment: start;
+        padding-top: Size.sz16;
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+        padding-bottom: Size.sz4;
+
+        if !error-log-expanded: HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "alert";
+            }
+        }
+
+        VerticalLayout {
+            padding-left: Size.sz4;
+            padding-right: Size.sz4;
+            spacing: Size.sz10;
+
+            if !error-log-expanded: VerticalLayout {
+                spacing: Size.sz2;
+
+                HeadingMd {
+                    text: props.error-title;
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: props.error-message;
+                    horizontal-alignment: center;
+                    color: Palette.content-tertiary;
+                }
+            }
+
+            VerticalLayout {
+                alignment: start;
+                spacing: Size.sz2;
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.CrashErrorMessage);
+                    horizontal-alignment: center;
+                }
+
+                Flickable {
+                    VerticalLayout {
+                        alignment: start;
+
+                        HorizontalLayout {
+                            alignment: start;
+
+                            TextMd {
+                                text: props.long-error-message;
+                                horizontal-alignment: left;
+                                color: Palette.content-tertiary;
+                                vertical-stretch: 0;
+                            }
+                        }
+                    }
+
+                    TouchArea {
+                        clicked => {
+                            error-log-expanded = !error-log-expanded;
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            alignment: end;
+            padding-left: Size.sz2;
+            padding-right: Size.sz2;
+            padding-bottom: Size.sz2;
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonDismiss);
+                importance: primary;
+                clicked => {
+                    error-log-expanded = false;
+                    Navigate.backward-animate(Animate.None);
+                }
+            }
+        }
+    }
+}

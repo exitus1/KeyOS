@@ -1,0 +1,38 @@
+
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Check
+on: 
+  workflow_call:
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+jobs:
+  check-atsama5d27:
+    name: Check atsama5d27 compilation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix-rust
+      
+      - run: nix develop .#build --command cargo check --target armv7a-none-eabi --package atsama5d27
+
+  check-workspace:
+    name: Check workspace compilation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix-rust
+      
+      - run: |
+          nix develop .#build --command just check-workspace
+
+  check-recovery:
+    name: Check recovery compilation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix-rust
+      
+      - run: |
+          nix develop .#build --command just check-recovery

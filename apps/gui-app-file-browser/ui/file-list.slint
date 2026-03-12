@@ -1,0 +1,198 @@
+// SPDX-FileCopyrightText: © 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Icon, RadioButton, Shimmer, TextMd, TextSm } from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+export struct FileEntryModel {
+    name: string,
+    info: string,
+    is-folder: bool,
+    is-selected: bool,
+}
+
+export struct FileListData {
+    loading: bool,
+    error: bool,
+    num-files-filtered: int,
+    files: [FileEntryModel],
+}
+
+
+component FileEntry {
+    in property <string> name;
+    in property <string> info;
+    in property <bool> is-folder;
+    in property <bool> is-pressed;
+    in property <bool> is-last;
+    in property <bool> is-select-mode;
+    in property <bool> is-selected;
+    in property <bool> is-loading;
+    in property <int> loading-phase;
+
+    min-width: i-layout.min-width;
+    min-height: max(Size.sz16, i-layout.min-height);
+    vertical-stretch: 0;
+    horizontal-stretch: 1;
+
+    states [
+        pressed when root.is-pressed: {
+            i-background.background: Palette.background-primary.mix(black, 0.8);
+        }
+    ]
+
+    i-background := Rectangle {
+        height: root.height - 1px;
+
+        i-layout := HorizontalLayout {
+            padding-left: Size.sz3;
+            spacing: Size.sz4;
+
+            if root.is-select-mode: VerticalLayout {
+                vertical-stretch: 1;
+                alignment: center;
+                RadioButton {
+                    checked: root.is-selected;
+                    controlled: true;
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                Icon {
+                    name: root.is-folder ? "folder" : "file";
+                    color: Palette.content-lightcopper-brand;
+                    size: Size.sz12;
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 16px;
+                padding-top: Size.sz5;
+                padding-bottom: Size.sz5;
+                padding-right: Size.sz5;
+
+                if !root.is-loading: VerticalLayout {
+                    alignment: center;
+
+                    TextMd {
+                        text: root.name;
+                        color: Palette.content-primary;
+                    }
+
+                    if root.info != "": TextSm {
+                        text: root.info;
+                        color: Palette.content-tertiary;
+                    }
+                }
+
+                if root.is-loading: VerticalLayout {
+                    alignment: center;
+
+                    Shimmer {
+                        width: 100%;
+                        height: Size.sz6;
+                        starting-step: root.loading-phase;
+                        Rectangle {
+                            border-radius: Size.sz6;
+                            padding: Size.sz2;
+                            background: Palette.content-tertiary.brighter(50%);
+                        }
+                    }
+                }
+
+                if root.is-folder && !root.is-loading: VerticalLayout {
+                    alignment: center;
+                    Icon {
+                        name: "chevron-right";
+                        size: Size.sz6;
+                    }
+                }
+            }
+        }
+    }
+
+    if !is-last: Rectangle {
+        y: i-background.height;
+        height: 1px;
+        width: root.width;
+        background: Palette.content-tertiary;
+    }
+
+    @children
+}
+
+export component FileList inherits Flickable {
+    in property <[FileEntryModel]> model;
+    in property <bool> is-select-mode;
+    in property <bool> long-press-enabled: true;
+    in property <duration> long-press-delay: 0.6s;
+
+    callback entry-pressed(name: string, is-folder: bool);
+    callback entry-long-pressed(name: string, is-folder: bool);
+
+    VerticalLayout {
+        alignment: start;
+
+        for item[index] in model: FileEntry {
+            height: self.min-height;
+            name: item.name;
+            info: item.info;
+            is-folder: item.is-folder;
+            is-pressed: i-touch-area.pressed;
+            is-last: index == model.length - 1;
+            is-select-mode: root.is-select-mode;
+            is-selected: item.is-selected;
+
+            property <bool> long-press-armed: false;
+            property <bool> long-press-fired: false;
+
+            i-touch-area := TouchArea {
+                pointer-event(event) => {
+                    if (event.kind == PointerEventKind.down) {
+                        long-press-fired = false;
+                        if (!root.is-select-mode && root.long-press-enabled) {
+                            long-press-armed = true;
+                        }
+                    } else if (event.kind == PointerEventKind.up) {
+                        long-press-armed = false;
+                        if (!long-press-fired) {
+                            root.entry-pressed(item.name, item.is-folder);
+                        }
+                    } else if (event.kind == PointerEventKind.cancel) {
+                        long-press-armed = false;
+                    }
+                }
+            }
+
+            Timer {
+                interval: root.long-press-delay;
+                running: long-press-armed;
+
+                triggered() => {
+                    long-press-armed = false;
+                    long-press-fired = true;
+                    root.entry-long-pressed(item.name, item.is-folder);
+                }
+            }
+        }
+    }
+}
+
+export component FileListLoading inherits Flickable {
+    in property <bool> are-folders-allowed;
+    private property <[float]> loading-items: are-folders-allowed ? [0, 1, 2, 3] : [0, 1, 2];
+
+    VerticalLayout {
+        alignment: start;
+        for i in loading-items: FileEntry {
+            height: self.min-height;
+            is-folder: i == 0 && root.are-folders-allowed;
+            is-last: i == loading-items.length - 1;
+            is-loading: true;
+
+            // Make the loaders out of phase with each other
+            loading-phase: root.are-folders-allowed ? 3 - i : 2 - i;
+        }
+    }
+}

@@ -1,0 +1,57 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { Icon, TextMd, HeadingMd, Button, NavHeader, BasePage, PageBody, ContentSection, WrappedIcon, ButtonSection } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../../../../../gen/tr.slint";
+
+import { Navigate, Animate } from "../../../../../gen/navigate.slint";
+import { ChangePinSuccessProps } from "./props.slint";
+import { Callbacks } from "../../../../../callbacks.slint";
+import { PinGlobal } from "../../../../../globals/pin-global.slint";
+
+export component ChangePinSuccessPage inherits BasePage {
+    property <bool> is-pin: PinGlobal.is-pin-entry;
+
+    function nav() {
+        Navigate.security({ replace: true, animate: Animate.None });
+    }
+
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.ChangePinTitle);
+            clicked => {
+                nav();
+            }
+        }
+
+        PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "check";
+                    }
+                }
+
+                HeadingMd {
+                    text: is-pin ? TR2.lookup(TrId.VerifyPinSuccessHeader) : TR2.lookup(TrId.VerifyPasswordSuccessHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    importance: Importance.primary;
+                    label: TR2.lookup(TrId.CommonButtonDone);
+                    clicked => {
+                        nav();
+                    }
+                }
+            }
+        }
+    }
+}

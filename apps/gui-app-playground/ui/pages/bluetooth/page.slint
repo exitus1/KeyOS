@@ -1,0 +1,67 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { Button, HeadingLg, HeadingMd, TextMd, BasePage, IconButton } from "@ui/widgets.slint";
+import { Palette, Size, UISize } from "@ui/theme.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+
+export component BluetoothPagePage inherits BasePage {
+    VerticalLayout {
+        padding: 10px;
+        spacing: 20px;
+        height: 100%;
+        alignment: stretch;
+
+        HorizontalLayout {
+            alignment: space-between;
+            HorizontalLayout {
+                spacing: 10px;
+                IconButton {
+                    icon: "chevron-left";
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+
+                HeadingLg {
+                    text: "Bluetooth Playground";
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Button {
+            label: "Test SPI (small packets)";
+            importance: primary;
+            clicked => {
+                Callbacks.bt-spi-test-start(8);
+            }
+        }
+
+        Button {
+            label: "Test SPI (large packets)";
+            importance: primary;
+            clicked => {
+                Callbacks.bt-spi-test-start(240);
+            }
+        }
+
+        Button {
+            label: "Stop";
+            importance: primary;
+            clicked => {
+                Callbacks.bt-spi-test-stop();
+            }
+        }
+
+        TextMd {
+            text: "SPI Test status:\n" + Callbacks.bt-spi-test-status;
+            width: 100%;
+            height: 80px;
+            padding-top: 20px;
+            horizontal-alignment: center;
+        }
+    }
+}

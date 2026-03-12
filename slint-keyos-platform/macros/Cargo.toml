@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "slint-keyos-platform-macros"
+version = "0.1.1"
+edition = "2021"
+description = "Convenience macros for KeyOS GUI apps"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+darling = "0.20.1"
+proc-macro2 = "1.0.81"
+quote = "1.0.33"
+slint-keyos-platform-common = { path = "../common" }
+syn = "2.0.38"

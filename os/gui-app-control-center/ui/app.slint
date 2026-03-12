@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { ControlCenter, State, Callbacks } from "./control-center.slint";
+import { Palette, UISize, Palettes, CurrentTheme, Images, Utils } from "@ui/theme.slint";
+import { DarkPalette } from "@ui/palettes/dark-palette.slint";
+import { LightPalette } from "@ui/palettes/light-palette.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+
+export { State, Callbacks, Images, Utils, UISize, CurrentTheme, TR }
+export * from "gen/exports.slint";
+
+export component AppWindow inherits Window {
+    in property <int> control_center_battery <=> control_center.battery;
+    in property <bool> control_center_is_charging <=> control_center.is-charging;
+    in property <bool> control_center_is_expanded <=> control_center.is-expanded;
+
+    in property <string> control_center_time <=> control-center.time;
+    in property <string> control_center_day_of_week <=> control-center.day-of-week;
+    in property <string> control_center_date <=> control-center.date;
+
+    in property <bool> is-shut-down-mode <=> control_center.is-shut-down-mode;
+    in property <string> control_center_system_msg <=> control_center.system-msg;
+
+    background: Palette.transparent;
+    width: UISize.screen-width;
+    height: UISize.control-center-expanded-height;
+
+    control_center := ControlCenter {
+        y: 0px;
+        time: "";
+        day-of-week: "";
+        date: "";
+        system-msg: "";
+        is-expanded: false;
+        is-shut-down-mode: false;
+    }
+}

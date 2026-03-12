@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "ordered-table-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+keyos-integration-test = { path = "../keyos-integration-test" }
+ordered-table = { path = "../../utils/ordered-table" }
+serde = { version = "1.0", features = ["derive"] }
+fs = { workspace = true }
+server = { path = "../../server" }

@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "usb"
+version = "0.1.0"
+edition = "2021"
+description = "USB Server API crate"
+publish = false
+
+[dependencies]
+ehci = { workspace = true, features = ["rkyv"] }
+log = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+thiserror = { workspace = true }
+uuid = { version = "1.10", features = ["v4"] }
+xous = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true, features = ["rkyv"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

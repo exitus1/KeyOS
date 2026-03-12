@@ -1,0 +1,258 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CreateAccountProps } from "./props.slint";
+import { CreateAccount, CreateAccountState } from "../../create-account.slint";
+import { SignPsbt } from "../../sign-psbt.slint";
+import { Network } from "../../callbacks.slint";
+import { IconButton, AppHeader, BasePage, PageBody,
+         ContentSection, Dropdown, DropdownOverlay,
+         TitledInput, ButtonSection, Button, TextMd, ShowHide,
+         TimerCircularProgress, NavHeader, HeadingMd,
+         WrappedIcon, JumboIconPageBody 
+     } from "@ui/widgets.slint";
+import { Palette, Size, Importance, CardColor } from "@ui/theme.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+
+component LoadingPage inherits JumboIconPageBody {
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            TimerCircularProgress {
+                indeterminate: true;
+            }
+        }
+
+        HeadingMd {
+            text: TR2.lookup(TrId.CreatingAccountHeader);
+            horizontal-alignment: center;
+        }
+    }
+}
+
+component SuccessPage inherits JumboIconPageBody {
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon { }
+        }
+
+        HeadingMd {
+            horizontal-alignment: center;
+            text: TR2.lookup(TrId.CreatingAccountSuccessHeader);
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonDone);
+            clicked => {
+                CreateAccount.state = CreateAccountState.Idle;
+                Navigate.backward();
+            }
+        }
+    }
+}
+
+component ErrorPage inherits JumboIconPageBody {
+    PageBody {
+        padding-top: 0;
+        ContentSection {
+            HorizontalLayout {
+                alignment: center;
+                WrappedIcon {
+                    inner-icon: "close";
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz6;
+                HeadingMd {
+                    horizontal-alignment: center;
+                    text: TR2.lookup(TrId.CreatingAccountFailedHeader);
+                }
+
+                TextMd {
+                    horizontal-alignment: center;
+                    text: TR2.lookup(TrId.CreatingAccountFailedSubheader);
+                    color: Palette.content-tertiary;
+                }
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonButtonRetry);
+                importance: Importance.primary;
+                clicked => {
+                    CreateAccount.state = CreateAccountState.Idle;
+                }
+            }
+        }
+    }
+}
+
+export component CreateAccountPage inherits BasePage {
+    in property <CreateAccountProps> props;
+
+    property <string> new-label;
+    // Use strings to represent u32, since slint ints are i32
+    property <string> next-available-index: CreateAccount.get-next-index(new-network);
+    property <string> new-index: CreateAccount.prefilled-mode ? CreateAccount.prefilled-index : CreateAccount.get-next-index(new-network);
+    property <Network> new-network: CreateAccount.prefilled-mode ? CreateAccount.prefilled-network : Network.Bitcoin;
+    property <bool> has-errors: label-error || index-error;
+    property <bool> label-error: true;
+    property <string> index-message: CreateAccount.validate-new-index(new-index, new-network);
+    property <bool> index-error: index-message != "";
+    property <bool> is-advanced-open: false;
+    property <bool> prefilled: CreateAccount.prefilled-mode;
+
+    property <[Network]> networks: [
+        Network.Bitcoin,
+        Network.Testnet4,
+    ];
+
+    pure function index-to-network(index: int) -> Network {
+        if (index < 0 || index >= networks.length) {
+            return Network.Bitcoin;
+        }
+        return networks[index];
+    }
+
+    VerticalLayout {
+        visible: CreateAccount.state == CreateAccountState.Idle;
+        AppHeader {
+            title: TR2.lookup(TrId.CreateAccountTitle);
+
+            IconButton {
+                icon: "chevron-left";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    CreateAccount.state = CreateAccountState.Idle;
+                    CreateAccount.reset-prefilled-mode();
+                    SignPsbt.cancel-signing();
+                    Navigate.backward();
+                }
+            }
+        }
+
+        PageBody {
+            p-x: Size.sz4;
+            p-y: Size.sz4;
+
+            ContentSection {
+                TitledInput {
+                    title: TR2.lookup(TrId.CreateAccountLabel);
+                    placeholder: TR2.lookup(TrId.CreateAccountLabelFillerText);
+                    // message: TR2.lookup(TrId.CreateAccountMissingField);
+                    has-notice: true;
+                    caps-mode: sentences;
+
+                    edited(text) => {
+                        new-label = text;
+                        self.message = CreateAccount.validate-new-label(text);
+                        self.has-notice = self.message != "";
+                        label-error = self.has-notice;
+                    }
+                }
+
+                ShowHide {
+                    text: TR2.lookup(TrId.CreateAccountAdvancedOptions);
+
+                    ContentSection {
+                        index-input := TitledInput {
+                            title: TR2.lookup(TrId.CreateAccountIndex);
+                            text: new-index;
+                            message: index-message;
+                            has-disabled: self.message != "" || self.text == "";
+                            input-type: InputType.number;
+                            bounded-number: true;
+                            minimum: "0";
+                            maximum: "4294967295";  // Bitcoin indices are u32s, so bound to u32 max
+                            enabled: !prefilled;
+                            show-clear-btn: !prefilled;
+
+                            edited(text) => {
+                                new-index = text;
+                                self.message = CreateAccount.validate-new-index(new-index, new-network);
+                                self.has-disabled = self.message != "" || text == "";  // TODO: maybe add error copy for empty index, it's unlikely though
+                                index-error = self.has-disabled;
+                            }
+
+                            accepted(text) => {
+                                if (text == "") {
+                                    self.text = next-available-index;
+                                    self.edited(self.text);
+                                }
+                            }
+                        }
+
+                        network-picker := Dropdown {
+                            title: TR2.lookup(TrId.CreateAccountNetwork);
+                            selected-index: prefilled ? (CreateAccount.prefilled-network == Network.Bitcoin ? 0 : 1) : 0;
+                            enabled: !prefilled;
+                            model: [
+                                {
+                                    label: "Mainnet",
+                                    value: "Mainnet",
+                                },
+                                {
+                                    label: "Testnet",
+                                    value: "Testnet",
+                                },
+                            ];
+                        }
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonCreate);
+                    enabled: !has-errors;
+                    clicked => {
+                        CreateAccount.create-single-sig({
+                            label: new-label,
+                            network: new-network,
+                            index: new-index,
+                            color: CardColor.light-copper
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    if network-picker.showing: DropdownOverlay {
+        dropdown-x: network-picker.absolute-position.x;
+        dropdown-y: network-picker.absolute-position.y;
+        dropdown-width: network-picker.width;
+        model: network-picker.model;
+        selected-index: network-picker.selected-index;
+
+        item-selected(index, value) => {
+            network-picker.selected-index = index;
+            network-picker.selected-value = value;
+            new-network = index-to-network(index);
+            next-available-index = CreateAccount.get-next-index(new-network);
+            new-index = next-available-index;
+            index-message = CreateAccount.validate-new-index(new-index, new-network);
+            index-input.text = new-index;
+            index-input.message = index-message;
+            index-input.has-disabled = index-message != "";
+            index-error = index-input.has-disabled;
+            network-picker.showing = false;
+        }
+
+        touched-off => {
+            network-picker.showing = false;
+        }
+    }
+
+    if CreateAccount.state == CreateAccountState.Creating: LoadingPage { }
+    if CreateAccount.state == CreateAccountState.Success: SuccessPage { }
+    if CreateAccount.state == CreateAccountState.Error: ErrorPage { }
+}

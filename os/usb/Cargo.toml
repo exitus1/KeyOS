@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "usb-server"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+recovery-os = []
+default = ["settings"]
+
+[dependencies]
+ehci = { workspace = true, features = ["rkyv"] }
+gpio = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+power-manager = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true, optional = true }
+usb = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-names = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true, features = ["rkyv"] }
+utralib = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

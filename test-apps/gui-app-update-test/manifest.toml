@@ -1,0 +1,23 @@
+appId = "0x6b713041faef901f23743263a45dcb83"
+appSignature = "0x00"
+
+[appName]
+en = "Update Tester"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/fs" = [
+    "GetUsbReadAccess",
+    "GetAirlockReadAccess",
+    "GetUserReadAccess",
+    "GetSystemReadAccess",
+    "GetSystemWriteAccess",
+]
+"os/update" = [
+    "SubscribeUpdateProgress",
+    "StartUpdate",
+    "ContinueUpdate",
+    "GetUpdateApplied",
+    "GetUpdateStatus",
+    "ClearUpdateApplied",
+]

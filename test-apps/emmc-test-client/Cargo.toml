@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "emmc-test-client"
+version = "0.1.0"
+edition = "2021"
+description = "eMMC server test client"
+
+[dependencies]
+emmc = { path = "../../os/emmc" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+xous = { path = "../../xous/xous-rs" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

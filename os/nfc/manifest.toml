@@ -1,0 +1,19 @@
+appId = "0x6f732f6E666300000000000000000000"
+syscall = ["SetThreadPriority"]
+
+[appName]
+en = "NFC Server"
+
+[servers."os/nfc"]
+ReadNdefRawMsg = { id = 0, type = "archive" }
+WriteNdefRawMsg = { id = 1, type = "archive" }
+SetEnabled = { id = 2, type = "blockingScalar" }
+IsEnabled = { id = 3, type = "blockingScalar" }
+IsActive = { id = 4, type = "blockingScalar" }
+
+[permissions]
+template = ["gpio"]
+"os/fido" = ["U2fProcessApdu", "CtapProcessCbor"]
+"os/gpio" = ["SetIrq"]
+"os/spi" = ["ClaimPeripheral", "SpiXfer", "St25r95ReadData"]
+"os/settings" = ["SubscribeNfcEnabled"]

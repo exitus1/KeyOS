@@ -1,0 +1,45 @@
+[servers."os/fs"]
+OpenFileMessage = { id = 0, type = "archive" }
+ReadFile = { id = 1, type = "lendMut" }
+WriteFile = { id = 2, type = "lendMut" }
+SeekFile = { id = 3, type = "archive" }
+CloseFile = { id = 4, type = "blockingScalar" }
+Remove = { id = 5, type = "archive" }
+AtomicCopy = { id = 6, type = "archive" }
+OpenDirMessage = { id = 7, type = "archive" }
+CreateDirMessage = { id = 8, type = "archive" }
+NextEntry = { id = 9, type = "archive" }
+GetMetadata = { id = 10, type = "archive" }
+Rename = { id = 11, type = "archive" }
+TruncateFile = { id = 12, type = "archive" }
+CloseDir = { id = 13, type = "blockingScalar" }
+Flush = { id = 14, type = "blockingScalar" }
+MapFileMessage = { id = 15, type = "archive" }
+SubscribeFilesystemEvent = { id = 16, type = "scalarEvent" }
+ReadBlocks = { id = 17, type = "lendMut" }
+WriteBlocks = { id = 18, type = "lendMut" }
+BlockCount = { id = 19, type = "blockingScalar" }
+FlushFs = { id = 20, type = "blockingScalar" }
+SetLen = { id = 21, type = "archive" }
+DiskEncryptionKeysReady = { id = 22, type = "scalar", cfg = "not(feature = \"recovery-os\")" }
+FormatEncryptedVolume = { id = 23, type = "blockingScalar", cfg = "not(feature = \"recovery-os\")" }
+SetMtime = { id = 24, type = "archive" }
+AsyncRead = { id = 25, type = "archive" }
+AsyncWrite = { id = 26, type = "archive" }
+AsyncCopyBlock = { id = 27, type = "blockingScalar" }
+MountAirlock = { id = 28, type = "blockingScalar", cfg = "not(feature = \"recovery-os\")" }
+FormatAirlock = { id = 29, type = "blockingScalar", cfg = "not(feature = \"recovery-os\")" }
+GetUsbReadAccess = { id = 30, type = "blockingScalar" }
+GetUsbWriteAccess = { id = 31, type = "blockingScalar" }
+GetBootReadAccess = { id = 32, type = "blockingScalar" }
+GetBootWriteAccess = { id = 41, type = "blockingScalar" }
+GetUserReadAccess = { id = 33, type = "blockingScalar" }
+GetUserWriteAccess = { id = 34, type = "blockingScalar" }
+GetSystemReadAccess = { id = 35, type = "blockingScalar" }
+GetSystemWriteAccess = { id = 36, type = "blockingScalar" }
+GetAirlockReadAccess = { id = 37, type = "blockingScalar" }
+GetAirlockWriteAccess = { id = 38, type = "blockingScalar" }
+GetEncryptedRootReadAccess = { id = 39, type = "blockingScalar" }
+GetEncryptedRootWriteAccess = { id = 40, type = "blockingScalar" }
+GetSystemAppDataReadAccess = { id = 42, type = "blockingScalar" }
+GetSystemAppDataWriteAccess = { id = 43, type = "blockingScalar" }

@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { ListView } from "std-widgets.slint";
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { BasePage, PageBody, ContentSection, ButtonSection, WrappedIcon, Button } from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+import { Callbacks } from "../../../../callbacks.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+import { LogGlobal } from "../../../../globals/log-global.slint";
+
+import { ViewLogsProps } from "props.slint";
+
+component LogLine inherits Text {
+    color: Palette.content-primary;
+    wrap: no-wrap;
+    vertical-alignment: TextVerticalAlignment.top;
+    horizontal-alignment: TextHorizontalAlignment.left;
+    font-family: "Source Code Pro";
+    font-size: 14px;
+    height: 17px;
+}
+
+export component ViewLogsPage inherits BasePage {
+    in property <ViewLogsProps> props;
+    property <bool> at-top: flickable.viewport-y == 0;
+    property <bool> at-bottom: -flickable.viewport-y + flickable.height >= flickable.viewport-height;
+    property <bool> glue-bottom: true;
+
+    header := SettingsNavHeader {
+        y: 0px;
+        title: TR2.lookup(TrId.LogsTitle);
+    }
+
+    flickable := ListView {
+        y: header.height;
+        width: parent.width;
+        height: parent.height - header.height - Size.sz15 - Size.sz6 - Size.sz6;
+        viewport-width: parent.width;
+        mouse-drag-pan-enabled: true;
+        vertical-scrollbar-policy: always-off;
+        for line in LogGlobal.log-lines: LogLine {
+            text: line;
+        }
+        scrolled() => {
+            glue-bottom = at-bottom;
+        }
+        changed viewport-height => {
+            if root.glue-bottom {
+                self.viewport-y = self.height - self.viewport-height;
+            }
+        }
+    }
+    // Top shadow
+    Rectangle {
+        width: flickable.width;
+        height: 80px;
+        y: flickable.y;
+        visible: !at-top;
+        background: @linear-gradient(0deg, #00000000 0%, Palette.background-primary 100%);
+    }
+
+    // Bottom shadow
+    Rectangle {
+        width: flickable.width;
+        height: 80px;
+        y: flickable.y + flickable.height - self.height;
+        visible: !at-bottom && !glue-bottom;
+        background: @linear-gradient(0deg, Palette.background-primary 0%, #00000000 100%);
+    }
+
+    // Save button
+    HorizontalLayout {
+        y: root.height - Size.sz15 - Size.sz6;
+        height: Size.sz15;
+        alignment: center;
+
+        Button {
+            width: min(424px, parent.width);
+            height: Size.sz15;
+            label: TR2.lookup(TrId.LogsSaveFile);
+            icon: "save";
+            clicked => {
+                Callbacks.save-log-files();
+            }
+        }
+    }
+
+    Timer {
+        interval: 250ms;
+        running: true;
+        triggered() => {
+            LogGlobal.update-log-lines();
+        }
+    }
+}

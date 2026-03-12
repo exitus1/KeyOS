@@ -1,0 +1,125 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundationdevices.com>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "atsama5d27"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "fitment"
+required-features = ["fitment"]
+
+[[bin]]
+name = "se"
+
+[[bin]]
+name = "camera"
+required-features = ["camera"]
+
+[[bin]]
+name = "sha"
+required-features = ["sha"]
+
+[[bin]]
+name = "avalanche"
+required-features = []
+
+[[bin]]
+name = "charger"
+required-features = ["charger"]
+
+[[bin]]
+name = "uart-dma"
+required-features = []
+
+[[bin]]
+name = "usbhost"
+required-features = ["usb-host"]
+
+[[bin]]
+name = "shdwc"
+required-features = []
+
+[[bin]]
+name = "rtc"
+required-features = []
+
+[[bin]]
+name = "aesb"
+required-features = []
+
+[[bin]]
+name = "aes"
+required-features = ["aes"]
+
+[[bin]]
+name = "securam"
+required-features = ["securam"]
+
+[[bin]]
+name = "nfc-rfal"
+required-features = ["nfc-rfal"]
+
+[dependencies]
+armv7 = { path = "../armv7" }
+bitfield = "0.15.0"
+bitflags = "2.4.1"
+bq24157 = { path = "../bq24157", optional = true }
+bq27421 = { path = "../bq27421", optional = true }
+critical-section = { version = "1.1.2", optional = true }
+drv2605 = { version = "0.1.0", optional = true }
+eh-0 = { package = "embedded-hal", version = "0.2.7", features = ["unproven"], optional = true }
+eh-1 = { package = "embedded-hal", version = "1.0", optional = true }
+ehci = { path = "../ehci", optional = true }
+embedded-alloc = { version = "0.5.1", optional = true }
+embedded-graphics = { version = "0.8.1", optional = true }
+embedded-sdmmc = { version = "0.7.0", default-features = false, optional = true }
+ft3269 = { path = "../ft3269", optional = true }
+hex = { version = "0.4.3", default-features = false, optional = true }
+hex-literal = { version = "0.4.1", optional = true, default-features = false }
+is31fl32xx = { version = "0.1.0", optional = true }
+log = { version = "0.4.21", optional = true }
+mass-storage = { path = "../mass-storage", optional = true }
+ndef = { workspace = true, optional = true }
+ovm7690-rs = { path = "../ovm7690-rs", optional = true }
+r0 = "1.0.0"
+rfal = { workspace = true, optional = true }
+rkyv = { version = "0.8", default-features = false, optional = true }
+rtt-target = { git = "https://github.com/Foundation-Devices/rtt-target.git", branch = "cortex-a", features = ["cortex-a"], optional = true }
+utralib = { path = "../../utralib" }
+vcell = "0.1.3"
+
+[build-dependencies]
+png-decoder = "0.1.1"
+
+[features]
+eh-0 = ["dep:eh-0"]
+eh-1 = ["dep:eh-1"]
+rtt = ["rtt-target"]
+lcd-console = ["embedded-graphics"]
+fitment = ["eh-0", "eh-1", "ft3269", "drv2605", "is31fl32xx"]
+camera = ["eh-1", "ovm7690-rs"]
+sha = ["hex"]
+aes = ["hex", "hex-literal"]
+securam = ["hex"]
+charger = ["bq24157", "bq27421", "is31fl32xx", "eh-0"]
+heap = ["embedded-alloc"]
+logging = ["log", "heap", "critical-section"]
+critical-section = ["dep:critical-section", "armv7/critical-section"]
+usb-host = [
+    "bq24157",
+    "ehci",
+    "mass-storage",
+    "heap",
+    "logging",
+    "embedded-sdmmc",
+]
+nfc-rfal = ["critical-section", "drv2605", "eh-0", "heap", "is31fl32xx", "rfal"]
+nfc-ndef = ["ndef"]
+nfc-ndef-read = ["nfc-ndef"]
+nfc-ndef-write = ["nfc-ndef"]
+nfc-ndef-format = ["nfc-ndef"]
+nfc-ce = []
+
+default = ["lcd-console", "eh-1"]

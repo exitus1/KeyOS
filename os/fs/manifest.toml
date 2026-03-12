@@ -1,0 +1,24 @@
+appId = "0x66730000000000000000000000000000"
+syscall = ["SetThreadPriority"]
+extends = "../../api/fs"
+
+[appName]
+en = "File System"
+
+[servers."os/fs"]
+SubscriberDisconnected = { id = 64, type = "scalar" }
+
+[permissions]
+"os/emmc" = [
+    "ReadBlocks",
+    "WriteBlocks",
+    "ReadEncryptedBlocks",
+    "WriteEncryptedBlocks",
+    "BlockCount",
+]
+"os/mass-storage" = [
+    "ReadBlocks",
+    "WriteBlocks",
+    "BlockCount",
+    "Subscribe",
+]

@@ -1,0 +1,18 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+@rust-attr(derive(serde::Serialize, serde::Deserialize))
+export struct AuthView {
+    label: string,
+    account: string,
+    issuer: string,
+    color: int,
+    code: string,
+    index: int,
+}
+
+export enum ScanQrCaller {
+    add,
+    main,
+    edit,
+}

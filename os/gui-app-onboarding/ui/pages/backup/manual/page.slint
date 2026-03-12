@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { ManualBackupProps } from "props.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { Dialog, ButtonSection, Button, HeadingMd, TextMd } from "@ui/widgets.slint";
+import { Palette } from "@ui/theme.slint";
+import { OnboardingShieldPage, ShieldSection, ShieldContent, OverlayImage } from "../../../widgets/shield-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+export component ManualBackupPage inherits OnboardingShieldPage {
+    in property <ManualBackupProps> props;
+
+    property <bool> show-dialog:false;
+
+    ShieldSection {
+        ShieldContent {
+            HeadingMd {
+                text: TR2.lookup(TrId.BackupManualMainHeader);
+                horizontal-alignment: center;
+            }
+
+            TextMd {
+                text: TR2.format(TrId.BackupManualMainSubheader, ["2", "3"]);
+                horizontal-alignment: center;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.format(TrId.BackupManualMainXOfYKeycardBackup, ["2", "3"]);
+                importance: primary;
+                clicked => {
+                    Navigate.manual-keycard-backup({ });
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.BackupManualMainManualSeedBackup);
+                importance: primary;
+                clicked => {
+                    show-dialog = true;
+                }
+            }
+        }
+    }
+
+    OverlayImage {
+        image: "images/three-d/manual-backup";
+    }
+
+    if show-dialog:Rectangle {
+        background: Palette.overlay;
+
+        Dialog {
+            title: TR2.lookup(TrId.KeycardBackupManualModalBewareHeader);
+            message: TR2.lookup(TrId.KeycardBackupManualModalBewareContent);
+            ok-text: TR2.lookup(TrId.CommonButtonContinue);
+            show-ok: true;
+            cancel-text: TR2.lookup(TrId.CommonButtonCancel);
+            show-cancel: true;
+            show-close-button: true;
+            width: 352px;
+            on-cancel => {
+                show-dialog = false;
+            }
+            on-ok => {
+                Navigate.manual-backup-seed({ });
+            }
+        }
+    }
+}

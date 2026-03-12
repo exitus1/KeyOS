@@ -1,0 +1,172 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox, TextEdit } from "std-widgets.slint";
+import { AccountCard, Icon, HeadingLg, HeadingMd, Shield, HeadingSm, TextLg, SwitchControlled, BasePage } from "@ui/widgets.slint";
+import { Importance, CurrentTheme, Palette, Palettes, Images, Size, UISize, Utils } from "@ui/theme.slint";
+import { Slider } from "@ui/widgets/slider.slint";
+import { Button } from "@ui/widgets/button.slint";
+
+export { Utils, Images, CurrentTheme }
+
+export global Callbacks {
+    callback reboot();
+    callback shut-down();
+    callback crash-test();
+
+    in-out property <bool> debug-touch: false;
+    callback set-debug-touch(bool);
+
+    in-out property <int> touch-offset: 0;
+    callback set-touch-offset(int);
+}
+
+component App inherits BasePage {
+
+    function toggle-debug-touch() {
+        Callbacks.set-debug-touch(!Callbacks.debug-touch);
+    }
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 20px;
+        alignment: start;
+
+        HeadingLg {
+            text: "System Actions";
+            color: Palette.content-primary;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        Button {
+            label: "Reboot";
+            clicked => {
+                Callbacks.reboot();
+            }
+        }
+
+        Button {
+            label: "Shut Down";
+            clicked => {
+                Callbacks.shut-down();
+            }
+        }
+
+        Button {
+            label: "Crash This App";
+            clicked => {
+                Callbacks.crash-test();
+            }
+        }
+
+        Rectangle {
+            height: Size.sz15;
+
+            TouchArea {
+                clicked => {
+                    toggle-debug-touch();
+                }
+            }
+
+            HorizontalLayout {
+                TextLg {
+                    text: "Debug Touch";
+                    vertical-alignment: center;
+                }
+
+                VerticalLayout {
+                    alignment: center;
+                    SwitchControlled {
+                        checked: Callbacks.debug-touch;
+                        changed => {
+                            toggle-debug-touch();
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            TextLg {
+                text: "Touch Vertical Offset";
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: space-between;
+
+                Button {
+                    label: "-";
+                    clicked => {
+                        Callbacks.set-touch-offset(Callbacks.touch-offset - 1);
+                    }
+                }
+
+                TextLg {
+                    text: Callbacks.touch-offset;
+                }
+
+                Button {
+                    label: "+";
+                    clicked => {
+                        Callbacks.set-touch-offset(Callbacks.touch-offset + 1);
+                    }
+                }
+            }
+
+            Rectangle {
+                width: root.width;
+                height: UISize.screen-height;
+                background: Palette.background-primary.brighter(30%);
+                border-color: Palette.border-tertiary;
+                border-width: 1px;
+
+                in-out property <length> touch-x: 100px;
+                in-out property <length> touch-y: 50px;
+
+                TouchArea {
+                    pointer-event(event) => {
+                        touch-x = self.mouse-x;
+                        touch-y = self.mouse-y;
+                    }
+                }
+
+                Rectangle {
+                    width: 1px;
+                    height: parent.height;
+                    x: touch-x;
+                    y: 0px;
+                    background: red;
+                }
+
+                Rectangle {
+                    height: 1px;
+                    width: parent.height;
+                    x: 0px;
+                    y: touch-y;
+                    background: red;
+                }
+            }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+    background: Palette.background-primary;
+
+    app := App { }
+
+    init => {
+        CurrentTheme.palette = Palettes.dark;
+    }
+
+    // Allow unfocusing textboxes by clicking out of them
+    FocusScope {
+        init => {
+            self.focus()
+        }
+    }
+}

@@ -1,0 +1,12 @@
+appId = "0x0944ad38232eab9a060661c2e8dc7eb5"
+
+[appName]
+en = "Image Viewer"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/fs" = [
+    "GetUsbReadAccess",
+    "GetUserReadAccess",
+    "GetAirlockReadAccess",
+]

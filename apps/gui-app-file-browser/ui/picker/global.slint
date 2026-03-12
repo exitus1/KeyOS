@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SegmentModel } from "@ui/widgets/segmented-selector.slint";
+import { BreadCrumb } from "../location-switcher.slint";
+import { FileListData } from "../file-list.slint";
+
+export global PickerGlobal {
+    in property <bool> is-active: false;
+    in property <bool> is-dir-selection-mode: false;
+    in property <bool> is-folders-allowed: true;
+
+    in property <string> current-path: "";
+
+    in property <int> location-idx: 0;
+    in property <[SegmentModel]> allowed-locations: [];
+    in property <[FileListData]> file-lists: [{ }, { }, { }];
+
+    pure callback build-breadcrumbs(int, string) -> [BreadCrumb];
+
+    callback location-changed(int);
+    callback breadcrumb-selected(string, int);
+    callback back();
+    callback entry-pressed(string, bool);
+    callback select-directory();
+}

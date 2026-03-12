@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { FwUpdateState, FwUpdatePage } from "@ui/pages/fw-update-page.slint";
+
+import { UpdateProgressProps } from "props.slint";
+
+import { Navigate, Animate } from "../../../gen/navigate.slint";
+import { UpdateGlobal } from "../../../globals/update-global.slint";
+import { SettingGlobal } from "../../../globals/setting-global.slint";
+
+export component UpdateProgressPage inherits Rectangle {
+    in property <UpdateProgressProps> props;
+
+    // Auto-start download when view loads
+    init => {
+        if (UpdateGlobal.fw-update-state == FwUpdateState.Idle) {
+            UpdateGlobal.download-firmware-update();
+        }
+    }
+
+    FwUpdatePage {
+        state: UpdateGlobal.fw-update-state;
+        error: UpdateGlobal.fw-update-error;
+
+        progress-percent: UpdateGlobal.fw-update-progress;
+        eta: UpdateGlobal.fw-update-eta;
+        keyos-version: SettingGlobal.current-keyos-version;
+
+        retry-fw-update => {
+            UpdateGlobal.download-firmware-update();
+        }
+        complete-fw-update => {
+            UpdateGlobal.fw-update-state = FwUpdateState.Idle;
+            Navigate.update({ replace: true, animate: Animate.None });
+        }
+    }
+}

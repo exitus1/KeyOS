@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Icon} from "./icon.slint";
+import {Palette, Size, Importance} from "@ui/theme.slint";
+
+export component IconButton inherits Rectangle {
+    // Override inherited properties
+    width: size;
+    height: size;
+    background: bg-color;
+    border-radius: Size.sz2;
+    clip: true;
+
+    function get-icon-color(importance: Importance) -> brush {
+        if (importance == Importance.primary) {
+            return Palette.content-primary-inverse;
+        } else if (importance == Importance.tertiary) {
+            return Palette.content-primary;
+        } else {
+            return Palette.content-brand;
+        }
+    }
+
+    function get-icon-bg-color(importance: Importance) -> brush {
+        if (importance == Importance.primary) {
+            return Palette.background-brand;
+        } else if (importance == Importance.secondary) {
+            return Palette.background-primary;
+        } else {
+            return Palette.transparent;
+        }
+    }
+
+    // Private properties
+    in property <brush> icon-color: get-icon-color(importance);
+    in property <brush> bg-color: get-icon-bg-color(importance);
+
+    // Public properties
+    in property <string> id;
+    in property <Importance> importance;
+    in property <bool> enabled: true;
+    in property <image> icon;
+    in property <length> size: Size.sz16;
+    in property <length> icon-size: Size.sz10;
+    in property <bool> recolorable: true;
+
+    // Callbacks
+    callback clicked(string);
+
+    VerticalLayout {
+        alignment: center;
+
+        HorizontalLayout {
+            alignment: center;
+            if recolorable: Icon {
+                source: icon;
+                horizontal-stretch: 1;
+                color: enabled ? icon-color : icon-color.mix(Palette.white, 0.5);
+                size: icon-size;
+            }
+            if !recolorable: Icon {
+                source: icon;
+                horizontal-stretch: 1;
+                size: icon-size;
+            }
+        }
+    }
+
+    touchArea := TouchArea {
+        clicked => {
+            if (enabled) {
+                clicked(id);
+            }
+        }
+    }
+
+    states [
+        disabled when !root.enabled: {
+            root.background: bg-color.mix(Palette.white, 0.5);
+        }
+        pressed when touchArea.pressed: {
+            root.background: bg-color.mix(Palette.black, 0.8);
+        }
+    ]
+}

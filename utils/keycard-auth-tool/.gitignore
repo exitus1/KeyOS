@@ -1,0 +1,62 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Config files with secrets (keep example configs)
+config.toml
+*-config.toml
+!example-config.toml
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# Build artifacts
+dist/
+build/
+
+# Environment variables
+.env
+.env.test
+.env.production
+.env.local
+
+# Test artifacts
+test-results/
+coverage/
+
+# Editor files
+*.swp
+*.swo
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*

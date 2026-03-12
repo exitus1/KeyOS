@@ -1,0 +1,118 @@
+# GitHub access token file for toolchain download
+.github-access-token
+
+# Local `cosign2` config
+cosign2.toml
+/*.pem
+
+# Build output
+boot.img
+boot_sama5d2x.cip
+customer_key_sama5d2x.cip
+customer_key_sama5d2x_nk.cip
+root_cert_hash_sama5d2x.cip
+root_cert_hash_sama5d2x_nk.cip
+
+target
+icu4x_data
+*.rs.bk
+
+# shouldn't be committed
+tools/v2p.txt
+
+*.map
+
+# Emacs
+*~
+
+# local utility shellscripts
+update-precursors.sh
+buildpush.ps1
+# local-only routines used to start builds
+/*.ps1
+/*.bat
+# notes
+/*.txt
+
+# SSH id file for convenience
+/id_pi
+
+# updater files
+tools/updater/precursorupdater/__pycache__
+tools/updater/precursorupdater/precursorusb/__pycache__
+
+# pddb debug files
+tools/pddb-images/
+tools/__pycache__
+
+# PDDB backup files
+*.pddb
+
+# PDDB for mtxcli (only for testing in hosted mode)
+/kernel/mtxcli
+
+# renode will tickle this every time you run it, but you shouldn't commit that back to the tree
+/emulation/linux-server-rootfs.jffs2
+
+# don't record weirdnesses dealing with vscode
+.vscode
+.vs
+settings.json
+
+# Emacs backup files
+*~
+
+# don't commit local modifications to the Renode filesystem template
+emulation/linux-server-rootfs.jffs2
+
+# bloat analyzer reports
+reports/
+
+# Distribution / packaging
+.Python
+/build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.pyc
+MANIFEST
+
+.idea
+.DS_Store
+
+# Files used by simulator
+xous/kernel/.last_pos
+
+screenshots/
+simulator-files/
+permissions.json
+
+xous/kernel/disk*.dat
+xous/kernel/hosted*.json
+
+# slint platform generated files
+gen/
+router.txt
+
+utils/examples/generated-keys/
+
+utils/secrets-gen2/examples/generated-keys/
+
+utils/secrets-gen2/provisioning-test/generated-keys/
+.envrc
+.env
+.direnv
+
+# flash dump default file name
+flash_dump.bin

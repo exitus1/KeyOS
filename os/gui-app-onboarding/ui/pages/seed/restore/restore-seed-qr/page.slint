@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, ButtonSection, JumboIconPageBody } from "@ui/widgets.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+import { Navigate } from "../../../../gen/navigate.slint";
+import { SeedGlobal,  MasterSeedState, OnboardingCallbacks } from "../../../../onboarding-callbacks.slint";
+import { OnboardingBasePage } from "../../../../widgets/base-page.slint";
+import { RestoreSeedLoading, RestoreSuccessContent, RestoreFailed } from "../../../../widgets/restore-seed.slint";
+
+
+component Success inherits JumboIconPageBody {
+    RestoreSuccessContent { }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonContinue);
+            importance: primary;
+            clicked => {
+                if (SeedGlobal.is-master-key-recovery) {
+                    OnboardingCallbacks.finish-onboarding();
+                } else {
+                    Navigate.restore-magic-backup({ });
+                }
+            }
+        }
+    }
+}
+
+export component RestoreSeedQrPage inherits OnboardingBasePage {
+    property <MasterSeedState> state <=> SeedGlobal.master-seed-state;
+
+    if state == MasterSeedState.SavingToSE || state == MasterSeedState.EncryptingFs: RestoreSeedLoading { }
+    if state == MasterSeedState.Success: Success { }
+    if state == MasterSeedState.Failed: RestoreFailed {
+        // todo: i18n
+        title: "Failed to restore from SeedQR";
+        retry => {
+            state = MasterSeedState.Idle;
+            SeedGlobal.restore-from-seed-qr();
+        }
+    }
+}

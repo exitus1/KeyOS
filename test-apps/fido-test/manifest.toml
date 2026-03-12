@@ -1,0 +1,16 @@
+appId = "0xf0cda4111835a1483ebb778b1e2f1250"
+
+[appName]
+en = "fido test client"
+
+[permissions]
+"os/ctap-hid" = ["ProcessHidPacket", "RegisterSimuUsbReceiver"]
+"os/fido" = [
+    "SetLive",
+    "IsLive",
+    "CreateSecurityKey",
+    "NextSecurityKeyIndex",
+    "GetSelectedSecurityKey",
+    "SelectSecurityKey",
+    "ResetState",
+]

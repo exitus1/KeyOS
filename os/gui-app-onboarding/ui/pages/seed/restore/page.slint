@@ -1,0 +1,121 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, UISize } from "@ui/theme.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { HeadingMd, Dialog, TextSm, TextMd, Icon, JumboIcon, Shield, Button, ButtonSection, NavHeader } from "@ui/widgets.slint";
+import { ShieldSection, ShieldContent, OnboardingShieldPage, OverlayImage } from "../../../widgets/shield-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { OnboardingCallbacks, SeedGlobal } from "../../../onboarding-callbacks.slint";
+
+enum RestoreOption {
+    ScanQr,
+    SeedWords,
+}
+
+export component RestoreSeedPage inherits OnboardingShieldPage {
+    property <bool> show-dialog: false;
+    property <RestoreOption> restore-option: ScanQr;
+
+    NavHeader {
+        y: 0;
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    ShieldSection {
+        ShieldContent {
+            VerticalLayout {
+                spacing: Size.sz3;
+                HeadingMd {
+                    vertical-stretch: 0;
+                    text: TR2.lookup(TrId.RecoverMainHeader);
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: TR2.lookup(TrId.RecoverMainContent);
+                    horizontal-alignment: center;
+                }
+            }
+        }
+
+        ButtonSection {
+            Button {
+                icon: "scan-qr";
+                label: TR2.lookup(TrId.RecoverMainScanSeedQr);
+                importance: secondary;
+                clicked => {
+                    restore-option = RestoreOption.ScanQr;
+                    show-dialog = true;
+                }
+            }
+
+            Button {
+                icon: "edit";
+                label: TR2.lookup(TrId.RecoverMainEnterSeedWords);
+                importance: secondary;
+                clicked => {
+                    restore-option = RestoreOption.SeedWords;
+                    show-dialog = true;
+                }
+            }
+
+            Button {
+                icon: "file";
+                label: TR2.lookup(TrId.RecoverMainRestorePassportBackup);
+                importance: secondary;
+                enabled: false;
+                // clicked => {
+                //     Navigate.enter-backup-code({ });
+                // }
+            }
+
+            Button {
+                icon: "nfc-1-card-vert";
+                label: TR2.lookup(TrId.RecoverMainSeedFromKeycards);
+                importance: primary;
+                clicked => {
+                    Navigate.restore-keycard-backup({ });
+                }
+            }
+        }
+    }
+
+    OverlayImage {
+        image: "images/three-d/restore";
+    }
+
+    if show-dialog: Rectangle {
+        background: Palette.overlay;
+
+        TouchArea {
+            clicked => {
+                show-dialog = false;
+            }
+        }
+
+        Dialog {
+            title: TR2.lookup(TrId.SeedRecoverModalHeader);
+            message: TR2.lookup(TrId.SeedRecoverModalContent1);
+            ok-text: TR2.lookup(TrId.SeedRecoverModalContinueRecovering);
+            warning-message: TR2.lookup(TrId.SeedRecoverModalContent2);
+            show-ok: true;
+            cancel-text: TR2.lookup(TrId.CommonButtonReturn);
+            show-cancel: true;
+            width: 352px;
+            on-cancel => {
+                show-dialog = false;
+            }
+            on-ok => {
+                show-dialog = false;
+                if restore-option == RestoreOption.ScanQr {
+                    SeedGlobal.restore-from-seed-qr();
+                } else if restore-option == RestoreOption.SeedWords {
+                    Navigate.restore-seed-words({ });
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+appId = "0x646d612d736572766572000000000000"
+memory = ["XDMAC0"]
+syscall = ["ClaimInterrupt", "VirtToPhysPid", "VirtToPhys", "SetThreadPriority"]
+extends = "../../api/dma"
+
+[appName]
+en = "Generic DMA server"
+
+[servers."os/dma"]
+TransferCompleteMsg = { id = 31, type = "scalar" }
+
+[permissions]
+"os/power-manager" = ["SetPeripheralEnabled"]

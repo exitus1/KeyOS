@@ -1,0 +1,237 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Callbacks as CB } from "../../callbacks.slint";
+import { SeedView, SeedViewType } from "../../types.slint";
+import { Palette, Size, Importance, CallbackResult, ResultLevel } from "@ui/theme.slint";
+import { IconButton, AppHeader, BasePage, PageBody, ScrollBody,
+         ContentSection, ErrorModal, Dropdown, DropdownOverlay,
+         TitledInput, ButtonSection, Button, TextMd,
+         Icon, ShowHide } from "@ui/widgets.slint";
+import { CreateProps } from "./props.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+export component CreatePage inherits BasePage {
+    in property <CreateProps> props;
+
+    property <SeedView> new-seed;
+    property <CallbackResult> result: { level: ResultLevel.info, success: true, text: "", title: "" };
+    property <bool> has-errors: type-picker.selected-index == -1 || label-error || (CB.is-indexed-seed(new-seed.seed-type) && index-error) || (new-seed.seed-type == SeedViewType.password && password-error);
+    property <bool> label-error: true;
+    property <string> index-message: "";
+    property <bool> index-error: index-message != "";
+    property <bool> password-error: true;
+    property <bool> password-has-focus: password-input.has-focus;
+    property <string> next-available-index: "";
+
+    // Trigger auto-scroll when password input gains focus
+    changed password-has-focus => {
+        if (password-has-focus && new-seed.seed-type == SeedViewType.password) {
+            content-scroll.viewport-y = -150px;
+        }
+    }
+
+    property <[SeedViewType]> seed-view-types: [
+        SeedViewType.bitcoin-12,
+        SeedViewType.bitcoin-24,
+        SeedViewType.password,
+        SeedViewType.nostr-key,
+    ];
+
+    pure function index-to-seed-view-type(index: int) -> SeedViewType {
+        if (index < 0 || index >= seed-view-types.length) {
+            return SeedViewType.bitcoin-12;
+        }
+        return seed-view-types[index];
+    }
+
+    VerticalLayout {
+        AppHeader {
+            title: TR2.lookup(TrId.CreateItemTitle);
+
+            IconButton {
+                icon: "chevron-left";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+        }
+
+        PageBody {
+            p-x: Size.sz4;
+            p-y: Size.sz4;
+
+            content-scroll := ScrollBody {
+                p-x: Size.zero;
+                p-y: Size.zero;
+
+                ContentSection {
+                    type-picker := Dropdown {
+                        title: TR2.lookup(TrId.CreateItemType);
+                        placeholder: TR2.lookup(TrId.CreateItemTypeTextFiller);
+                        model: [
+                            {
+                                label: CB.get-seed-name(SeedViewType.bitcoin-12),
+                                value: "bitcoin-12",
+                                icon: "acorn",
+                            },
+                            {
+                                label: CB.get-seed-name(SeedViewType.bitcoin-24),
+                                value: "bitcoin-24",
+                                icon: "acorn",
+                            },
+                            {
+                                label: CB.get-seed-name(SeedViewType.password),
+                                value: "password",
+                                icon: "pin",
+                            },
+                            {
+                                label: CB.get-seed-name(SeedViewType.nostr-key),
+                                value: "nostr-key",
+                                icon: "nostr",
+                            },
+                        ];
+
+                        changed(index, value) => {
+                            new-seed.seed-type = index-to-seed-view-type(index);
+                        }
+                    }
+
+                    if type-picker.selected-index != -1: TitledInput {
+                        title: TR2.lookup(TrId.CreateItemItemLabel);
+                        placeholder: TR2.lookup(TrId.CreateItemItemLabelFillerText);
+                        text: new-seed.label;
+                        message: TR2.lookup(TrId.CreateItemSeedErrorsMissingField);
+                        has-notice: self.message != "";
+                        caps-mode: sentences;
+
+                        edited(text) => {
+                            new-seed.label = text;
+                            self.message = CB.validate-new-label(text);
+                            self.has-notice = self.message != "";
+                            label-error = self.has-notice;
+                        }
+                    }
+
+                    if (type-picker.selected-index != -1 && CB.is-indexed-seed(new-seed.seed-type)): ShowHide {
+                        text: TR2.lookup(TrId.CreateItemAdvancedOptions);
+
+                        TitledInput {
+                            title: TR2.lookup(TrId.CreateItemIndex);
+                            text: new-seed.indexed-seed.index;
+                            message: index-message;
+                            has-notice: self.message != "" || self.text == "";
+                            input-type: InputType.number;
+                            bounded-number: true;
+                            minimum: "0";
+                            maximum: "4294967295";  // Bitcoin indices are u32s, so bound to u32 max
+
+                            edited(text) => {
+                                new-seed.indexed-seed.index = text;
+                                self.message = CB.validate-new-index(new-seed.indexed-seed.index, new-seed.seed-type);
+                                self.has-notice = self.message != "" || text == "";  // TODO: maybe add error copy for empty index, it's unlikely though
+                                index-error = self.has-notice;
+                            }
+
+                            accepted(text) => {
+                                if (text == "") {
+                                    self.text = next-available-index;
+                                    self.edited(self.text);
+                                }
+                            }
+                        }
+                    }
+
+                    if (type-picker.selected-index != -1 && new-seed.seed-type == SeedViewType.password): TitledInput {
+                        title: TR2.lookup(TrId.CreateItemAccount);
+                        placeholder: TR2.lookup(TrId.CreateItemAccountFillerText);
+                        text: new-seed.password.account;
+                        caps-mode: sentences;
+
+                        edited(text) => {
+                            new-seed.password.account = text;
+                        }
+                    }
+
+                    password-input := TitledInput {
+                        visible: type-picker.selected-index != -1 && new-seed.seed-type == SeedViewType.password;
+                        title: TR2.lookup(TrId.CreateItemPassword);
+                        placeholder: TR2.lookup(TrId.CreateItemPasswordFillerText);
+                        text: new-seed.password.password;
+                        has-notice: self.text == "";
+                        show-password: false;
+                        input-type: InputType.password;
+
+                        edited(text) => {
+                            new-seed.password.password = text;
+                            self.has-notice = text == "";
+                            // TODO: potentially add warning copy
+                            // if (self.has-notice) {
+                            //     self.message = "Passwords must not be empty";
+                            // } else {
+                            //     self.message = "";
+                            // }
+                            password-error = self.has-notice;
+                        }
+                    }
+
+                    // Conditional spacer for keyboard scrolling
+                    if password-has-focus: Rectangle {
+                        height: 250px;
+                    }
+                }
+            }
+
+            ButtonSection {
+                save-button := Button {
+                    label: TR2.lookup(TrId.CommonButtonSave);
+                    enabled: !has-errors;
+                    clicked => {
+                        // Navigation is handled by rust code
+                        new-seed.color = CB.get-default-color(new-seed.seed-type);
+                        result = CB.save(new-seed);
+                    }
+                }
+            }
+        }
+    }
+
+    if type-picker.showing: DropdownOverlay {
+        dropdown-x: type-picker.absolute-position.x;
+        dropdown-y: type-picker.absolute-position.y;
+        dropdown-width: type-picker.width;
+        model: type-picker.model;
+        selected-index: type-picker.selected-index;
+
+        item-selected(index, value) => {
+            type-picker.selected-index = index;
+            type-picker.selected-value = value;
+            new-seed.seed-type = index-to-seed-view-type(index);
+            if (CB.is-indexed-seed(new-seed.seed-type)) {
+                next-available-index = CB.get-next-index-string(new-seed.seed-type);
+                new-seed.indexed-seed.index = next-available-index;
+                index-message = CB.validate-new-index(new-seed.indexed-seed.index, new-seed.seed-type);
+            }
+            type-picker.showing = false;
+        }
+
+        touched-off => {
+            type-picker.showing = false;
+        }
+    }
+
+    if !result.success: ErrorModal {
+        icon: result.level == ResultLevel.info ? "info" : "alert";
+        icon-color: result.level == ResultLevel.info ? Palette.content-brand : Palette.content-notice;
+        title: result.title;
+        text: result.text;
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+
+        confirm-clicked => {
+            result.success = true;
+        }
+    }
+}

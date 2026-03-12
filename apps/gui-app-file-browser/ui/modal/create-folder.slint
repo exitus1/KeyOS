@@ -1,0 +1,64 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, Icon, ContentSection, HeadingMd, TextSm, Input, ButtonSection } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+
+import { ModalGlobal } from "./global.slint";
+import { TextInputModal } from "./widgets.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+export component CreateFolderModal inherits Rectangle {
+    property <bool> loading: ModalGlobal.loading;
+    property <bool> name-valid: ModalGlobal.validate-create-folder(input.text);
+
+    TextInputModal {
+        VerticalLayout {
+            padding: Size.sz6;
+            alignment: start;
+            spacing: Size.sz6;
+
+            HorizontalLayout {
+                alignment: center;
+                Icon {
+                    name: "info";
+                    size: Size.sz12;
+                    color: Palette.content-brand;
+                }
+            }
+
+            ContentSection {
+                spacing: Size.sz4;
+                HeadingMd {
+                    text: TR2.lookup(TrId.MainModalAddFolderTitle);
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.MainModalAddFolderContent);
+                    color: Palette.content-secondary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            input := Input {
+                show-clear-btn: true;
+                accepted => {
+                    ModalGlobal.create-folder-confirmed(input.text);
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonConfirm);
+                    importance: Importance.primary;
+                    enabled: !root.loading && root.name-valid;
+                    loading: root.loading;
+                    clicked => {
+                        ModalGlobal.create-folder-confirmed(input.text);
+                    }
+                }
+            }
+        }
+    }
+}

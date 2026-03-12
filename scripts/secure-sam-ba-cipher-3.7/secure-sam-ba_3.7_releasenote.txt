@@ -1,0 +1,77 @@
+# Microchip Secure SAM-BA Cipher
+Release version: 3.7
+Release date: 2022-04
+
+
+## Overview
+
+The Secure SAM-BA Cipher tool can be used to generate the encrypted/authenticated files that are needed to enable and use the secure boot mode embedded in Microchip MPUs.
+
+Please note that all presented APIs / command line options are subject to change from one version to another.
+
+
+## License
+
+Secure SAM-BA Cipher is provided under the GNU General Public License version 2 only. A copy
+of the license can be found in the LICENSE file.
+
+## Important Note
+It is under the user's responsibility to keep his RSA key pair used for the license generation, and his license files secret and in a safe and secure place.
+
+
+## Supported host platforms
+
+This release runs the following platforms:
+- Windows 32-bit and 64-bit
+- Linux x86_64
+
+## Supported Microchip ARM MPUs
+- SAMA5D3
+- SAMA5D4
+- SAMA5D2
+- SAM9X60
+- SAMA7G5
+- SAMA5D29
+- PIC32CXMT
+- SAM9X7
+
+## Contents
+
+### Directory Architecture
+
+secure-sam-ba-cipher-3.7:
+  Secure SAM-BA Cipher v3.7 Python source files, command-line documentation and key file examples.
+
+A comprehensive documentation can be found opening the README.cipher.html file.
+
+## ChangeLog
+
+## Version 3.7
+
+### Enhancements
+
+- Added support of SAMA5D29
+- Added support of SAM9X7
+
+## Version 3.6
+
+### Enhancements
+
+- Added support of PIC32CXMT
+
+## Version 3.5
+
+### Enhancements
+
+- New licensing mechanism based on RSA public key. The tool is no more locked to the computer on which it is running.
+
+- All features are implemented using Python 3.8 and sources are provided.
+
+- Added compatibility with last versions of SAMA5D2 and SAMA5D3 ROM codes.
+
+### API Changes
+
+- The secure mode message file (needed to set SAMA5D3x and SAMA5D4x devices in secure boot mode) is provided by Microchip in addition to the license file. It is no more generated using this tool.
+- The command-line to generate encrypted customer key message, generates files for all devices in the same family.
+- The command-line to generate encrypted root CA hash message, generates files for all devices in the same family.
+

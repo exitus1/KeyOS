@@ -1,0 +1,103 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { Icon, TextMd, TextSm, TextLg, TextXl, SliderBrightness, Switch, MenuSectionLayout, MenuItemLayout, HLine, ItemTextPreview, Button, BasePage, PageBody, ContentSection, ButtonSection, MenuSection, MenuSectionContainer } from "@ui/widgets.slint";
+import { IconSize, Palette, Palettes, Importance, Timings, CurrentTheme } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { BatteryProps } from "props.slint";
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { BatteryGlobal } from "../../../globals/battery-global.slint";
+
+export component BatteryPage inherits BasePage {
+    in property <BatteryProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.SettingsBattery);
+        }
+
+        PageBody {
+            ContentSection {
+                MenuSection {
+                    title: "Battery";
+
+                    MenuSectionContainer {
+                        MenuSectionLayout {
+                            MenuItemLayout {
+                                first: true;
+                                label: "State of Charge";
+                                ItemTextPreview {
+                                    text: BatteryGlobal.battery-level + " %";
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                label: "Remaining Capacity";
+                                ItemTextPreview {
+                                    text: BatteryGlobal.remaining-capacity-mah + " mAh";
+                                }
+                            }
+
+                            HLine { }
+
+                            MenuItemLayout {
+                                last: true;
+                                label: "Current Capacity";
+                                ItemTextPreview {
+                                    text: BatteryGlobal.current-capacity-mah + " mAh";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if BatteryGlobal.has-fault: MenuSection {
+                    title: "Last Reported Charge Fault (" + BatteryGlobal.num-reported-faults + ")";
+                    MenuItemLayout {
+                        first: true;
+                        last: true;
+                        padding: Size.sz4;
+                        label: BatteryGlobal.last-fault;
+                        ButtonSection {
+                            Button {
+                                label: "Clear";
+                                importance: Importance.primary;
+                                clicked => {
+                                    BatteryGlobal.clear-battery-fault();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                MenuSection {
+                    title: "Electrical Status";
+
+                    MenuSectionLayout {
+                        MenuItemLayout {
+                            first: true;
+                            label: "Current";
+                            ItemTextPreview {
+                                text: BatteryGlobal.current-ma + " mA";
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuItemLayout {
+                            last: true;
+                            label: "Voltage";
+                            ItemTextPreview {
+                                text: (BatteryGlobal.voltage-mv / 1000.0) + " V";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { Input, BasePage, PageBody } from "@ui/widgets.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { SettingGlobal } from "../../../globals/setting-global.slint";
+import { Callbacks } from "../../../callbacks.slint";
+
+export component DeviceNamePage inherits BasePage {
+    focus-scope := FocusScope {
+        focus-changed-event() => {
+            input.focus();
+        }
+    }
+
+    init => {
+        focus-scope.focus();
+    }
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.SettingsDeviceName);
+        }
+
+        PageBody {
+            input := Input {
+                text: SettingGlobal.device-name;
+                caps-mode: sentences;
+
+                edited(text) => {
+                    self.has-notice = (text == "");
+                }
+
+                accepted(text) => {
+                    if (text != "") {
+                        SettingGlobal.set-device-name(text);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: KeyOS hosted mode Ubuntu
+on:
+  workflow_call:
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+jobs:
+  build:
+    runs-on: [ self-hosted, Linux ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix-rust
+
+      - name: Build KeyOS in hosted mode
+        run: nix develop .#build --command cargo xtask build --hosted --dont-sign --ci
+
+  unit-tests:
+    runs-on: [ self-hosted, Linux ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix-rust
+
+      - name: Run unit tests
+        run: nix develop .#build --command just unit-test
+
+  integration-tests:
+    runs-on: [ self-hosted, Linux ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix-rust
+
+      - name: Run integration tests
+        run: nix develop .#build --command just integration-test

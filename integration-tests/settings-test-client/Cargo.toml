@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "settings-test-client"
+version = "0.1.0"
+edition = "2021"
+description = "Settings server test client"
+
+[dependencies]
+keyos-integration-test = { path = "../keyos-integration-test" }
+serde = "1.0.203"
+worker = { path = "../../worker", features = ["test_executor"]}
+log = { workspace = true }
+log-server = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+xous-ipc = { workspace = true }

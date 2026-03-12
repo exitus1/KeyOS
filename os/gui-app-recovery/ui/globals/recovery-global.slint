@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { StepModel } from "@ui/widgets/step-list.slint";
+
+export enum RecoveryStep {
+    Extracting,
+    Rebooting,
+}
+
+export enum RecoveryValidationStep {
+    Reading,
+    Copying,
+    Verifying
+}
+
+export global RecoveryGlobal {
+    // UI Mode/Status
+    in property <bool> is-usb-drive-connected: false;
+    in property <bool> is-tar-copied: false;
+    in property <bool> recovery-in-progress: false;
+    in property <float> recovery-progress: 0;
+    in property <bool> recovery-complete: false;
+    in property <bool> recovery-error: false;
+    in property <string> recovery-error-str: "An unknown error occurred";
+    in property <bool> is-hash-view-open: false;
+
+    // Selected firmware file data
+    in property <string> new-keyos-file-path: "";
+    in property <bool> new-keyos-selected: false;
+    in property <bool> new-keyos-valid: false;
+    in property <bool> new-keyos-validation-in-progress: false;
+    in property <bool> new-keyos-validation-error;
+    in property <string> new-keyos-validation-error-str;
+    in property <RecoveryValidationStep> new-keyos-validation-step;
+    in property <string> new-keyos-version: "";
+    in property <string> new-keyos-build-date: "";
+    in property <string> new-keyos-hash: "";
+    in property <int> num-apps: 0;
+    in property <int> num-assets: 0;
+
+    in property <RecoveryStep> curr-recovery-step;
+
+    in property <bool> is-insufficient-battery-charge-modal-showing: false;
+    in property <bool> is-recovering-critical-components: false;
+    in property <bool> is-critical-recovery-confirmation-modal-showing: false;
+}

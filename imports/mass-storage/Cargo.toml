@@ -1,0 +1,15 @@
+[package]
+name = "mass-storage"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = "0.4.21"
+rkyv = { version = "0.8", default-features = false, optional = true }
+zerocopy = { version = "0.8.5", features = ["derive"] }
+
+[dev-dependencies]
+clap = { version = "4.3", features = ["derive"] }
+clap-num = "1.1.1"
+env_logger = "0.11.3"
+yusb = "0.1.2"

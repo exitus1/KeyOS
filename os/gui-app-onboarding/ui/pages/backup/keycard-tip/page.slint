@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { PageBody, BasePage, NavHeader, HeadingMd, TextMd, ButtonSection, ContentSection, Button } from "@ui/widgets.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { KeyCardAnimation } from "@ui/widgets/key-card-animation.slint";
+import { Size } from "@ui/theme.slint";
+
+export component KeycardTipPage inherits BasePage {
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.KeycardBackupCreateIntroTitle);
+            clicked => {
+                Navigate.backward()
+            }
+        }
+
+        PageBody {
+
+            ContentSection {
+                spacing: Size.sz10;
+
+                HorizontalLayout {
+                    alignment: center;
+                    KeyCardAnimation { }
+                }
+
+                HeadingMd {
+                    text: TR2.lookup(TrId.KeycardBackupCreateIntroHeader);
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: TR2.lookup(TrId.KeycardBackupCreateIntroContent);
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonConfirm);
+                    importance: primary;
+                    clicked => {
+                        Navigate.creating-magic-backup({ });
+                    }
+                }
+            }
+        }
+    }
+}

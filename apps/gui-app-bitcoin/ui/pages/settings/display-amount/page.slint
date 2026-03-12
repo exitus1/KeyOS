@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSectionContainer, 
+    MenuSectionLayout,
+    MenuActionItem, 
+    HLine, MenuItemLayout, ItemTextPreview, BasePage, PageBody, RadioItem, NavHeader
+} from "@ui/widgets.slint";
+
+import { Settings, DisplayAmount } from "../../../settings.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+
+export component SettingsDisplayAmountPage inherits BasePage {
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.WalletSettingsDisplayAmountHeader);
+            clicked => {
+                Navigate.backward();
+            }
+        }
+
+        PageBody {
+            MenuSectionContainer {
+                MenuSectionLayout {
+                    RadioItem {
+                        first: true;
+                        label: TR2.lookup(TrId.SettingsDisplayAmountAuto);
+                        checked: Settings.display-amount == DisplayAmount.Auto;
+                        clicked => {
+                            Settings.set-display-amount(DisplayAmount.Auto);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: TR2.lookup(TrId.SettingsDisplayAmountBtc);
+                        checked: Settings.display-amount == DisplayAmount.Btc;
+                        clicked => {
+                            Settings.set-display-amount(DisplayAmount.Btc);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        last: true;
+                        label: TR2.lookup(TrId.SettingsDisplayAmountSats);
+                        checked: Settings.display-amount == DisplayAmount.Sats;
+                        clicked => {
+                            Settings.set-display-amount(DisplayAmount.Sats);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

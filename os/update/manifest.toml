@@ -1,0 +1,29 @@
+appId = "0x6F732F75706461746500000000000000"
+syscall = ["SetThreadPriority"]
+
+[appName]
+en = "Update Server"
+
+[servers."os/update"]
+SubscribeUpdateProgress = { id = 0, type = "archiveEvent" }
+StartUpdate = { id = 1, type = "move" }
+ContinueUpdate = { id = 2, type = "move" }
+DownloadStallTick = { id = 3, type = "scalar" }
+FirmwareVersion = { id = 4, type = "archive" }
+ApplyDownloadedUpdate = { id = 5, type = "move" }
+GetUpdateApplied = { id = 6, type = "blockingScalar" }
+ClearUpdateApplied = { id = 7, type = "scalar" }
+GetUpdateStatus = { id = 8, type = "archive" }
+
+[permissions]
+template = ["fs-generic", "crypto-sha"]
+"os/fs" = [
+    "GetSystemReadAccess",
+    "GetSystemWriteAccess",
+    "GetSystemAppDataReadAccess",
+    "GetSystemAppDataWriteAccess",
+]
+"os/power-manager" = ["GetStatus"]
+"os/quantum-link" = ["SubscribeFirmwareFetch", "StartFirmwareUpdate"]
+"os/gui-server" = ["Shutdown"]
+"os/security" = ["GetFirmwareTimestamp", "SetFirmwareTimestamp"]

@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "bt"
+version = "0.1.0"
+edition = "2021"
+description = "Bluetooth Server API crate"
+publish = false
+
+[dependencies]
+bitflags = { workspace = true }
+log = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+gpio = { workspace = true }
+postcard = { workspace = true }
+spi = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

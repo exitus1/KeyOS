@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Page } from "./page.slint";
+import { Link, HeadingMd, TextMd } from "@ui/widgets.slint";
+import { Size, Importance, Utils, Palette } from "@ui/theme.slint";
+
+export component LinksPage inherits Page {
+    private property <string> output;
+
+    VerticalLayout {
+        spacing: Size.sz2;
+        VerticalLayout {
+            spacing: Size.sz8;
+            HeadingMd {
+                text: "Output: " + output;
+                height: Size.sz10;
+            }
+
+            Rectangle {
+                width: 200px;
+                height: 60px * 3 + Size.sz4 * 4;
+                background: Palette.background-primary;
+                VerticalLayout {
+                    spacing: Size.sz4;
+                    padding: Size.sz4;
+                    alignment: start;
+
+                    for state in ["enabled", "disabled", "pressed"]: HorizontalLayout {
+                        spacing: Size.sz4;
+                        Link {
+                            id: state;
+                            label: "Learn more.";
+                            enabled: state != "disabled";
+                            force-pressed: state == "pressed";
+                            clicked(id) => {
+                                output = "Clicked on " + id + "!";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

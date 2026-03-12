@@ -1,0 +1,8 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#[cfg(keyos)]
+mod inner;
+
+#[cfg(keyos)]
+pub use inner::*;

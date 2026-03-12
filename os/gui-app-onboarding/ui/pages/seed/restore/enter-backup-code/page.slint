@@ -1,0 +1,156 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, Icon, Shield, HeadingMd, TextSm, AppHeader, IconButton } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../../../widgets/base-page.slint";
+import { Font } from "@ui/fonts.slint";
+import { Palette, Size, Utils, CardColor, UISize } from "@ui/theme.slint";
+import { EnterBackupCodeProps } from "props.slint";
+import { VerticalBox } from "std-widgets.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+export component NumberInput inherits OnboardingBasePage {
+    in-out property <string> text <=> input.text;
+    in property <int> index;  // Input number (0 to 19)
+    in property <bool> isValid;
+    out property <bool> allNumbersFilled;
+    callback edited();
+    callback nextFocus(index: int); // Callback to move focus to the next input
+
+    border-width: 1px;
+    border-color: input.has-focus ? Palette.border-focus : (isValid ? Palette.background-primary-alternative : Palette.content-copper-brand); // Green if valid, red if invalid
+    border-radius: 12px;
+    width: 56px;
+    height: 56px;
+    background: Palette.background-primary-alternative;
+
+    input := TextInput {
+        height: parent.height;
+        width: parent.width;
+        vertical-alignment: center;
+        horizontal-alignment: center;
+        color: isValid ? Palette.content-primary : Palette.content-copper-brand;
+        font-size: 20px;
+
+        edited => {
+            if (input.text != "") { // only one number per input !!!
+                input.clear-focus();
+            }
+        }
+
+        accepted => {
+           // nextFocus(index + 1); // Move focus to the next input when "Enter" is pressed
+
+                input.clear-focus();
+
+            if (index == 0 && input.text != "") { // make this work for all words and leave one var allWordsFilled
+                    allNumbersFilled = true;
+            }
+        }
+    }
+}
+
+export component EnterBackupCodePage inherits OnboardingBasePage {
+    in property <EnterBackupCodeProps> props;
+    in-out property <[string]> number: [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+    ];
+    in-out property <bool> allNumbersFilled: true;
+    in-out property <bool> isCodeValid: true;
+    in-out property <bool> isChecked:true;
+
+    VerticalLayout {
+        alignment: stretch;
+        spacing: Size.sz6;
+        padding: Size.sz6;
+
+        AppHeader {
+            title: TR2.lookup(TrId.RecoverFileBackupCodeTitle);
+
+            IconButton {
+                icon: "chevron-left";
+                importance: tertiary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+        }
+
+        if(isChecked && !isCodeValid):
+        TextSm {
+            text: TR2.lookup(TrId.RecoverFileBackupCodeErrorSubheader);
+            color: Palette.content-lightcopper-brand;
+            horizontal-alignment: center;
+        }
+
+        VerticalLayout {
+            alignment: center;
+            spacing: Size.sz6;
+            padding: Size.sz6;
+
+            VerticalLayout {
+                spacing: Size.sz4;
+                alignment: center;
+                for row in 5: HorizontalLayout {
+                    for col in 4: HorizontalLayout {
+                        alignment: space-around;
+                        NumberInput {
+                            text: number[row * 4 + col];
+                            index: row * 4 + col;
+                            isValid: !(isChecked && !isCodeValid);
+                            edited => {
+                                number[row * 4 + col] = self.text;
+                                allNumbersFilled = self.allNumbersFilled;
+                            }
+                            nextFocus => {
+                                if (row * 4 + col + 1 < number.length) {
+                                    number[row * 4 + col + 1] = "";
+                                    // Implement focus logic if needed
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle { }
+
+        if  number[0] == "": Button {
+
+            label: TR2.lookup(TrId.RecoverFileBackupCodeSwitchToBackupWords);
+            importance: tertiary;
+
+            clicked => {
+                Navigate.enter-backup-words({ });
+            }
+        }
+        Button {
+            label: TR2.lookup(TrId.CommonButtonContinue);
+            enabled: allNumbersFilled && isChecked && isCodeValid;
+            clicked => {
+                Navigate.restore-file-backup-restoring({ });
+            }
+        }
+    }
+}

@@ -1,0 +1,233 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AccountCard, Icon, HeadingLg, HeadingMd, Shield, HeadingLg } from "@ui/widgets.slint";
+import { Importance, CurrentTheme, Palette, Palettes, Images, Size, UISize, Utils } from "@ui/theme.slint";
+import { Slider } from "@ui/widgets/slider.slint";
+import { Button } from "@ui/widgets/button.slint";
+import { TR2, TrId } from "gen/tr.slint";
+import {TR} from "@ui/i18n/i18n.slint"; // Only used to fix the compilation, can be removed later
+
+export * from "gen/exports.slint";
+export { TR, Utils, Images, CurrentTheme }
+
+export global Constants {
+    out property <int> max-title-length: 17;
+    out property <length> app-card-width: UISize.screen-width / 2;
+    out property <length> app-card-spacer-width: (self.app-card-width - self.app-card-gap-width);
+    out property <length> app-card-gap-width: Size.sz8;
+    out property <length> app-card-height: 470px;
+    out property <length> app-card-spacer-height: self.app-card-height;
+    out property <length> app-card-image-height: UISize.screen-height / 2;
+
+    out property <duration> scroll-anim-duration: 150ms;
+    out property <duration> app-close-anim-duration: 300ms;
+}
+
+export global Callbacks {
+    callback switch-to-launcher();
+    callback app-touched(bool, int, int);
+    callback flicked(length);
+    callback close-all();
+}
+
+export struct AppItem {
+    name: string,
+    pid: int,
+    img: image,
+}
+
+export global Global {
+    in property <[AppItem]> apps: [];
+    in property <bool> is-app-hidden: false;
+    in property <int> hidden-app-index: 0;
+    in property <image> fake-app-image;
+    in property <string> fake-app-name;
+    in property <duration> fake-app-anim-duration: Constants.app-close-anim-duration;
+
+    in property <bool> disable-controls: false;
+    in property <bool> debug-mode: false;
+}
+
+// Invisible spacer to pad the scrollable content and make the first and last app card centered
+component AppCardSpacer inherits Rectangle {
+    background: Global.debug-mode ? darkgrey : transparent;
+    width: Constants.app-card-spacer-width;
+    height: Constants.app-card-spacer-height;
+    TouchArea {
+        enabled: !Global.disable-controls;
+        clicked => {
+            Callbacks.switch-to-launcher();
+        }
+    }
+}
+
+component AppCard inherits Rectangle {
+    width: Constants.app-card-width;
+    height: Constants.app-card-height;
+
+    in property <string> app-name;
+    in property <int> pid;
+    in property <int> index;
+
+    visible: (!Global.is-app-hidden || index != Global.hidden-app-index);
+    in property <image> img;
+
+    TouchArea {
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz4;
+            horizontal-stretch: 0;
+
+            HeadingLg {
+                color: Palette.content-primary;
+                text: Utils.shorten-string(app-name, Constants.max-title-length);
+                vertical-alignment: center;
+                horizontal-alignment: center;
+                padding-bottom: Size.sz4;
+            }
+
+            Image {
+                width: Constants.app-card-width;
+                height: Constants.app-card-image-height;
+                source: img;
+            }
+        }
+
+        pointer-event(e) => {
+            if (self.visible) {
+                if (e.kind == PointerEventKind.down) {
+                    Callbacks.app-touched(true, index, pid);
+                }
+                if (e.kind == PointerEventKind.up) {
+                    Callbacks.app-touched(false, index, pid);
+                }
+            }
+        }
+    }
+
+    // (Debug) card center indicator
+    Rectangle {
+        visible: Global.debug-mode;
+        y: root.y;
+        x: Constants.app-card-width / 2;
+        width: 1px;
+        height: Constants.app-card-height;
+        background: green;
+    }
+}
+
+component FakeCard inherits AppCard {
+    img: Global.fake-app-image;
+}
+
+component App {
+    width: 100%;
+    height: 100%;
+
+    in-out property <length> scroll-offset <=> flickable.viewport-x;
+    in-out property <length> flickable-y <=> flickable.y;
+    in-out property <length> fake-card-y <=> fake-card.y;
+    in-out property <float> fake-card-img-opacity <=> fake-card.opacity;
+    in property <length> left-spacer-width <=> left-spacer.width;
+
+    Image {
+        source: CurrentTheme.palette == Palettes.dark ? @image-url("bg-dark.png") : @image-url("bg.png");
+    }
+
+    TouchArea {
+        fake-card := FakeCard {
+            animate y {
+                duration: Global.fake-app-anim-duration;
+                easing: ease-out-quad;
+            }
+
+            x: UISize.screen-width / 2 - Constants.app-card-width / 2;
+            app-name: Global.fake-app-name;
+            pid: 0;
+            visible: Global.is-app-hidden;
+        }
+
+        VerticalLayout {
+            padding-top: 2 * Size.sz16 + Size.sz7;
+            alignment: center;
+
+            flickable := Flickable {
+                interactive: !Global.is-app-hidden;
+                animate viewport-x { duration: Constants.scroll-anim-duration; }
+
+                HorizontalLayout {
+                    spacing: Constants.app-card-gap-width;
+
+                    left-spacer := AppCardSpacer { }
+
+                    for app[index] in Global.apps: AppCard {
+                        app-name: app.name;
+                        pid: app.pid;
+                        img: app.img;
+                        index: index;
+                    }
+
+                    AppCardSpacer { }
+                }
+
+                flicked => {
+                    self.viewport-y = 0px; // Only horizontal scroll is allowed
+                    Callbacks.flicked(self.viewport-x);
+                }
+            }
+
+            Rectangle {
+                height: Size.sz12;
+                background: transparent;
+            }
+
+            HorizontalLayout {
+                padding: Size.sz2;
+                alignment: center;
+                horizontal-stretch: 0;
+
+                Button {
+                    icon: "close";
+                    visible: Global.apps.length != 0;
+                    enabled: !Global.disable-controls;
+                    importance: Importance.secondary;
+                    label: TR2.lookup(TrId.ButtonCloseAll);
+                    clicked(id) => {
+                        Callbacks.close-all();
+                    }
+                }
+            }
+        }
+
+        clicked => {
+            if (!Global.disable-controls) {
+                Callbacks.switch-to-launcher();
+            }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    in-out property <length> scroll-offset <=> app.scroll-offset;
+    in-out property <length> flickable-y <=> app.flickable-y;
+    in-out property <length> fake-card-y <=> app.fake-card-y;
+    in-out property <float> fake-card-img-opacity <=> app.fake-card-img-opacity;
+    in property <length> left-spacer-width <=> app.left-spacer-width;
+
+    background: Palette.transparent;
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+
+    app := App { }
+
+    // (Debug) screen center indicator
+    Rectangle {
+        visible: Global.debug-mode;
+        y: 0;
+        x: UISize.screen-width / 2;
+        width: 1px;
+        height: UISize.screen-height;
+        background: red;
+    }
+}

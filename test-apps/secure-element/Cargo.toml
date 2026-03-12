@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "secure-element"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cryptoauthlib = { path = "../../cryptoauthlib" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+power-manager = { workspace = true }
+xous = { path = "../../xous/xous-rs" }
+xous-names = { package = "xous-api-names", path = "../../xous/api/names" }
+xous-ticktimer = { package = "xous-api-ticktimer", path = "../../xous/api/ticktimer" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { path = "../../imports/atsama5d27" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

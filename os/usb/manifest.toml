@@ -1,0 +1,22 @@
+appId = "0x75736200000000000000000000000000"
+memory = ["UDPHS", "UDPHS_RAM", "UHPHS_EHCI"]
+syscall = ["ClaimInterrupt", "VirtToPhys", "SetThreadPriority"]
+extends = "../../api/usb"
+
+[appName]
+en = "USB Server"
+
+[servers."os/usb"]
+DoWork = { id = 0, type = "scalar" }
+SubscriberDisconnected = { id = 64, type = "scalar" }
+
+[servers."os/usbdev"]
+EndOfReset = { id = 16, type = "scalar" }
+Ep0RxComplete = { id = 19, type = "scalar" }
+Ep0TxComplete = { id = 18, type = "scalar" }
+DmaInterrupt = { id = 20, type = "scalar" }
+
+[permissions]
+template = ["gpio"]
+"os/power-manager" = ["SetPeripheralEnabled", "SetUsbBoost"]
+"os/settings" = ["SubscribeDeviceName", "SubscribeUsbEnabled"]

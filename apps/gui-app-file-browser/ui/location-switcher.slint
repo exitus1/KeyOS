@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Icon, PopupMenu, PopupMenuItem, SegmentedSelector, HeadingMd } from "@ui/widgets.slint";
+import { SegmentModel } from "@ui/widgets/segmented-selector.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+export struct BreadCrumb {
+    label: string,
+    icon: string,
+}
+
+export component LocationSwitcher inherits Rectangle {
+    in property <[SegmentModel]> locations: [];
+    in property <int> selected-index: 0;
+    in property <[BreadCrumb]> breadcrumbs: [];
+    in-out property <bool> menu-open: false;
+
+    callback location-changed(int);
+    callback breadcrumb-selected(string, int);
+
+    property <string> current-label: breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : "";
+    property <bool> has-breadcrumbs: breadcrumbs.length > 1;
+
+    width: 240px;
+    height: Size.sz13;
+    clip: false;
+
+    changed locations => {
+        menu-open = false;
+    }
+
+    if !has-breadcrumbs: SegmentedSelector {
+        one-way-selected-index: true;
+        width: parent.width;
+        segments: root.locations;
+        selected_index: root.selected_index;
+        clicked(_, index) => {
+            root.location-changed(mod(index + 1, root.locations.length));
+        }
+    }
+
+    if has-breadcrumbs: Rectangle {
+        menu-button := Rectangle {
+            border-radius: Size.sz6;
+            height: Size.sz13;
+            width: parent.width;
+
+            HorizontalLayout {
+                spacing: Size.sz2;
+                padding-left: Size.sz4;
+                padding-right: Size.sz4;
+                alignment: center;
+
+                HeadingMd {
+                    text: root.current-label;
+                    color: Palette.content-primary;
+                    wrap: no-wrap;
+                    overflow: elide;
+                    horizontal-stretch: 1;
+                    vertical-alignment: center;
+                }
+
+                VerticalLayout {
+                    alignment: center;
+                    Icon {
+                        name: "chevron-down";
+                        size: Size.sz8;
+                        color: root.has-breadcrumbs ? Palette.content-tertiary : Palette.content-disabled;
+                    }
+                }
+            }
+
+            touch-area := TouchArea {
+                enabled: root.has-breadcrumbs;
+                clicked => {
+                    root.menu-open = !root.menu-open;
+                }
+            }
+
+            states [
+                pressed when touch-area.pressed: {
+                    menu-button.background: Palette.background-hover;
+                }
+            ]
+        }
+
+        if (root.menu-open && root.has-breadcrumbs): PopupMenu {
+            x: menu-button.x + (menu-button.width / 2) - (self.width / 2);
+            y: menu-button.y + menu-button.height + Size.sz2;
+            z: 100;
+
+            for index in root.breadcrumbs.length - 1: PopupMenuItem {
+                label: breadcrumbs[index].label;
+                left-icon: breadcrumbs[index].icon;
+                first: index == 0;
+                last: index == root.breadcrumbs.length - 2;
+                clicked => {
+                    root.menu-open = false;
+                    root.breadcrumb-selected(breadcrumbs[index].label, index);
+                }
+            }
+        }
+    }
+}

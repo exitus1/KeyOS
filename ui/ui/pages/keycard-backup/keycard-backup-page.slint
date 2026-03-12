@@ -1,0 +1,88 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, Icon, TimerCircularProgress, ButtonSection, WrappedIcon, JumboIconPageBody } from "@ui/widgets.slint";
+import { StepList, StepModel } from "@ui/widgets/step-list.slint";
+import { KeyCardAnimation } from "@ui/widgets/key-card-animation.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { StepLine, StepLineSection } from "@ui/widgets/step-list.slint";
+import { HeadingMd } from "@ui/widgets/txt.slint";
+import { KeycardBackupError, KeycardBackupErrorDialog } from "keycard-backup-error.slint";
+
+export component KeycardBackupPage inherits VerticalLayout {
+    in property <bool> magic;
+    in property <bool> saving-to-keycard;
+    in property <[StepModel]> steps;
+    in property <string> header-text;
+    in property <string> button-label;
+
+    callback start-backup();
+    callback continue();
+
+    init => {
+        root.start-backup();
+    }
+
+    // 1. sending-envoy-shard: showing phone icon with spinner (magic only)
+    // 2. saving-to-keycard: showing keycard icon with spinner
+    // 3. waiting-for-tap: showing keycard tap animation
+    // 4. backup-created: showing success checkmark
+    out property <bool> sending-envoy-shard: root.magic && steps[0].in-progress;
+    out property <bool> backup-created: steps[steps.length - 1].completed;
+    out property <bool> waiting-for-tap: !root.backup-created && !root.saving-to-keycard && !root.sending-envoy-shard;
+
+    alignment: space-between;
+
+    VerticalLayout {
+        spacing: Size.sz10;
+
+        HorizontalLayout {
+            alignment: center;
+
+            if sending-envoy-shard: TimerCircularProgress {
+                indeterminate: true;
+                Icon {
+                    name: "smartphone";
+                    size: 96px;
+                }
+            }
+
+            if saving-to-keycard: TimerCircularProgress {
+                indeterminate: true;
+                Icon {
+                    name: "nfc-1-card-vert";
+                    size: 96px;
+                }
+            }
+
+            if waiting-for-tap: KeyCardAnimation { }
+
+            if backup-created: WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "check";
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            text: root.header-text;
+            horizontal-alignment: center;
+        }
+
+        StepList {
+            steps: steps;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            enabled: root.backup-created;
+            label: root.button-label;
+            importance: primary;
+
+            clicked => {
+                root.continue();
+            }
+        }
+    }
+}

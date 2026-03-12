@@ -1,0 +1,148 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Page } from "./page.slint";
+import { TextXs, Icon } from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+component IconItem {
+    in property <string> name;
+
+    VerticalLayout {
+        horizontal-stretch: 1;
+        min-width: Size.sz8;
+        max-width: Size.sz8;
+        spacing: 0px;
+
+        Rectangle {
+            height: Size.sz11;
+            @children
+        }
+
+        TextXs {
+            height: Size.sz11;
+            width: 100px;
+            text: name;
+            color: Palette.content-tertiary;
+            horizontal-alignment: center;
+            wrap: word-wrap;
+        }
+    }
+}
+
+export component IconsPage inherits Page {
+    private property <[[string]]> normal-icons: [
+        [
+            "alert",
+            "arrow-down-left",
+            "arrow-down-right",
+            "arrow-down",
+            "arrow-left",
+            "arrow-right",
+            "arrow-up-left",
+            "arrow-up-right"
+        ],
+        [
+            "arrow-up",
+            "bell",
+            "biometrics",
+            "bitcoin",
+            "check-circle",
+            "check",
+            "chevron-down",
+            "chevron-left"
+        ],
+        [
+            "chevron-right",
+            "chevron-up",
+            "clipboard",
+            "coins",
+            "devices",
+            "download",
+            "ellipsis",
+            "filter"
+        ],
+        ["history", "info", "learn", "list", "menu-up", "menu", "node", "passport"],
+        [
+            "performance",
+            "play",
+            "plus",
+            "postmix",
+            "privacy",
+            "return",
+            "sats",
+            "scan-qr"
+        ],
+        [
+            "search",
+            "shield",
+            "shield2",
+            "show-arrows",
+            "skip-back",
+            "skip-fwd",
+            "sort",
+            "sort-ascending",
+            "sort-descending"
+        ],
+        [
+            "tablet",
+            "tag",
+            "tool",
+            "transfer",
+            "two-coins",
+            "empty",
+            "backspace",
+            "delete"
+        ],
+        ["shifted", "unshifted", "filter2"]
+    ];
+
+    private property <[[string]]> color-icons: [
+        [
+            "bell-active",
+            "bitcoin-testnet-1",
+            "bitcoin-testnet-2",
+            "bitcoin-testnet-3",
+            "bitcoin-testnet-4",
+            "bitcoin-testnet-5",
+            "card-view",
+            "sats-testnet-1"
+        ],
+        [
+            "sats-testnet-2",
+            "sats-testnet-3",
+            "sats-testnet-4",
+            "sats-testnet-5",
+            "locked",
+            "unlocked",
+            "add",
+            "remove"
+        ]
+    ];
+
+    VerticalLayout {
+        spacing: Size.sz3;
+        padding-top: Size.sz3;
+        for row in normal-icons: HorizontalLayout {
+            spacing: Size.sz8;
+
+            for icon-name in row: IconItem {
+                name: icon-name;
+                Icon {
+                    name: icon-name;
+                }
+            }
+        }
+        for row in color-icons: HorizontalLayout {
+            spacing: Size.sz8;
+
+            for icon-name in row: IconItem {
+                name: icon-name;
+                Icon {
+                    name: icon-name;
+                    colorize: transparent;
+                }
+            }
+        }
+    }
+}

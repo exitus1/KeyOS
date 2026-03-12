@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global InfoGlobal {
+    // Bootloader info
+    in property <string> bootloader-version: "N/A";
+    in property <string> bootloader-build-date: "N/A";
+    in property <string> bootloader-hash: "";
+
+    // Firmware info
+    in property <string> firmware-version: "";
+    in property <string> firmware-build-date: "";
+    in property <string> firmware-hash: "";
+
+    // Recovery info
+    in property <string> recovery-version: "";
+    in property <string> recovery-build-date: "";
+    in property <string> recovery-hash: "";
+}

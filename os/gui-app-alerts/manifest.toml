@@ -1,0 +1,7 @@
+appId = "0x32defc0867555fe8002759667000b22a"
+
+[appName]
+en = "Alerts"
+
+[permissions]
+template = ["gui-app", "navigable"]

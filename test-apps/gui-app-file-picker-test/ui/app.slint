@@ -1,0 +1,127 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox, TextEdit } from "std-widgets.slint";
+import { AccountCard, Icon, HeadingLg, HeadingMd, Shield, HeadingSm, TextSm, Checkbox } from "@ui/widgets.slint";
+import { Importance, CurrentTheme, Palette, Palettes, Images, Size, UISize, Utils } from "@ui/theme.slint";
+import { Slider } from "@ui/widgets/slider.slint";
+import { Button } from "@ui/widgets/button.slint";
+
+export { Utils, Images, CurrentTheme }
+
+export global Callbacks {
+    callback open-file-picker();
+}
+
+export component AppWindow inherits Window {
+    out property <bool> dirs-allowed: true;
+    out property <bool> hidden-allowed: false;
+    out property <bool> search-allowed: true;
+    in property <string> picker-result: "";
+
+    background: white;
+    padding: 0;
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+
+    Rectangle {
+        VerticalLayout {
+            padding: 10px;
+            spacing: 20px;
+
+            Rectangle {
+                height: UISize.control-center-status-bar-height;
+            }
+
+            Rectangle {
+                height: 50px;
+                background: Palette.black;
+                border-radius: Size.sz12;
+
+                HeadingLg {
+                    text: "File Picker Demo";
+                    color: Palette.white;
+                }
+            }
+
+            HorizontalLayout {
+                alignment: start;
+                spacing: 20px;
+                Checkbox {
+                    checked: hidden-allowed;
+                    controlled: false;
+                    clicked => {
+                        hidden-allowed = !hidden-allowed;
+                    }
+                }
+
+                TextSm {
+                    text: "Show hidden files";
+                    color: Palette.content-secondary;
+                }
+            }
+
+            HorizontalLayout {
+                alignment: start;
+                spacing: 20px;
+                Checkbox {
+                    checked: dirs-allowed;
+                    controlled: false;
+                    clicked => {
+                        dirs-allowed = !dirs-allowed;
+                    }
+                }
+
+                TextSm {
+                    text: "Allow directories";
+                    color: Palette.content-secondary;
+                }
+            }
+
+            HorizontalLayout {
+                alignment: start;
+                spacing: 20px;
+                Checkbox {
+                    checked: search-allowed;
+                    controlled: false;
+                    clicked => {
+                        search-allowed = !search-allowed;
+                    }
+                }
+
+                TextSm {
+                    text: "Allow search";
+                    color: Palette.content-secondary;
+                }
+            }
+
+            Button {
+                label: "Open File Picker";
+                clicked => {
+                    Callbacks.open-file-picker();
+                }
+            }
+
+            if picker-result != "": VerticalLayout {
+                padding: 10px;
+
+                HeadingSm {
+                    text: "Result";
+                    color: Palette.content-primary;
+                }
+
+                TextSm {
+                    text: picker-result;
+                    color: Palette.content-secondary;
+                }
+            }
+        }
+    }
+
+    // Allow defocusing the keyboard by clicking somewhere else
+    FocusScope {
+        init => {
+            self.focus()
+        }
+    }
+}

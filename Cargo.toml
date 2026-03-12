@@ -1,0 +1,305 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+cargo-features = ["trim-paths"]
+
+[workspace]
+resolver = "2"
+
+members = [
+    "api/app-manager",
+    "api/backup",
+    "api/bt",
+    "api/crypto",
+    "api/dma",
+    "api/fs",
+    "api/gpio",
+    "api/gui-server",
+    "api/haptics",
+    "api/i2c",
+    "api/power-manager",
+    "api/quantum-link",
+    "api/rgb-led",
+    "api/security",
+    "api/settings",
+    "api/spi",
+    "api/update",
+    "api/usb",
+    "apps/gui-app-authenticator",
+    "apps/gui-app-bitcoin",
+    "apps/gui-app-file-browser",
+    "apps/gui-app-image-viewer",
+    "apps/gui-app-playground",
+    "apps/gui-app-qr-scanner",
+    "apps/gui-app-regulatory",
+    "apps/gui-app-security-keys",
+    "apps/gui-app-seed-vault",
+    "apps/gui-app-switcher",
+    "apps/gui-app-system-actions",
+    "apps/simulator",
+    "apps/simulator-cli",
+    "boot/charge-boot",
+    "boot/common",
+    "boot/keyos-boot",
+    "cryptoauthlib",
+    "i18n",
+    "imports/atsama5d27",
+    "imports/getrandom",
+    "imports/prepare-release/prepare-release-bin",
+    "imports/securam-manager",
+    "integration-tests/keyos-integration-test",
+    "integration-tests/ordered-table-test",
+    "integration-tests/settings-test-client",
+    "integration-tests/worker-test",
+    "keyos",
+    "loader",
+    "os/accelerometer",
+    "os/ambient-light",
+    "os/app-manager",
+    "os/app-manifest",
+    "os/backup",
+    "os/bt",
+    "os/camera",
+    "os/crypto",
+    "os/ctap-hid",
+    "os/dma",
+    "os/emmc",
+    "os/fido",
+    "os/fs",
+    "os/gpio",
+    "os/gui-app-alerts",
+    "os/gui-app-control-center",
+    "os/gui-app-keyboard",
+    "os/gui-app-launcher",
+    "os/gui-app-lock-screen",
+    "os/gui-app-onboarding",
+    "os/gui-app-recovery",
+    "os/gui-app-settings",
+    "os/gui-server",
+    "os/haptics",
+    "os/i2c",
+    "os/keycard",
+    "os/logging/file",
+    "os/logging/hosted",
+    "os/logging/serial",
+    "os/logging/usb-file",
+    "os/logging/usb-serial",
+    "os/mass-storage-emulation",
+    "os/mass-storage-server",
+    "os/nfc",
+    "os/power-manager",
+    "os/quantum-link",
+    "os/recovery-worker",
+    "os/rgb-led",
+    "os/security",
+    "os/settings",
+    "os/spi",
+    "os/update",
+    "os/usb",
+    "release-manifest",
+    "server",
+    "server/macro",
+    "slint-keyos-platform/build",
+    "slint-keyos-platform/common",
+    "slint-keyos-platform/macros",
+    "slint-keyos-platform/runtime",
+    "svd2utra",
+    "systemview-keyos",
+    "test-apps/bt-test",
+    "test-apps/condvar-test",
+    "test-apps/crypto-client",
+    "test-apps/emmc-test-client",
+    "test-apps/fido-test",
+    "test-apps/fpu-test",
+    "test-apps/fs-benchmark",
+    "test-apps/fs-test",
+    "test-apps/gui-app-file-picker-test",
+    "test-apps/gui-app-update-test",
+    "test-apps/ipc-test",
+    "test-apps/mass-storage-test",
+    "test-apps/mem-move-test-recv",
+    "test-apps/mem-move-test-src",
+    "test-apps/mutex-test",
+    "test-apps/nfc-ndef",
+    "test-apps/randomness-test",
+    "test-apps/sandbox-test/runner",
+    "test-apps/sandbox-test/worker",
+    "test-apps/secure-element",
+    "test-apps/security-client",
+    "test-apps/sensors-test",
+    "test-apps/shamir-test",
+    "test-apps/spawn-test",
+    "test-apps/stack-overflow-test",
+    "test-apps/sys-benchmark",
+    "test-apps/syscall-arg-invalid-addr-test",
+    "test-apps/test1",
+    "test-apps/test2",
+    "test-apps/thread-return-join-test",
+    "test-apps/ticktimer-test-client",
+    "test-apps/undef-test",
+    "ui/slintbook",
+    "utils/fuse",
+    "utils/fw-utils",
+    "utils/keycard-auth-tool",
+    "utils/keycard-scan",
+    "utils/localizer",
+    "utils/ordered-table",
+    "utils/sambuca",
+    "utils/shared-fut",
+    "utils/update-slint-preview",
+    "utils/ql-utils",
+    "utralib",
+    "worker",
+    "xous/api/log",
+    "xous/api/names",
+    "xous/api/ticktimer",
+    "xous/ipc",
+    "xous/kernel",
+    "xous/log",
+    "xous/names",
+    "xous/ticktimer",
+    "xous/trng",
+    "xous/xous-rs",
+    "xtask",
+]
+
+[workspace.dependencies]
+# workspace members
+app-manager = { path = "api/app-manager" }
+backup = { path = "api/backup" }
+bt = { path = "api/bt" }
+cosign2 = { path = "imports/cosign2/cosign2" }
+crypto = { path = "api/crypto" }
+defer = { path = "utils/defer" }
+dma = { path = "api/dma" }
+file-backed = { path = "utils/file-backed" }
+fs = { path = "api/fs" }
+fw-utils = { path = "utils/fw-utils" }
+getrandom = { path = "imports/getrandom" }
+gpio = { path = "api/gpio" }
+gui-server-api = { path = "api/gui-server" }
+haptics = { path = "api/haptics" }
+i2c = { path = "api/i2c" }
+keycard = { path = "os/keycard" }
+keycard-scan = { path = "utils/keycard-scan" }
+log-server = { package = "xous-api-log", path = "xous/api/log" }
+power-manager = { path = "api/power-manager" }
+ql-utils = { path = "utils/ql-utils" }
+quantum-link = { path = "api/quantum-link" }
+rgb-led = { path = "api/rgb-led" }
+security = { path = "api/security" }
+server = { path = "server" }
+settings = { path = "api/settings" }
+shared-fut = { path = "utils/shared-fut" }
+slint-keyos-platform = { path = "slint-keyos-platform/runtime" }
+slint-keyos-platform-build = { path = "slint-keyos-platform/build" }
+spi = { path = "api/spi" }
+update = { path = "api/update" }
+usb = { path = "api/usb" }
+utralib = { path = "utralib" }
+whence = { path = "utils/whence" }
+worker = { path = "worker" }
+xous = { path = "xous/xous-rs" }
+xous-ipc = { path = "xous/ipc" }
+xous-names = { package = "xous-api-names", path = "xous/api/names" }
+xous-ticktimer = { package = "xous-api-ticktimer", path = "xous/api/ticktimer" }
+
+# imports
+armv7 = { path = "imports/armv7" }
+atsama5d27 = { path = "imports/atsama5d27", default-features = false }
+bq24157 = { path = "imports/bq24157" }
+bq27421 = { path = "imports/bq27421" }
+ehci = { path = "imports/ehci" }
+fatfs = { path = "imports/rust-fatfs", default-features = false }
+ft3269 = { path = "imports/ft3269" }
+fuse = { path = "utils/fuse" }
+libblur = { path = "imports/libblur", default-features = false }
+ltr303 = { path = "imports/ltr303" }
+mass-storage = { path = "imports/mass-storage", features = ["rkyv"] }
+ovm7690-rs = { path = "imports/ovm7690-rs" }
+qbsdiff = { path = "imports/qbsdiff" }
+softbuffer = { path = "imports/softbuffer" }
+tar = { path = "imports/tar-rs" }
+tusb320 = { path = "imports/tusb320" }
+
+# common deps 
+anyhow = "1.0"
+async-channel = { version = "2.5" }
+async-task = { version = "4.7" }
+async-watch = { version = "0.3" }
+bitflags = "2.6.0"
+bzip2 = "0.6.0"
+cargo_metadata = "0.18.1"
+crc = "3.2.1"
+embedded-hal = "1.0"
+foundation-ur = { version = "0.4.0" }
+foundation-urtypes = { version = "0.5.0" }
+futures-lite = { version = "2.5" }
+hex = { version = "0.4.3" }
+jiff = { version = "0.2.5", default-features = false, features = ["std"] }
+log = "0.4.14"
+ndef = { version = "0.5.0", features = ["alloc", "cbor"] }
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+oneshot = { version = "0.1" }
+paste = { version = "1" }
+postcard = { version = "1.0.8", features = ["use-std"] }
+rkyv = { version = "0.8.13", default-features = false, features = [
+    "std",
+    "bytecheck",
+] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.139"
+sha2 = { version = "0.10" }
+thiserror = "2.0"
+
+rfal = { version = "3.0.0", git = "https://github.com/Foundation-Devices/rfal-sys", rev = "12ffcc2bffad8d545b3dc6da429b166d1bed8205" }
+st25r95 = { version = "0.1.0", git = "https://github.com/Foundation-Devices/st25r95", rev = "86224011bf2ccfe9464f651587ca1dff9d76f064" }
+
+backup-shard = { git = "https://github.com/Foundation-Devices/foundation-api", branch = "add-chunk-offset", features = [
+    "keyos",
+] }
+btp = { git = "https://github.com/Foundation-Devices/foundation-api", branch = "add-chunk-offset" }
+foundation-api = { git = "https://github.com/Foundation-Devices/foundation-api", branch = "add-chunk-offset", features = [
+    "keyos",
+] }
+ngwallet = { git = "https://github.com/Foundation-Devices/ngwallet", tag = "2.15.0", features = [
+    "rkyv",
+    "sha2",
+] }
+
+i-slint-backend-winit = { git = "https://github.com/Foundation-Devices/slint.git", tag = "v1.12.1-foundation8" }
+i-slint-common = { git = "https://github.com/Foundation-Devices/slint.git", tag = "v1.12.1-foundation8" }
+i-slint-compiler = { git = "https://github.com/Foundation-Devices/slint.git", tag = "v1.12.1-foundation8" }
+i-slint-core = { git = "https://github.com/Foundation-Devices/slint.git", tag = "v1.12.1-foundation8", default-features = false }
+slint = { git = "https://github.com/Foundation-Devices/slint.git", tag = "v1.12.1-foundation8", default-features = false }
+slint-build = { git = "https://github.com/Foundation-Devices/slint.git", tag = "v1.12.1-foundation8" }
+
+[profile.release]
+codegen-units = 1  # 1 better optimizations
+debug = true       # Simplify debugging. These symbols don't take space on the device
+trim-paths = "all"
+incremental = true
+
+# local development profile
+[profile.hosted]
+inherits = "release"
+codegen-units = 256
+debug = true
+opt-level = 1
+incremental = true
+
+[profile.bootloader]
+inherits = "release"
+strip = true
+lto = true
+opt-level = "s"      # Optimize for size
+panic = "abort"
+codegen-units = 1
+
+[patch.crates-io]
+getrandom = { path = "imports/getrandom" }
+pqcrypto-traits = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }
+pqcrypto-mldsa = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }
+pqcrypto-mlkem = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }
+pqcrypto-internals = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }

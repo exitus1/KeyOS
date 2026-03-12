@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "security"
+version = "0.1.0"
+edition = "2021"
+description = "Secure Hardware API crate"
+publish = false
+
+[dependencies]
+bip39 = "2.1"
+crypto = { workspace = true }
+log = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+thiserror = "1.0"
+xous = { workspace = true }
+zeroize = { version = "1.8.1", default-features = false, features = ["zeroize_derive"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

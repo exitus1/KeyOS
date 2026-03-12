@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-file-browser"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+recovery-os = ["slint-keyos-platform/recovery-os"]
+default = []
+
+[dependencies]
+anyhow = { workspace = true }
+async-channel = { workspace = true }
+fs = { workspace = true }
+i18n = { path = "../../i18n" }
+log = { workspace = true }
+log-server = { workspace = true }
+server = { workspace = true }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+whence = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+power-manager = { workspace = true }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }
+
+[dev-dependencies]
+fs = { workspace = true, features = ["test"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

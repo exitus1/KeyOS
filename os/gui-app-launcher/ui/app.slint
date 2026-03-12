@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Router } from "./gen/router.slint";
+import { LauncherCallbacks, State } from "./launcher-callbacks.slint";
+import { Images, CurrentTheme, Utils } from "@ui/theme.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+import { BaseWindow } from "@ui/widgets.slint";
+
+export component AppWindow inherits BaseWindow {
+    Router { }
+}
+
+export * from "gen/exports.slint";
+export { TR, Utils, Images, CurrentTheme }
+export { LauncherCallbacks, State }

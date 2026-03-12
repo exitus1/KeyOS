@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "security-client-demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bt = { workspace = true }
+fs = { workspace = true }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+rand = "0.8"
+security = { workspace = true }
+server = { path = "../../server" }
+xous-ipc = { path = "../../xous/ipc" }

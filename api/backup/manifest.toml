@@ -1,0 +1,6 @@
+[servers."os/backup"]
+StatusSubscribe = { id = 1, type = "scalarEvent" }
+CreateBackup = { id = 2, type = "archive" }
+RestoreBackup = { id = 3, type = "archive" }
+SubscribeRestoreProgress = { id = 4, type = "archiveEvent" }
+CreateBackupFile = { id = 5, type = "archive" }

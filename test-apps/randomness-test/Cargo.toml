@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+authors = ["Foundation Devices, Inc. <hello@foundation.xyz>"]
+description = "Program to test the trng server"
+edition = "2021"
+name = "randomness-test"
+version = "0.1.0"
+
+[features]
+default = []
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+bytemuck = "1.21.0"
+fs = { workspace = true }
+getrandom = { path = "../../imports/getrandom" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+random_tester = "0.1.0"
+server = { path = "../../server" }
+trng = { path = "../../xous/trng" }
+xous = { path = "../../xous/xous-rs" }

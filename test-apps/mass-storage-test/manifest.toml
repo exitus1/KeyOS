@@ -1,0 +1,11 @@
+appId = "0x6d6173732d73746f726167652d746573"
+
+[appName]
+en = "Mass storage test client"
+
+[permissions]
+template = ["fs-generic"]
+"os/fs" = [
+    "GetUsbReadAccess",
+    "GetUsbWriteAccess",
+]

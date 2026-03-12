@@ -1,0 +1,18 @@
+{
+  "sources": "lang",
+  "slint-file": "out/ui/ui/i18n/translations.slint",
+  "apps": {
+    "onboarding": {
+      "path": "out/os/gui-app-onboarding"
+    },
+    "settings": {
+      "path": "out/os/gui-app-settings"
+    },
+    "control-center": {
+      "path": "out/os/gui-app-control-center"
+    },
+    "bitcoin": {
+      "path": "out/apps/gui-app-bitcoin"
+    }
+  }
+}

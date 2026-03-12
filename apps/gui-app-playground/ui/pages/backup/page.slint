@@ -1,0 +1,161 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { Button, HeadingLg, HeadingMd, TextMd, BasePage, IconButton, TimerCircularProgress } from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { Navigate } from "../../gen/navigate.slint";
+
+enum BackupState {
+    Idle,
+    BackingUp,
+    Restoring,
+    Success,
+    Failure,
+}
+
+export component BackupPagePage inherits BasePage {
+    VerticalLayout {
+        padding: 10px;
+        spacing: 20px;
+        height: 100%;
+        alignment: start;
+
+        HorizontalLayout {
+            alignment: space-between;
+            HorizontalLayout {
+                spacing: 10px;
+                IconButton {
+                    icon: "chevron-left";
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+
+                HeadingLg {
+                    text: "Backup Test";
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        if Callbacks.backup-state == BackupState.Idle: VerticalLayout {
+            spacing: 15px;
+
+            Button {
+                label: "Create Backup";
+                importance: primary;
+                clicked => {
+                    Callbacks.create-backup();
+                }
+            }
+
+            Button {
+                label: "Select Backup File to Restore";
+                importance: secondary;
+                clicked => {
+                    Callbacks.select-backup-file();
+                }
+            }
+
+            Button {
+                label: "Restore from Envoy";
+                importance: secondary;
+                clicked => {
+                    Callbacks.restore-from-envoy();
+                }
+            }
+
+            if Callbacks.restore-path != "": VerticalLayout {
+                spacing: 10px;
+                padding-top: 10px;
+
+                TextMd {
+                    text: "Selected backup file:";
+                    color: Palette.content-secondary;
+                }
+
+                TextMd {
+                    text: Callbacks.restore-path;
+                    color: Palette.content-primary;
+                    wrap: word-wrap;
+                }
+
+                Button {
+                    label: "Restore Backup";
+                    importance: primary;
+                    clicked => {
+                        Callbacks.restore-backup();
+                    }
+                }
+            }
+        }
+
+        if Callbacks.backup-state == BackupState.BackingUp: VerticalLayout {
+            spacing: Size.sz5;
+            HeadingMd {
+                text: "Creating backup...";
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                TimerCircularProgress {
+                    indeterminate: true;
+                }
+            }
+        }
+
+        if Callbacks.backup-state == BackupState.Restoring: VerticalLayout {
+            spacing: Size.sz5;
+            HeadingMd {
+                text: "Restoring backup...";
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                TimerCircularProgress {
+                    indeterminate: true;
+                }
+            }
+        }
+
+        if Callbacks.backup-state == BackupState.Success: VerticalLayout {
+            spacing: Size.sz6;
+            HeadingMd {
+                text: "Success!";
+                color: Palette.content-positive;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            Button {
+                label: "Done";
+                clicked => {
+                    Callbacks.backup-state = BackupState.Idle;
+                }
+            }
+        }
+
+        if Callbacks.backup-state == BackupState.Failure: VerticalLayout {
+            spacing: Size.sz6;
+            HeadingMd {
+                text: "Failed";
+                color: Palette.content-negative;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            Button {
+                label: "Retry";
+                clicked => {
+                    Callbacks.backup-state = BackupState.Idle;
+                }
+            }
+        }
+    }
+}

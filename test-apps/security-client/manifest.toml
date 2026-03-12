@@ -1,0 +1,32 @@
+appId = "0x73656375726974792d636c69656e7400"
+
+[appName]
+en = "Security Server Demo Client"
+
+[permissions]
+template = ["fs-generic"]
+"os/bt" = ["GetState"]
+"os/security" = [
+    "GetDeviceId",
+    "GetFirmwareTimestamp",
+    "SetSeedAndPin",
+    "GetSeedFingerprint",
+    "IsPinSet",
+    "KeycardAuthenticityMac",
+    "Login",
+    "LoggedIn",
+    "ChangePin",
+    "Logout",
+    "GetSeed",
+    "SetFirmwareTimestamp",
+    "SetSeed",
+    "GetSecurityWords",
+    "GetFactoryResetCounter",
+    "SignWithSecurityCheckKey",
+    "SignWithFidoKey",
+    "Lockout",
+]
+"os/fs" = [
+    "GetSystemReadAccess",
+    "GetSystemWriteAccess",
+]

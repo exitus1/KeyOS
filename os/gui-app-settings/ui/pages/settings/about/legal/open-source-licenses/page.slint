@@ -1,0 +1,53 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../../gen/tr.slint";
+import { TextXs, SliderBrightness, Switch, TextXl, TextMd, BasePage, PageBody, ContentSection, QrCodeCard, TextSm } from "@ui/widgets.slint";
+import { IconSize, Palette, Importance, Timings, Images } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+
+import { LicensesProps } from "props.slint";
+import { SettingsNavHeader } from "../../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../../gen/navigate.slint";
+
+
+export component LicensesPage inherits BasePage {
+    in property <LicensesProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.LicensesTitle);
+        }
+
+        VerticalLayout {
+            Flickable {
+                width: parent.width;
+                viewport-width: self.width;
+
+                VerticalLayout {
+                    padding-top: Size.sz4;
+                    padding-bottom: Size.sz4;
+                    padding-left: Size.sz7;
+                    padding-right: Size.sz7;
+                    spacing: Size.sz5;
+
+                    TextSm {
+                        text: "1. Universal Introductory Statement & Source Code Offer\n\nOPEN SOURCE SOFTWARE LICENSES AND LEGAL NOTICES\n\nThis product includes software components licensed under various open source and third-party licenses, including the GNU General Public License (GPL) versions 2 and 3, the Apache License 2.0, the MIT License, the BSD family of licenses (1-Clause, 2-Clause, and 3-Clause), and the SIL Open Font License 1.1 (OFL-1.1).\n\nYou have the right to receive a copy of the corresponding source code for the components covered by copyleft licenses (GPL, etc.). The source code and full license texts, including the complete list of components and required copyright notices, are available free of charge.\n\nAccess the full licenses and source code by visiting the following website or scanning the QR code below:\n\nGitHub: https://github.com/foundation-devices";
+                    }
+
+                    HorizontalLayout {
+                        alignment: center;
+
+                        QrCodeCard {
+                            data: "https://docs.foundation.xyz/";
+                        }
+                    }
+
+                    TextSm {
+                        text: "2. MANDATORY WARRANTY DISCLAIMER (GPL, MIT, Apache, BSD, OFL)\n\nWARRANTY DISCLAIMER\n\nTHE SOFTWARE AND FONT COMPONENTS ARE PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n\nIN NO EVENT SHALL THE COPYRIGHT HOLDERS, AUTHORS, OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\nThe programs are distributed in the hope that they will be useful, but WITHOUT ANY WARRANTY.\n\n3. ATTRIBUTION AND SPECIAL CONDITIONS\n\nCOPYRIGHT AND ATTRIBUTION NOTICES\n\nRequired copyright notices, permission notices, and full license conditions have been retained in the accompanying source code and documentation, accessible via the link above.\n\nSpecial Conditions Summary:\n\nGPLv3: The warranty disclaimer above constitutes the required warranty notice under the GPL. Licensees may convey the work under that License, and details on how to view a copy of the License are provided via the link above.\n\nBSD-3-Clause: The names of copyright holders and contributors for software licensed under the BSD-3-Clause may not be used to endorse or promote products derived from this software without specific prior written permission.\n\nOFL-1.1 (Fonts): This product uses Font Software licensed under the SIL Open Font License, Version 1.1. The Font Software may not be sold by itself. If the Font Software was modified, it may not use any Reserved Font Name(s) unless written permission was granted by the Copyright Holder.\n\nLicenseRef-Microchip: This product includes proprietary software components licensed from Microchip Technology Inc. Specific license terms and attribution details are provided in the accompanying source code and documentation.";
+                    }
+                }
+            }
+        }
+    }
+}

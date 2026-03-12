@@ -1,0 +1,441 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { IconButton, NavHeader, BasePage, TextMd, Button, SlideToButton, PageBody, ContentSection, ButtonSection, JumboIconPageBody, TimerCircularProgress, HeadingMd, DynamicQrCode, WrappedIcon, ConfirmationModal, Modal } from "@ui/widgets.slint";
+import { Palette, Size, UISize, ResultLevel, CardColor } from "@ui/theme.slint";
+import { TransactionCard } from "../../widgets/transaction-card.slint";
+import { Animate, Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { SignPsbt, SignPsbtState, PsbtOriginView, FileSaveState } from "../../sign-psbt.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { SignPsbtProps } from "./props.slint";
+
+component SignSubheader inherits VerticalLayout {
+    in property <string> account-name;
+
+    if account-name.character-count > 4: VerticalLayout {
+        TextMd {
+            text: TR2.lookup(TrId.SigningTransactionSubheaderThreeLines);
+            color: Palette.content-tertiary;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            wrap: word-wrap;
+        }
+
+        // This allows the elision to be inside the quotes
+        HorizontalLayout {
+            alignment: center;
+            width: 424px;
+            TextMd {
+                text: "\"";
+                wrap: no-wrap;
+                color: Palette.content-tertiary;
+            }
+
+            TextMd {
+                text: account-name;
+                color: Palette.content-tertiary;
+                overflow: elide;
+                wrap: no-wrap;
+                horizontal-alignment: TextHorizontalAlignment.center;
+            }
+
+            TextMd {
+                text: "\".";
+                wrap: no-wrap;
+                color: Palette.content-tertiary;
+            }
+        }
+    }
+
+    if account-name.character-count <= 4: TextMd {
+        text: TR2.format(TrId.SigningTransactionSubheaderTwoLines, [account-name]);
+        color: Palette.content-tertiary;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        wrap: word-wrap;
+    }
+}
+
+component AccountNotFoundModal inherits ConfirmationModal {
+    in property <bool> is-multisig;
+    in property <string> account-index;
+
+    icon: "status";
+    icon-color: Palette.content-brand;
+    title: is-multisig ? TR2.lookup(TrId.MultisigModalNotSavedHeader) : TR2.format(TrId.AccountModalNotSavedHeader, [account-index]);
+    text: is-multisig ? TR2.lookup(TrId.MultisigModalNotSavedContent) : TR2.format(TrId.AccountModalNotSavedContent, [account-index]);
+    confirm-button-label: TR2.lookup(TrId.AccountModalNotSavedSaveThenSign);
+    cancel-button-label: TR2.lookup(TrId.AccountModalNotSavedCancelSigning);
+}
+
+component AccountArchivedModal inherits ConfirmationModal {
+    in property <bool> is-multisig;
+    in property <string> account-index;
+    in property <string> account-name;
+
+    icon: "status";
+    icon-color: Palette.content-brand;
+    title: is-multisig ? TR2.lookup(TrId.AccountModalRestoreSignMultisigHeader) : TR2.format(TrId.AccountModalRestoreSignHeader, [account-index]);
+    text: is-multisig ? TR2.lookup(TrId.AccountModalRestoreSignMultisigContent) : TR2.lookup(TrId.AccountModalRestoreSignContent);
+    cancel-button-label: TR2.lookup(TrId.AccountModalRestoreSignRestoreSign);
+    confirm-button-label: TR2.lookup(TrId.AccountModalRestoreSignCancelSign);
+}
+
+component VerifyingPage inherits JumboIconPageBody {
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            TimerCircularProgress {
+                indeterminate: true;
+            }
+        }
+
+        HeadingMd {
+            text: TR2.lookup(TrId.ValidatingTransactionTitle);
+            horizontal-alignment: center;
+        }
+    }
+}
+
+component SignPage inherits VerticalLayout {
+    property <bool> signing: SignPsbt.state == SignPsbtState.Signing;
+
+    NavHeader {
+        title: TR2.lookup(TrId.SigningTransactionTitle);
+        left-icon: "chevron-left";
+
+        clicked => {
+            SignPsbt.done();
+        }
+    }
+
+    VerticalLayout {
+        alignment: space-between;
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+        padding-top: SignPsbt.pending-psbt.outputs.length == 1 ? Size.sz4 : Size.zero;
+        padding-bottom: Size.sz4;
+
+        ContentSection {
+            spacing: SignPsbt.pending-psbt.outputs.length == 1 ? Size.sz8 : Size.sz4;
+
+            VerticalLayout {
+                padding-left: Size.sz3;
+                padding-right: Size.sz3;
+
+                SignSubheader {
+                    account-name: SignPsbt.pending-psbt.account-name;
+                }
+            }
+
+            TransactionCard {
+                psbt: SignPsbt.pending-psbt;
+            }
+        }
+
+        if !signing: ButtonSection {
+            Button {
+                icon: "";
+                label: TR2.lookup(TrId.CommonButtonCancel);
+                importance: tertiary;
+                clicked => {
+                    SignPsbt.done();
+                }
+            }
+
+            SlideToButton {
+                label: TR2.lookup(TrId.CommonSlideToSignSign);
+                info-label: TR2.lookup(TrId.CommonSlideToSignHelper);
+
+                activated(id) => {
+                    SignPsbt.sign-psbt();
+                }
+            }
+        }
+
+        if signing: ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonSlideToSignSigning);
+                importance: tertiary;
+                loading: true;
+                enabled: false;
+            }
+        }
+    }
+}
+
+component QrSuccessPage inherits VerticalLayout {
+    property <bool> saved: SignPsbt.file-save-state == FileSaveState.Saved;
+
+    NavHeader {
+        title: TR2.lookup(TrId.SigningTransactionSuccessQRTitle);
+        left-icon: "chevron-left";
+
+        clicked => {
+            SignPsbt.done();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            TextMd {
+                text: TR2.lookup(TrId.SigningTransactionSuccessQRSubheader);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+
+            DynamicQrCode {
+                get-parts(density) => {
+                    SignPsbt.get-signed-ur(density);
+                }
+            }
+        }
+
+        ButtonSection {
+            Button {
+                importance: secondary;
+                icon: saved ? "check" : "save";
+                label: saved ? TR2.lookup(TrId.ExportMultisigSavedSaved) : TR2.lookup(TrId.CommonButtonSaveToFile);
+                enabled: !saved;
+                clicked => {
+                    SignPsbt.save-signed-psbt-to-file();
+                }
+            }
+
+            Button {
+                importance: primary;
+                icon: "";
+                label: TR2.lookup(TrId.CommonButtonDone);
+                clicked => {
+                    SignPsbt.done();
+                }
+            }
+        }
+    }
+}
+
+component QuantumSuccessPage inherits JumboIconPageBody {
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                inner-icon: "check";
+            }
+        }
+
+        HeadingMd {
+            horizontal-alignment: center;
+            text: TR2.lookup(TrId.SigningTransactionSuccessBTTitle);
+        }
+
+        TextMd {
+            horizontal-alignment: center;
+            text: TR2.lookup(TrId.SigningTransactionSuccessBTContent);
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonDone);
+            importance: primary;
+            clicked => {
+                SignPsbt.done()
+            }
+        }
+    }
+}
+
+component FileSuccessPage inherits JumboIconPageBody {
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                inner-icon: "check";
+            }
+        }
+
+        HeadingMd {
+            horizontal-alignment: center;
+            text: TR2.lookup(TrId.SigningTransactionSuccessSDTitle);
+        }
+
+        TextMd {
+            horizontal-alignment: center;
+            text: TR2.format(TrId.FileSavedContent, [SignPsbt.saved-file-path]);
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonDone);
+            importance: primary;
+            clicked => {
+                SignPsbt.done()
+            }
+        }
+    }
+}
+
+component ErrorPage inherits VerticalLayout {
+    NavHeader {
+        left-icon: "chevron-left";
+
+        clicked => {
+            SignPsbt.done();
+        }
+    }
+
+    VerticalLayout {
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+        padding-bottom: Size.sz6;
+        spacing: Size.sz10;
+        alignment: space-between;
+
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                inner-icon: "close";
+            }
+        }
+
+        HeadingMd {
+            horizontal-alignment: center;
+            text: SignPsbt.origin == PsbtOriginView.Qr ? TR2.lookup(TrId.InvalidQrHeader) : TR2.lookup(TrId.InvalidFileHeader);
+        }
+
+        HorizontalLayout {
+            alignment: center;
+            padding-left: SignPsbt.origin == PsbtOriginView.Qr ? Size.sz3 : Size.sz4;
+            padding-right: SignPsbt.origin == PsbtOriginView.Qr ? Size.sz3 : Size.sz4;
+
+            TextMd {
+                horizontal-alignment: center;
+                text: SignPsbt.origin == PsbtOriginView.Qr ? TR2.lookup(TrId.InvalidQrSubheader) : TR2.lookup(TrId.InvalidFileSubheader);
+                color: Palette.content-tertiary;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonButtonCancel);
+                importance: secondary;
+
+                clicked => {
+                    SignPsbt.done();
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonRetry);
+                importance: primary;
+
+                clicked => {
+                    SignPsbt.done();
+                    if SignPsbt.origin == PsbtOriginView.Qr {
+                        Callbacks.scan-clicked();
+                    } else {
+                        Callbacks.select-file();
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component SignPsbtPage inherits BasePage {
+    in property <SignPsbtProps> props;
+
+    property <SignPsbtState> state: SignPsbt.state;
+    property <bool> saved: SignPsbt.file-save-state == FileSaveState.Saved;
+    property <bool> has-save-error: SignPsbt.file-save-state == FileSaveState.Error;
+    property <bool> is-save-modal-open: saved;
+
+    if state == SignPsbtState.Verifying: VerifyingPage { }
+    if state == SignPsbtState.Sign || state == SignPsbtState.Signing: SignPage { }
+
+    if state == SignPsbtState.Success && SignPsbt.origin == PsbtOriginView.Qr: QrSuccessPage { }
+    if state == SignPsbtState.Success && SignPsbt.origin == PsbtOriginView.Quantum: QuantumSuccessPage { }
+    if state == SignPsbtState.Success && SignPsbt.origin == PsbtOriginView.File: FileSuccessPage { }
+
+    if state == SignPsbtState.Error: ErrorPage { }
+
+    if SignPsbt.show-account-not-found-modal: AccountNotFoundModal {
+        is-multisig: SignPsbt.is-multisig-account;
+        account-index: SignPsbt.account-index;
+
+        cancel-clicked => {
+            SignPsbt.show-account-not-found-modal = false;
+            SignPsbt.done();
+        }
+
+        confirm-clicked => {
+            SignPsbt.confirm-create-account();
+        }
+    }
+
+    if SignPsbt.show-account-archived-modal: AccountArchivedModal {
+        is-multisig: SignPsbt.is-multisig-account;
+        account-index: SignPsbt.account-index;
+        account-name: SignPsbt.pending-psbt.account-name;
+
+        cancel-clicked => {
+            SignPsbt.confirm-restore-account();
+        }
+
+        confirm-clicked => {
+            SignPsbt.show-account-archived-modal = false;
+            SignPsbt.done();
+        }
+    }
+
+    if is-save-modal-open: Modal {
+        icon: "save";
+        icon-color: Palette.content-brand;
+        title: TR2.lookup(TrId.FileSavedHeader);
+        text: TR2.format(TrId.FileSavedContent, [SignPsbt.saved-file-path]);
+
+        Button {
+            icon: "";
+            label: TR2.lookup(TrId.CommonButtonConfirm);
+            importance: primary;
+            clicked => {
+                is-save-modal-open = false;
+            }
+        }
+    }
+
+    if has-save-error: ConfirmationModal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.FileUnableSavedHeader);
+        text: TR2.lookup(TrId.FileUnableSavedContent);
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+        cancel-button-label: TR2.lookup(TrId.CommonButtonRetry);
+
+        cancel-clicked => {
+            SignPsbt.file-save-state = FileSaveState.Idle;
+            SignPsbt.save-signed-psbt-to-file();
+        }
+
+        confirm-clicked => {
+            SignPsbt.file-save-state = FileSaveState.Idle;
+        }
+    }
+
+    if SignPsbt.show-cant-sign-modal: Modal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.ScanModalIncorrectKeySinglesigHeader);
+        text: TR2.format(TrId.ScanModalIncorrectKeySinglesigContent, [SignPsbt.needed-fingerprint, SignPsbt.found-fingerprints]);
+
+        Button {
+            icon: "";
+            label: TR2.lookup(TrId.CommonButtonConfirm);
+            importance: primary;
+            clicked => {
+                SignPsbt.show-cant-sign-modal = false;
+                SignPsbt.done();
+            }
+        }
+    }
+}

@@ -1,0 +1,70 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSectionContainer, 
+    MenuActionItem,
+    MenuBooleanItem,
+    HLine, MenuSectionLayout, Icon,
+    BasePage,
+    PageBody,
+    MenuItemLayout
+} from "@ui/widgets.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { PinGlobal } from "../../../globals/pin-global.slint";
+import { SettingGlobal } from "../../../globals/setting-global.slint";
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+
+import { SecurityProps } from "props.slint";
+
+export component SecurityPage inherits BasePage {
+    in property <SecurityProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.SecurityTitle);
+        }
+
+        PageBody {
+            MenuSectionContainer {
+                MenuSectionLayout {
+                    MenuActionItem {
+                        first: true;
+                        label: TR2.lookup(TrId.SecurityChangePIN);
+                        clicked => {
+                            if (PinGlobal.verify-pin(TR2.lookup(TrId.ChangePinTitle), false)) {
+                                Navigate.change-pin-set-new({ });
+                            }
+                        }
+                    }
+
+                    HLine { }
+
+                    MenuItemLayout {
+                        last: true;
+                        label: TR2.lookup(TrId.SecuritySecurityWords);
+                        clicked() => {
+                            Navigate.security-words({ });
+                        }
+                        HorizontalLayout {
+                            alignment: end;
+                            spacing: Size.sz2;
+                            if SettingGlobal.show-security-words: Icon {
+                                name: "check";
+                                color: Palette.content-brand;
+                            }
+                            Icon {
+                                name: "chevron-right";
+                                color: Palette.content-tertiary;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

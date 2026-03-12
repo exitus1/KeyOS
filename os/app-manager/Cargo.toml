@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "app-manager-server"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+anyhow = "1.0"
+app-manager = { workspace = true }
+app-manifest = { path = "../app-manifest" }
+constant_time_eq = "0.4.2"
+cosign2 = { path = "../../imports/cosign2/cosign2", default-features = false }
+crypto = { workspace = true }
+fs = { workspace = true }
+fw-utils = { path = "../../utils/fw-utils" }
+hex = "0.4.3"
+log = { workspace = true }
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+num-derive = "0.4"
+num-traits = "0.2"
+power-manager = { workspace = true }
+rand = "0.8"
+rkyv = { workspace = true }
+serde_json = "1.0.139"
+server = { path = "../../server" }
+tar = { path = "../../imports/tar-rs" }
+thiserror = "1.0"
+xous = { path = "../../xous/xous-rs" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }
+
+[features]
+production = []

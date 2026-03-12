@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "power-manager"
+version = "0.1.0"
+edition = "2021"
+description = "Power Manager API crate"
+publish = false
+
+[dependencies]
+log = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+bq24157 = { workspace = true }
+i2c = { workspace = true }
+tusb320 = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

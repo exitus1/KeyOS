@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# KeyCard Authenticity Provisioning Tool Configuration
+#
+# This file contains the configuration for the keycard-auth-tool.
+# 
+# IMPORTANT: Keep this file secure as it contains the secret key used for
+# HMAC computation. This key should match the one stored in Slot 15 of the
+# ATECC608C on your Passport Prime device.
+
+# The secret key used for HMAC computation
+# - Must be exactly 64 hexadecimal characters (32 bytes)
+# - No "0x" prefix
+# - Case insensitive
+# - This key should match the one in Slot 15 of your ATECC608C
+keycard-authenticity-secret = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+# Example of different key formats (all valid):
+# keycard-authenticity-secret = "DEADBEEFCAFEBABE0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+# keycard-authenticity-secret = "fe12ab34cd56ef78901234567890abcdef1234567890abcdef1234567890abcd"

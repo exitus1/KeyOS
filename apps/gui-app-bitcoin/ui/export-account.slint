@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CardColor } from "@ui/theme.slint";
+import { MultiSigView, Network } from "./callbacks.slint";
+
+export enum ExportAccountState {
+    Idle,
+    Saving,
+    Saved,
+    Success,
+    Error,
+}
+
+export enum VisualFormat {
+    UR2,
+    QR,
+    None,
+}
+
+export struct ExportFormats {
+    visual: VisualFormat,
+    file: bool,
+}
+
+export struct ExportCapabilities {
+    single: bool,
+    join-multisig: bool,
+}
+
+export global ExportAccount {
+    in-out property <ExportAccountState> state: ExportAccountState.Idle;
+    in property <string> saved-file-path;
+
+    pure callback all-connectors() -> [string];
+    pure callback connector-display-name(connector-id: string) -> string;
+    pure callback connector-formats(connector-id: string) -> ExportFormats;
+    pure callback connector-capabilities(connector-id: string) -> ExportCapabilities;
+
+    // TODO: unify single and multisig callbacks
+    pure callback export-account-qr(account-id: string, connector-id: string, as_mult: bool, density: int) -> [string];
+    callback export-account-file(account-id: string, connector-id: string, as_multi: bool);
+
+    pure callback export-multisig-config-qr(account-id: string, density: int) -> [string];
+    callback export-multisig-config-file(account-id: string);
+}

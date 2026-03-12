@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, Modal } from "@ui/widgets.slint";
+import { Palette, Size, Importance, UISize } from "@ui/theme.slint";
+
+import { ModalGlobal } from "./global.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+export component DeleteModal inherits Modal {
+    property <bool> loading: ModalGlobal.loading;
+
+    icon: "alert";
+    icon-color: Palette.content-notice;
+    title: TR2.lookup(TrId.MainModalDeleteAreYouSureTitle);
+    text: TR2.lookup(TrId.MainModalDeleteAreYouSureContent);
+
+    Button {
+        icon: "";
+        label: TR2.lookup(TrId.CommonButtonCancel);
+        importance: Importance.secondary;
+        enabled: !root.loading;
+        clicked => {
+            ModalGlobal.cancel();
+        }
+    }
+
+    Button {
+        icon: "";
+        label: TR2.lookup(TrId.CommonButtonDelete);
+        importance: Importance.negative;
+        enabled: !root.loading;
+        loading: root.loading;
+        clicked => {
+            ModalGlobal.delete-confirmed();
+        }
+    }
+}

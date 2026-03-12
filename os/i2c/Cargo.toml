@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "i2c-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+i2c = { workspace = true }
+log = "0.4.14"
+server = { path = "../../server" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+rkyv = { workspace = true }
+utralib = { workspace = true }
+xous = { path = "../../xous/xous-rs" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

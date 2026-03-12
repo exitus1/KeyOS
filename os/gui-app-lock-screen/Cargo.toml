@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "gui-app-lock-screen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+haptics = { workspace = true }
+jiff = { version = "0.2.5", default-features = false, features = ["alloc", "std"] }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+security = { workspace = true }
+server = { path = "../../server" }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }

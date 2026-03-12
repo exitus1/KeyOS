@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+use std::any::type_name;
+
+use whence::WhenceExt;
+use xous_ipc::XousValidator;
+
+use crate::{Error, Owned, Server, ServerContext};
+
+/// A [`Move`] message handler.
+pub trait MoveHandler<M>
+where
+    M: Move,
+    Self: Server,
+{
+    fn handle(&mut self, msg: Owned<M>, sender: xous::PID, context: &mut ServerContext<Self>);
+}
+
+/// A message which can be serialized and deserialized using rkyv, with no response.
+pub trait Move: crate::ArchiveCodec + crate::MessageId + 'static {}
+
+/// Message handler, used by ServerMessages::messages()
+pub fn handle_move_message<M, S>(handler: &mut S, raw: xous::MessageEnvelope, context: &mut ServerContext<S>)
+where
+    M: Move,
+    S: MoveHandler<M>,
+    <M as rkyv::Archive>::Archived: for<'a> rkyv::bytecheck::CheckBytes<XousValidator<'a>>,
+{
+    let pid = raw.sender.pid().unwrap();
+    if let Err(e) = try_handle_move_message(pid, handler, raw, context) {
+        log::warn!("move handle error (PID {pid}) for {}: {e}", type_name::<M>());
+    }
+}
+
+fn try_handle_move_message<M, S>(
+    pid: xous::PID,
+    handler: &mut S,
+    raw: xous::MessageEnvelope,
+    context: &mut ServerContext<S>,
+) -> whence::Result<(), Error>
+where
+    M: Move,
+    S: MoveHandler<M>,
+    <M as rkyv::Archive>::Archived: for<'a> rkyv::bytecheck::CheckBytes<XousValidator<'a>>,
+{
+    let msg = Owned::new_move(raw).whence()?;
+    handler.handle(msg, pid, context);
+    Ok(())
+}
+
+/// Send a [`Move`] message.
+/// Blocks if the queue is full.
+/// Cannot be used from an IRQ context.
+pub fn send_move<M>(cid: xous::CID, msg: M) -> Result<(), xous::Error>
+where
+    M: Move,
+{
+    xous_ipc::Buffer::into_buf(&msg).map_err(|_| xous::Error::InternalError)?.send(cid, M::ID as u32)?;
+    Ok(())
+}
+
+/// Try to send a [`Move`] message.
+/// Returns an error if the queue is full
+/// Can be used from an IRQ context.
+pub fn send_move_nowait<M>(cid: xous::CID, msg: M) -> Result<(), xous::Error>
+where
+    M: Move,
+{
+    let buf = xous_ipc::Buffer::into_buf(&msg).map_err(|_| xous::Error::InternalError)?;
+    buf.send_nowait(cid, M::ID as u32)?;
+    Ok(())
+}

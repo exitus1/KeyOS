@@ -1,0 +1,149 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+
+import { Button, TextLg } from "@ui/widgets.slint";
+import { Images, Size, Utils, CurrentTheme, Palette } from "@ui/theme.slint";
+import { UISize } from "@ui/types.slint";
+import { HorizontalBox } from "std-widgets.slint";
+import { TextMd } from "@ui/widgets/txt.slint";
+
+export global Callbacks {
+    callback popup-select-file();
+    pure callback load-image(string) -> image;
+}
+
+export { Utils, Images, CurrentTheme }
+
+export global Global {
+    in property <[string]> file-paths: [];
+    in property <int> current-file-idx: 0;
+}
+
+component App {
+    width: 100%;
+    height: 100%;
+
+    function next-file() {
+        Global.current-file-idx = mod((Global.current-file-idx + 1), Global.file-paths.length);
+    }
+
+    function prev-file() {
+        Global.current-file-idx = mod((Global.current-file-idx - 1), Global.file-paths.length);
+    }
+
+    function show-main-view() {
+        Global.file-paths = [];
+        Global.current-file-idx = 0;
+    }
+
+    private property <length> TOP_TOUCH_AREA_HEIGHT: 100px;
+    private property <length> BOTTOM_TOUCH_AREA_HEIGHT: 50px;
+    private property <bool> has-files: Global.file-paths.length > 0;
+    private property <bool> show-filename: true;
+
+    function toggle-filename() {
+        show-filename = !show-filename;
+    }
+
+    if has-files: Rectangle {
+        Image {
+            source: Callbacks.load-image(Global.file-paths[Global.current-file-idx]);
+            x: 0px;
+            y: 0px;
+            width: parent.width;
+            height: parent.height;
+            image-fit: contain;
+        }
+
+        Rectangle {
+            background: white;
+            visible: show-filename;
+            y: parent.height - BOTTOM_TOUCH_AREA_HEIGHT;
+            height: BOTTOM_TOUCH_AREA_HEIGHT;
+
+            TextMd {
+                text: Global.file-paths[Global.current-file-idx];
+                color: Palette.black;
+                horizontal-alignment: center;
+            }
+        }
+
+        // Top touch area - exit image view and let user pick a new folder
+        Rectangle {
+            y: 0px;
+            width: parent.width;
+            height: TOP_TOUCH_AREA_HEIGHT;
+
+            TouchArea {
+                clicked => {
+                    show-main-view();
+                }
+            }
+        }
+
+        // Left touch area - previous file
+        Rectangle {
+            x: 0;
+            y: TOP_TOUCH_AREA_HEIGHT;
+            width: parent.width / 2;
+            height: parent.height - TOP_TOUCH_AREA_HEIGHT - BOTTOM_TOUCH_AREA_HEIGHT;
+
+            TouchArea {
+                clicked => {
+                    prev-file();
+                }
+            }
+        }
+
+        // Right touch area - next file
+        Rectangle {
+            x: parent.width / 2;
+            y: TOP_TOUCH_AREA_HEIGHT;
+            width: parent.width / 2;
+            height: parent.height - TOP_TOUCH_AREA_HEIGHT - BOTTOM_TOUCH_AREA_HEIGHT;
+
+            TouchArea {
+                clicked => {
+                    next-file();
+                }
+            }
+        }
+        // Bottom touch area - show/hide the filename
+        Rectangle {
+            y: parent.height - BOTTOM_TOUCH_AREA_HEIGHT;
+            width: parent.width;
+            height: BOTTOM_TOUCH_AREA_HEIGHT;
+            TouchArea {
+                clicked => {
+                    toggle-filename();
+                }
+            }
+        }
+    }
+
+    if !has-files: VerticalLayout {
+        alignment: center;
+        padding: Size.sz10;
+        spacing: Size.sz10;
+        TextLg {
+            horizontal-alignment: center;
+            text: "Image Viewer";
+        }
+
+        Button {
+            label: "Select File...";
+            clicked => {
+                Callbacks.popup-select-file();
+            }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    padding: 0;
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+
+    app := App { }
+}

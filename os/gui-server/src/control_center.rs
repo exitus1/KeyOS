@@ -1,0 +1,263 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+use {
+    crate::{DoubleBufferVMA, Gui, GuiState},
+    gui_server_api::{
+        consts::{
+            CONTROL_CENTER_DRAG_MARGIN_PX, CONTROL_CENTER_HEIGHT_COLLAPSED_PX,
+            CONTROL_CENTER_HEIGHT_EXPANDED_PX, CONTROL_CENTER_MIN_HEIGHT_PX, SCREEN_WIDTH,
+        },
+        touch::{Touch, TouchKind},
+        InputMessage,
+    },
+    log::{debug, error},
+    xous::{CID, PID},
+};
+
+/// The dark overlay won't become darker than this value
+/// TODO: put into the "fine tuning" settings
+const DARK_OVERLAY_ALPHA_MAX: u8 = 255 - 24;
+
+// The position of the drag handle measured from the bottom of the framebuffer.
+const DRAG_HANDLE_POS_BOTTOM_PX: usize = 28;
+/// The blur amount applied to the background under the dark overlay when the Control Center is fully
+/// expanded.
+// TODO: Reimplement blurring
+#[allow(dead_code)]
+const BG_BLUR_RADIUS: usize = 16;
+
+const ANIMATION_STEP: usize = 32;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum ControlCenterWindowState {
+    Collapsed,
+    Dragged,
+    Expanded,
+    Expanding,
+    Collapsing,
+}
+
+pub(crate) struct ControlCenterWindow {
+    pub(crate) input_cid: CID,
+    pub(crate) pid: PID,
+    pub(crate) bufs: DoubleBufferVMA,
+    pub(crate) state: ControlCenterWindowState,
+    pub(crate) curr_height: usize,
+    in_shutdown_mode: bool,
+}
+
+impl ControlCenterWindow {
+    pub fn new(input_cid: CID, pid: PID, bufs: DoubleBufferVMA) -> Self {
+        ControlCenterWindow {
+            input_cid,
+            pid,
+            bufs,
+            state: ControlCenterWindowState::Collapsed,
+            curr_height: CONTROL_CENTER_HEIGHT_COLLAPSED_PX,
+            in_shutdown_mode: false,
+        }
+    }
+
+    pub(crate) fn notify_expanded(&self, expanded: bool) {
+        log::debug!("Setting control center expanded={expanded:?}");
+        let msg = xous::Message::new_scalar(InputMessage::Custom3 as usize, expanded as usize, 0, 0, 0);
+        xous::send_message(self.input_cid, msg)
+            .map_err(|e| error!("Failed to notify control center of being expanded={expanded:?}: {e:?}"))
+            .ok();
+    }
+
+    pub(crate) fn notify_shutdown_mode(&mut self, shutdown_mode: bool) {
+        log::debug!("Setting control center shutdopwn mode={shutdown_mode:?}");
+        let msg = xous::Message::new_scalar(InputMessage::Custom4 as usize, shutdown_mode as usize, 0, 0, 0);
+        self.in_shutdown_mode = shutdown_mode;
+        xous::send_message(self.input_cid, msg)
+            .map_err(|e| error!("Failed to notify control center of shutdown mode={shutdown_mode:?}: {e:?}"))
+            .ok();
+    }
+}
+
+impl ControlCenterWindow {
+    /// Converts the current Control Center height into the dark overlay alpha value.
+    /// The overlay is intended to become less transparent as the Control Center expands, hiding the content
+    /// behind it.
+    pub(crate) fn dark_overlay_alpha(&self) -> u8 {
+        let height_ratio = self.curr_height as f32 / CONTROL_CENTER_HEIGHT_EXPANDED_PX as f32;
+        (DARK_OVERLAY_ALPHA_MAX as f32 * height_ratio) as u8
+    }
+}
+
+impl Gui {
+    pub(crate) fn is_touch_within_control_center(&self, touch: Touch) -> bool {
+        self.is_control_center_visible()
+            && self
+                .control_center_window
+                .as_ref()
+                .map(|window| touch.is_within_area(0, 0, SCREEN_WIDTH, window.curr_height))
+                .unwrap_or(false)
+    }
+
+    pub(crate) fn is_control_center_visible(&self) -> bool {
+        !matches!(self.state, GuiState::BootSplash)
+            && (self.control_center_window.as_ref().map(|cw| cw.in_shutdown_mode).unwrap_or(false)
+                || self.with_active_app(|w| w.display_control_center).unwrap_or(true))
+    }
+
+    pub(crate) fn control_center_process_touch(&mut self, touch: Touch) {
+        if !self.is_control_center_visible() {
+            return;
+        }
+
+        let Some(window) = &self.control_center_window else {
+            return;
+        };
+
+        match window.state {
+            ControlCenterWindowState::Collapsed => {
+                if touch.is_drag() {
+                    self.set_control_center_window_state(ControlCenterWindowState::Dragged);
+                }
+            }
+            ControlCenterWindowState::Dragged => {
+                self.drag_control_center(touch);
+            }
+            ControlCenterWindowState::Expanded => {
+                if touch.kind == TouchKind::Press
+                    && touch.y > CONTROL_CENTER_HEIGHT_EXPANDED_PX - CONTROL_CENTER_DRAG_MARGIN_PX
+                {
+                    self.drag_control_center(touch);
+                } else {
+                    // Allow touches to pass to the Control Center app
+                    xous::try_send_message(
+                        window.input_cid,
+                        touch.as_input_message(InputMessage::Touch as usize),
+                    )
+                    .ok();
+                }
+            }
+            ControlCenterWindowState::Collapsing | ControlCenterWindowState::Expanding => {}
+        }
+    }
+
+    fn set_control_center_window_state(&mut self, new_state: ControlCenterWindowState) {
+        let Some(window) = &mut self.control_center_window else {
+            return;
+        };
+        window.state = new_state;
+        window.notify_expanded(new_state != ControlCenterWindowState::Collapsed);
+        if new_state == ControlCenterWindowState::Collapsed {
+            window.notify_shutdown_mode(false);
+            window.notify_expanded(false);
+        } else {
+            window.notify_expanded(true);
+        }
+    }
+
+    fn drag_control_center(&mut self, touch: Touch) {
+        if let Some(window) = &mut self.control_center_window {
+            let needs_layer_update = match touch.kind {
+                TouchKind::Press => true,
+                TouchKind::Drag => {
+                    let new_h = (touch.y + DRAG_HANDLE_POS_BOTTOM_PX)
+                        .clamp(CONTROL_CENTER_MIN_HEIGHT_PX, CONTROL_CENTER_HEIGHT_EXPANDED_PX);
+                    window.curr_height = new_h;
+                    window.state = ControlCenterWindowState::Dragged;
+                    true
+                }
+                TouchKind::Release => {
+                    debug!("Expanding control center");
+                    self.control_center_expand();
+                    false
+                }
+            };
+
+            if needs_layer_update {
+                self.update_layers();
+            }
+        }
+    }
+
+    pub(crate) fn control_center_collapse(&mut self) {
+        let Some(window) = &mut self.control_center_window else {
+            return;
+        };
+
+        if window.state == ControlCenterWindowState::Collapsed {
+            return;
+        }
+        self.set_control_center_window_state(ControlCenterWindowState::Collapsing);
+    }
+
+    pub(crate) fn control_center_expand(&mut self) {
+        let Some(window) = &mut self.control_center_window else {
+            return;
+        };
+
+        if window.state == ControlCenterWindowState::Expanded {
+            return;
+        }
+        self.set_control_center_window_state(ControlCenterWindowState::Expanding);
+    }
+
+    pub(crate) fn is_control_center_collapsed(&self) -> bool {
+        self.control_center_window
+            .as_ref()
+            .map(|w| w.state == ControlCenterWindowState::Collapsed)
+            .unwrap_or(false)
+    }
+
+    pub(crate) fn is_control_center_animating(&self) -> bool {
+        self.control_center_window
+            .as_ref()
+            .map(|w| {
+                matches!(w.state, ControlCenterWindowState::Expanding | ControlCenterWindowState::Collapsing)
+            })
+            .unwrap_or(false)
+    }
+
+    pub(crate) fn is_control_center_blur_active(&self) -> bool {
+        self.control_center_window
+            .as_ref()
+            .map(|w| w.curr_height > CONTROL_CENTER_HEIGHT_EXPANDED_PX / 3)
+            .unwrap_or(false)
+    }
+
+    pub(crate) fn swap_control_center_bufs(&mut self, pid: PID) -> bool {
+        let Some(control_center_window) = &mut self.control_center_window else {
+            return false;
+        };
+        if control_center_window.pid != pid {
+            return false;
+        }
+
+        control_center_window.bufs = *control_center_window.bufs.swap();
+        true
+    }
+
+    pub(crate) fn control_center_animation_tick(&mut self) {
+        let Some(control_center) = &mut self.control_center_window else {
+            return;
+        };
+        match control_center.state {
+            ControlCenterWindowState::Collapsed
+            | ControlCenterWindowState::Dragged
+            | ControlCenterWindowState::Expanded => {}
+            ControlCenterWindowState::Expanding => {
+                if control_center.curr_height < CONTROL_CENTER_HEIGHT_EXPANDED_PX - ANIMATION_STEP {
+                    control_center.curr_height += ANIMATION_STEP;
+                } else {
+                    control_center.curr_height = CONTROL_CENTER_HEIGHT_EXPANDED_PX;
+                    self.set_control_center_window_state(ControlCenterWindowState::Expanded);
+                }
+            }
+            ControlCenterWindowState::Collapsing => {
+                if control_center.curr_height > CONTROL_CENTER_HEIGHT_COLLAPSED_PX + ANIMATION_STEP {
+                    control_center.curr_height -= ANIMATION_STEP;
+                } else {
+                    control_center.curr_height = CONTROL_CENTER_HEIGHT_COLLAPSED_PX;
+                    self.set_control_center_window_state(ControlCenterWindowState::Collapsed);
+                }
+            }
+        }
+    }
+}

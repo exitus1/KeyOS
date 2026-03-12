@@ -1,0 +1,370 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SecurityKeyCallbacks as CB } from "../../security-key-callbacks.slint";
+import { EditCaller, AuthenticatingState } from "../../security-key-types.slint";
+import { Button, Editable, Icon, IconButton, CircleIcon, AppHeader, LineCard,
+         TextLg, TextSm, TextMd, Divider, BasePage, OverlayMenu, PopupMenuItem, Link, Movable, ErrorModal } from "@ui/widgets.slint";
+import { Importance, Palette, Size, CardColor, Utils } from "@ui/theme.slint";
+import { CardPageVersion, CardList, EditPageVersion } from "@ui/pages.slint";
+import { MainProps } from "./props.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+component SecurityKey inherits Rectangle {
+    in property <string> name;
+    in property <CardColor> card-color: CardColor.light-copper;
+    in property <bool> usb-enabled: true;
+    in property <bool> nfc-enabled: true;
+    in property <bool> is-live: false;
+    in property <bool> reorder-mode: false;
+    in property <bool> edit-mode: false;
+    in property <bool> first: false;
+    in property <bool> last: false;
+
+    property <bool> solo: first && last;
+
+    callback clicked();
+
+    height: 96px;
+    LineCard {
+        horizontal-stretch: 1;
+        height: parent.height;
+        // TODO: de-duplicate logic and constants from here, authenticator, and vault
+        width: ((reorder-mode && !solo) ? 352px : 448px) - (edit-mode ? 48px : 0px);
+        card-color: card-color;
+
+        HorizontalLayout {
+            padding-left: Size.sz6;
+            padding-right: Size.sz5;
+            alignment: stretch;
+
+            VerticalLayout {
+                alignment: center;
+                spacing: Size.sz0_5;
+
+                TextLg {
+                    text: name;
+                    color: Palette.white;
+                    bold: true;
+                    wrap: no-wrap;
+                    overflow: elide;
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    height: Size.sz4;
+                    spacing: Size.sz4;
+
+                    if usb-enabled: HorizontalLayout {
+                        spacing: Size.sz1;
+                        Icon {
+                            name: "usb";
+                            color: Palette.white;
+                            size: Size.sz4;
+                        }
+
+                        TextSm {
+                            text: TR2.lookup(TrId.AccountsUsb);
+                            color: Palette.white;
+                            vertical-alignment: TextVerticalAlignment.center;
+                        }
+                    }
+
+                    if nfc-enabled: HorizontalLayout {
+                        spacing: Size.sz1;
+                        Icon {
+                            name: "nfc";
+                            color: Palette.white;
+                            size: Size.sz4;
+                        }
+
+                        TextSm {
+                            text: TR2.lookup(TrId.AccountsNfc);
+                            color: Palette.white;
+                            vertical-alignment: TextVerticalAlignment.center;
+                        }
+                    }
+
+                    // if is-live: HorizontalLayout {
+                    //     spacing: Size.sz1;
+                    //     Icon {
+                    //         name: "live-key";
+                    //         color: Palette.white;
+                    //         size: Size.sz4;
+                    //     }
+
+                    //     TextSm {
+                    //         text: TR2.lookup(TrId.AccountsLive);
+                    //         color: Palette.white;
+                    //         vertical-alignment: TextVerticalAlignment.center;
+                    //     }
+                    // }
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                CircleIcon {
+                    icon: "shield";
+                    line-color: card-color;
+                }
+            }
+        }
+    }
+
+    TouchArea {
+        clicked() => {
+            clicked();
+        }
+    }
+}
+
+export component MainPage inherits Rectangle {
+    in property <MainProps> props;
+    property <bool> light-mode: true;
+
+    private property <bool> is-menu-open: false;
+    private property <bool> reorder-mode: false;
+    private property <bool> edit-mode: false;
+    private property <bool> show-comms-modal: false;
+
+    function get-bottom-text() -> string {
+        if (CB.entries.length == 0) {
+            if (props.version == CardPageVersion.main) {
+                return TR2.lookup(TrId.MainEmptyNoKeys);
+            } else if (props.version == CardPageVersion.archive) {
+                return TR2.lookup(TrId.KeyArchiveNoArchivedKeys);
+            }
+        } else if (props.version == CardPageVersion.main) {
+            return TR2.lookup(TrId.MainTapKeyToActivate);
+        }
+        return "";
+    }
+
+    BasePage {
+        VerticalLayout {
+            // TODO: de-duplicate header with Authenticator
+            AppHeader {
+                title: props.version == CardPageVersion.main ? TR2.lookup(TrId.MainTitle) : TR2.lookup(TrId.KeyArchiveTitle);
+                side-padding: Size.sz8;
+
+                if props.version == CardPageVersion.main: Rectangle { }
+
+                if props.version == CardPageVersion.main && !(reorder-mode || edit-mode): IconButton {
+                    icon: "ellipsis";
+                    size: Size.sz8;
+                    importance: Importance.normal;
+
+                    clicked => {
+                        is-menu-open = !is-menu-open;
+                    }
+                }
+
+                if props.version == CardPageVersion.main && (reorder-mode || edit-mode): VerticalLayout {
+                    alignment: center;
+                    Link {
+                        label: TR2.lookup(TrId.EditDone);
+                        touch-factor: 1.5;
+                        importance: Importance.normal;
+
+                        clicked => {
+                            reorder-mode = false;
+                            edit-mode = false;
+                            card-list.exit-reorder-mode();
+                        }
+                    }
+                }
+
+                if props.version == CardPageVersion.archive: IconButton {
+                    icon: "chevron-left";
+                    size: Size.sz8;
+                    importance: Importance.normal;
+
+                    clicked => {
+                        CB.set-archive-mode(false);
+                        Navigate.backward();
+                    }
+                }
+            }
+
+            card-list := CardList {
+                sort-mode: CB.sort-mode;
+                sort-mode-titles: [
+                    TR2.lookup(TrId.AccountsReorderAlphabetical),
+                    TR2.lookup(TrId.AccountsReorderDate),
+                    TR2.lookup(TrId.AccountsReorderCustom)
+                ];
+                new-text: props.version == CardPageVersion.main ? TR2.lookup(TrId.EditNewKey) : "";
+                bottom-text: get-bottom-text();
+
+                set-sort-mode(mode) => {
+                    CB.sort-mode = mode;
+                    CB.set-sort-mode(mode);
+                }
+
+                search(text) => {
+                    CB.search(text)
+                }
+
+                new => {
+                    Navigate.edit({
+                        caller: EditCaller.main,
+                        key: {
+                            label: "",
+                            icon: "",
+                            live: false,
+                            color: 0,
+                            index: 0,
+                        },
+                        version: EditPageVersion.add,
+                    }, { })
+                }
+
+                for entry[index] in CB.entries: Movable {
+                    move-mode: reorder-mode && CB.sort-mode == 2;
+                    first: index == 0;
+                    last: index + 1 == CB.entries.length;
+
+                    move-position(up) => {
+                        CB.move-position(entry.index, up);
+                    }
+
+                    Editable {
+                        edit-mode: edit-mode;
+                        drag-and-drop: false;
+
+                        edit => {
+                            Navigate.edit({
+                                caller: EditCaller.main,
+                                key: entry,
+                                version: EditPageVersion.edit,
+                            }, { });
+                        }
+
+                        SecurityKey {
+                            name: entry.label;
+                            card-color: props.version == CardPageVersion.main ? Utils.index-to-card-color(entry.color) : CardColor.dark-grey;
+                            reorder-mode: reorder-mode && CB.sort-mode == 2;
+                            edit-mode: edit-mode;
+                            is-live: entry.live;
+                            first: index == 0;
+                            last: index + 1 == CB.entries.length;
+
+                            clicked => {
+                                if props.version == CardPageVersion.main {
+                                    if edit-mode {
+                                        Navigate.edit({
+                                            caller: EditCaller.main,
+                                            key: entry,
+                                            version: EditPageVersion.edit,
+                                        }, { });
+                                    } else if (!reorder-mode) {
+                                        if (!CB.is-usb-on() && !CB.is-nfc-on()) {
+                                            show-comms-modal = true;
+                                            return;
+                                        }
+                                        CB.select-key(entry.index);
+                                        CB.auth-state = AuthenticatingState.wait;
+                                        Navigate.authenticate({ });
+                                    }
+                                }
+                                if props.version == CardPageVersion.archive {
+                                    Navigate.edit({
+                                        caller: EditCaller.main,
+                                        key: entry,
+                                        version: EditPageVersion.archive,
+                                    }, { });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Ellipsis menu
+    if is-menu-open: OverlayMenu {
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainMenuNewKey);
+            icon: "plus";
+            first: true;
+            clicked => {
+                is-menu-open = false;
+                Navigate.edit({
+                    caller: EditCaller.main,
+                    key: {
+                        label: "",
+                        icon: "",
+                        live: false,
+                        color: 0,
+                        index: 0,
+                    },
+                    version: EditPageVersion.add,
+                }, { })
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainMenuEdit);
+            icon: "edit";
+            clicked => {
+                is-menu-open = false;
+                edit-mode = true;
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainMenuSearch);
+            icon: "search";
+            clicked => {
+                is-menu-open = false;
+                card-list.show-search-bar();
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainMenuReorder);
+            icon: "arrows-vertical";
+            clicked => {
+                is-menu-open = false;
+                // Clear search
+                CB.search("");
+                reorder-mode = true;
+                card-list.enter-reorder-mode();
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainMenuKeyArchive);
+            icon: "archive";
+            last: true;
+            clicked => {
+                is-menu-open = false;
+                // Clear search
+                CB.search("");
+                CB.set-archive-mode(true);
+                Navigate.main({ version: CardPageVersion.archive }, { });
+            }
+        }
+
+        touched-off => {
+            is-menu-open = false;
+        }
+    }
+
+    if show-comms-modal: ErrorModal {
+        icon: "info";
+        icon-color: Palette.content-brand;
+
+        title: TR2.lookup(TrId.AuthenticatingModalEnableCommsHeader);
+        text: TR2.lookup(TrId.AuthenticatingModalEnableCommsContent);
+
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+
+        confirm-clicked => {
+            show-comms-modal = false;
+        }
+    }
+}

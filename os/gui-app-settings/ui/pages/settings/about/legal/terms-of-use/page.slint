@@ -1,0 +1,567 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../../gen/tr.slint";
+import { TextXs, SliderBrightness, Switch, TextSm, TextMd, BasePage, PageBody, ContentSection, Divider, HeadingSm } from "@ui/widgets.slint";
+import { IconSize, Palette, Importance, Timings, Images } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+
+import { TermsOfUseProps } from "props.slint";
+import { SettingsNavHeader } from "../../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../../gen/navigate.slint";
+
+
+export component TermsOfUsePage inherits BasePage {
+    in property <TermsOfUseProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.TermsOfUseTitle);
+        }
+
+        VerticalLayout {
+            Flickable {
+                width: parent.width;
+                viewport-width: self.width;
+
+                VerticalLayout {
+                    padding-top: Size.sz4;
+                    padding-bottom: Size.sz4;
+                    padding-left: Size.sz7;
+                    padding-right: Size.sz7;
+                    spacing: Size.sz6;
+
+                    TextSm {
+                        text: "Last updated: November 11, 2025";
+                        wrap: TextWrap.word-wrap;
+                        color: Palette.content-tertiary;
+                    }
+
+                    TextSm {
+                        text: "By purchasing, activating, or using a Passport Prime hardware device (“Passport Prime,” “device,” or “Product”), you (“you,” “user,” or “purchaser”) agree to be bound by these Terms of Use (the “Agreement”).\nIf you do not agree, do not set up or use Passport Prime. You must be at least 18 years old, or of legal age in your jurisdiction, to accept these Terms.\nYour use of Foundation Devices’ website (foundation.xyz) remains governed by the Website Terms of Use and Privacy Policy.";
+                        wrap: TextWrap.word-wrap;
+                        color: Palette.content-primary;
+                    }
+
+                    VerticalLayout {
+                        spacing: Size.sz5;
+
+                        HeadingSm {
+                            text: "1. PRODUCT DESCRIPTION AND SCOPE";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(a) Passport Prime.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Passport Prime is a secure, offline hardware device designed primarily for storing and managing Bitcoin private keys and facilitating Bitcoin transactions. Passport Prime does not connect to the Internet and communicates only via Bluetooth with the Envoy app or through physical means such as QR codes or microSD cards.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(b) Envoy App.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Envoy is a mobile companion app used for setup, firmware updates, and communication with the Bitcoin network. Envoy may, at the user’s option, store private keys for its own built-in hot wallet. Envoy does not store or have access to any private keys, seed phrases, or unencrypted data originating from Passport Prime.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(c) NFC Keycard Backups.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "During setup, you may create a distributed backup of your Passport Prime’s seed and configuration data to NFC Keycards. These Keycards are the primary backup method. They are restorable only on a compatible Passport Prime. Foundation Devices cannot access, recover, or replace lost, damaged, or erased Keycards.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(d) Magic Backups.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Magic Backups is an optional encrypted backup service that allows you to back up encrypted Passport Prime data through Envoy. Encrypted backup data may be stored on Foundation Devices’ servers or trusted third-party infrastructure, but Foundation Devices never has access to the keys or credentials required to decrypt it.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You are solely responsible for remembering and safeguarding the encryption password or recovery key needed to restore from Magic Backups. If you lose this key, your data and funds cannot be recovered.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(e) Firmware and Updates.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Passport Prime accepts only firmware that has been digitally signed by Foundation Devices, ensuring authenticity and integrity. Foundation Devices is not liable for any device malfunction, data loss, or security compromise arising from interrupted updates, hardware failure, or user error during installation.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(f) Open Source Licenses.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Passport Prime includes software licensed under the GNU General Public License v3 and other open-source licenses. Your use of such software is subject to those licenses, which prevail over this Agreement in the event of conflict.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "2. USE OF PASSPORT PRIME";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Passport Prime includes functionality to store and facilitate the transfer of Bitcoin (“Bitcoin”) and other compatible assets. Foundation Devices has no control over, and no responsibility for, any Bitcoin transactions, on-chain activity, or network confirmations. You agree to comply with all applicable laws, including anti-money-laundering (“AML”) and counter-terrorist-financing regulations, when using Passport Prime.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "3. USER RESPONSIBILITIES AND SECURITY";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(a) Self-Custody and Backups.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You are solely responsible for securing your seed phrase, PIN, passphrase, NFC Keycards, Magic Backups encryption key, and any other credentials associated with your device. Foundation Devices does not have access to your private keys or unencrypted backups and cannot recover your credentials or funds.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(b) Loss of Access.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "If you lose or destroy your Passport Prime, forget your PIN or passphrase, or lose access to your Keycards or Magic Backups credentials, your funds may be permanently lost. Foundation Devices bears no liability for such loss.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(c) Permitted Research and Modifications.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Because Passport Prime and its firmware are open source, you may inspect, analyze, or modify the code and hardware for educational, research, or security purposes, provided you act responsibly and in good faith. You may not distribute or use modified versions that mislead users, compromise security, or violate law.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(d) Prohibited Use.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You may not use the Products for illegal activities, including fraud or money laundering, or interfere with the security or integrity of Passport Prime. Do not remove or alter branding, trademarks, or legal notices.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "(e) No Financial Advice.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Foundation Devices does not provide financial, investment, or tax advice. Information provided through Envoy or our documentation is for general information only.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "4. ASSUMPTION OF RISK";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You acknowledge and accept that:";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "1. Bitcoin and related technologies are volatile and subject to loss.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "2. The continued operation of Bitcoin depends on factors beyond our control, including network consensus rules, connectivity, and third-party actors.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "3. No government or insurance protects Bitcoin or transactions.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "4. Regulatory changes may affect your use of Bitcoin or Passport Prime.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "5. You are solely responsible for understanding and complying with tax obligations arising from your use of Bitcoin.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "6. Foundation Devices does not guarantee the future viability or value of Bitcoin.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "5. THIRD-PARTY PRODUCTS AND SERVICES";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Passport Prime requires certain third-party equipment, software, and services (such as mobile devices, operating systems, Bluetooth stacks, and internet connectivity) and may interoperate with optional third-party products or services.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Foundation Devices is not responsible for the performance, security, or availability of any third-party product or service. You are solely responsible for obtaining and complying with any licenses or terms governing those third-party products.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "6. TRANSFER OF PASSPORT PRIME";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You may transfer or sell Passport Prime to another person provided that the transferee agrees to be bound by the then-current version of these Terms available on our website at the time of transfer.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "7. OWNERSHIP AND FEEDBACK";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Except for the limited rights granted to you herein, all right, title, and interest (including copyrights, trademarks, patents, and trade secrets) in Passport Prime remain the exclusive property of Foundation Devices and its licensors.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Any feedback, suggestions, test results, or other information you provide related to Passport Prime become our property and may be used to improve our products without obligation or payment to you.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "8. USER REPRESENTATIONS AND WARRANTIES";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You represent and warrant that you have the legal capacity to enter into this Agreement and to fulfill your obligations hereunder, and that these Terms constitute a legal, valid, and binding obligation upon you.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "9. WARRANTY POLICY";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Foundation Devices warrants Passport Prime hardware to be free from defects in materials and workmanship under normal use for one (1) year from the date of purchase.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "This warranty does not cover damage from misuse, modification, liquids, electrical fault, or unauthorized repair.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "To submit a claim, contact hello@foundation.xyz with proof of purchase. We may repair or replace defective units at our discretion. Local consumer rights may provide additional remedies.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "10. DISCLAIMER OF WARRANTIES";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "THE PRODUCTS AND SERVICES ARE PROVIDED “AS IS” AND “AS AVAILABLE.” FOUNDATION DEVICES DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "WITHOUT LIMITATION, FOUNDATION DEVICES DOES NOT WARRANT THAT PASSPORT PRIME OR BACKUPS WILL OPERATE WITHOUT ERROR OR THAT ANY BACKUP (NFC KEYCARDS OR MAGIC BACKUPS) WILL BE SUCCESSFULLY RESTORED.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Some jurisdictions do not allow the exclusion of implied warranties; these limitations may not apply to you.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "11. LIMITATION OF LIABILITY";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "TO THE MAXIMUM EXTENT PERMITTED BY LAW, FOUNDATION DEVICES AND ITS AFFILIATES, OFFICERS, EMPLOYEES, AND SUPPLIERS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES (INCLUDING LOSS OF FUNDS, DATA, OR PROFITS) ARISING OUT OF YOUR USE OF PASSPORT PRIME OR THE SERVICES, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "IN NO EVENT SHALL OUR TOTAL LIABILITY EXCEED THE GREATER OF (A) ONE HUNDRED U.S. DOLLARS ($100) OR (B) THE AMOUNT YOU PAID FOR YOUR PASSPORT PRIME DEVICE.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Some jurisdictions do not allow the limitation or exclusion of liability; these limitations may not apply to you.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "12. INDEMNIFICATION";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You agree to indemnify and hold harmless Foundation Devices and its officers, employees, and agents from any claims, damages, or expenses (including attorneys’ fees) arising from (a) your use of Passport Prime, (b) your breach of these Terms, or (c) your violation of law. We may assume defense of any claim at your expense.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "13. RELEASE";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You release and forever discharge Foundation Devices and its agents from all claims or liabilities arising from your use of Passport Prime or loss of digital assets. If you are a California resident, you waive California Civil Code § 1542.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "14. PRIVACY AND DATA";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Your use of Passport Prime and Envoy is subject to our Privacy Policy. Foundation Devices does not collect or store private keys or seed phrases from Passport Prime. Envoy may collect limited diagnostic data with your consent.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "15. DISPUTE RESOLUTION";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "This Agreement is governed by the laws of the Commonwealth of Massachusetts, consistent with the Federal Arbitration Act. All disputes shall be resolved by binding arbitration under the JAMS rules referenced in Foundation Devices’ Website Terms of Use. You may opt out within 30 days by emailing hello@foundation.xyz.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "16. SURVIVAL AND GENERAL PROVISIONS";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Provisions that by their nature should survive termination (including Sections 3–16) will survive.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "You may not assign this Agreement without our consent. If any provision is invalid, the remainder will remain in effect. Headings are for convenience only. This Agreement constitutes the entire understanding between you and Foundation Devices concerning Passport Prime.";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        Divider {
+                            width: 50px;
+                        }
+
+                        HeadingSm {
+                            text: "17. CONTACT INFORMATION";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Foundation Devices, Inc.";
+                            bold: true;
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "6 Liberty Square #6018";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "Boston, MA 02109";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+
+                        TextSm {
+                            text: "hello@foundation.xyz";
+                            wrap: TextWrap.word-wrap;
+                            color: Palette.content-primary;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

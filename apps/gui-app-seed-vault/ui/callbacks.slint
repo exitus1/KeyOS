@@ -1,0 +1,81 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CallbackResult } from "@ui/theme.slint";
+import { SeedView, SeedViewType } from "./types.slint";
+import { TR2, TrId } from "./gen/tr.slint";
+
+export global Callbacks {
+    callback search(string);
+    callback validate-new-label(string) -> string;
+    callback validate-new-index(string, SeedViewType) -> string;
+    callback validate-edit-label(int, string) -> string;
+    callback save(SeedView) -> CallbackResult;
+    callback set-archived(int, bool);
+    callback set-archive-mode(bool);
+    callback move-position(int, bool);
+    callback set-sort-mode(int);
+    callback get-view-index([SeedView], int) -> int;
+    callback get-next-index-string(SeedViewType) -> string;
+    callback edit-indexed(int, string, int) -> CallbackResult;
+    callback edit-password(int, string, string, string, int) -> CallbackResult;
+    callback delete(int);
+    pure callback get-words(int) -> [string];
+    pure callback get-standard-seed-qr(int) -> image;
+    pure callback get-compact-seed-qr(int) -> image;
+    pure callback get-npub-qr(int) -> image;
+    pure callback get-npub(int) -> string;
+    pure callback get-nsec-qr(int) -> image;
+    pure callback get-nsec(int) -> string;
+
+    in-out property <[SeedView]> entries: [];
+    in-out property <int> sort-mode: 0;
+    in-out property <string> search-text: "";
+
+    pure public function is-indexed-seed(seed-type: SeedViewType) -> bool {
+        // Do this by inclusion rather than exclusion to avoid
+        // a mess if/when adding more non-indexed types
+        if (seed-type == SeedViewType.bitcoin-12 || seed-type == SeedViewType.bitcoin-24 || seed-type == SeedViewType.nostr-key) {
+            return true;
+        }
+        return false;
+    }
+
+    pure public function get-default-color(seed-type: SeedViewType) -> int {
+        // Each of these is an index in ui/ui/theme.slint card-color-picker-model.
+        if (seed-type == SeedViewType.bitcoin-12) {
+            return 0;  // teal
+        } else if (seed-type == SeedViewType.bitcoin-24) {
+            return 1;  // light-copper
+        } else if (seed-type == SeedViewType.password) {
+            return 5;  // dark-grey
+        } else if (seed-type == SeedViewType.nostr-key) {
+            return 3;  // purple
+        }
+        return 0;
+    }
+
+    pure public function get-seed-name(seed-type: SeedViewType) -> string {
+        if (seed-type == SeedViewType.bitcoin-12) {
+            return TR2.lookup(TrId.CreateItem12WordSeed);
+        } else if (seed-type == SeedViewType.bitcoin-24) {
+            return TR2.lookup(TrId.CreateItem24WordSeed);
+        } else if (seed-type == SeedViewType.password) {
+            return TR2.lookup(TrId.CreateItemPassword);
+        } else if (seed-type == SeedViewType.nostr-key) {
+            return TR2.lookup(TrId.CreateItemNostrKey);
+        }
+        return TR2.lookup(TrId.CreateItem12WordSeed);
+    }
+
+    pure public function get-icon(seed-type: SeedViewType) -> string {
+        if (seed-type == SeedViewType.bitcoin-12 || seed-type == SeedViewType.bitcoin-24) {
+            return "acorn";
+        } else if (seed-type == SeedViewType.password) {
+            return "pin";
+        } else if (seed-type == SeedViewType.nostr-key) {
+            return "nostr";
+        }
+        return "acorn";
+    }
+}

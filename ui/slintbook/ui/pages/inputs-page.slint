@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Size, Palette}  from "@ui/theme.slint";
+import {Button, TextMd, HeadingMd, Input, PasswordInput, SearchInput} from "@ui/widgets.slint";
+
+export component InputsPage inherits Page {
+    private property <string> output;
+    VerticalLayout {
+        spacing: Size.sz3;
+        VerticalLayout {
+            spacing: Size.sz8;
+            alignment: start;
+            width: 300px;
+
+            HeadingMd {
+                text: "Input";
+            }
+
+            Input {
+                placeholder: "Username";
+                text: "";
+            }
+
+            Input {
+                enabled: false;
+                placeholder: "Username";
+            }
+
+            Input {
+                placeholder: "Username";
+                text: "Darth Vader";
+                has-error: true;
+                message: "Username already taken";
+            }
+
+            Input {
+                placeholder: "Seed words";
+                text: "abandon";
+                prefix: "1.";
+            }
+
+            Input {
+                placeholder: "Seed words";
+                text: "marriage";
+                prefix: "24.";
+            }
+
+            SearchInput { }
+
+            SearchInput {
+                text: "Foundation";
+            }
+
+            PasswordInput {
+                text: "";
+            }
+        }
+    }
+}

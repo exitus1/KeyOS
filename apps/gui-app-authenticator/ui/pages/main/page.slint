@@ -1,0 +1,291 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AuthenticatorCallbacks as CB } from "../../authenticator-callbacks.slint";
+import { ScanQrCaller } from "../../authenticator-types.slint";
+import { Palette, Size, Importance, CardColor, Utils, ResultLevel } from "@ui/theme.slint";
+import { CardPill, IconButton, LineCard, Arc, TextLg, TextSm,
+         AppHeader, OverlayMenu, PopupMenuItem, BasePage, Movable, Link } from "@ui/widgets.slint";
+import { MainProps } from "./props.slint";
+import { EditPageVersion, CardPageVersion, CardList } from "@ui/pages.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+component AuthEntry inherits Rectangle {
+    in property <string> account;
+    in property <CardColor> card-color: CardColor.light-copper;
+    in property <string> label;
+    in property <string> code;
+    in property <int> time-remaining: 0;
+    in property <bool> reorder-mode: false;
+    in property <bool> first: false;
+    in property <bool> last: false;
+
+    property <bool> solo: first && last;
+
+    callback clicked();
+
+    function get-text-color() -> brush {
+        if time-remaining <= 5 {
+            return mod(time-remaining, 2) == 1 ? Palette.content-negative : Palette.content-tertiary;
+        } else if time-remaining <= 10 {
+            return mod(time-remaining, 2) == 0 ? Palette.content-negative-bold : Palette.content-tertiary;
+        } else {
+            return Palette.white;
+        }
+    }
+
+    height: 96px;
+    LineCard {
+        horizontal-stretch: 1;
+        height: parent.height;
+        width: (reorder-mode && !solo) ? 352px : 448px;
+        card-color: card-color;
+        HorizontalLayout {
+            padding-left: Size.sz6;
+            padding-right: Size.sz4;
+            alignment: stretch;
+
+            VerticalLayout {
+                alignment: center;
+                spacing: Size.sz1;
+                TextLg {
+                    text: label;
+                    color: Palette.white;
+                    bold: true;
+                    wrap: no-wrap;
+                    overflow: elide;
+                }
+
+                TextSm {
+                    text: account;
+                    color: Palette.white;
+                    wrap: no-wrap;
+                    overflow: elide;
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                CardPill {
+                    line-color: card-color;
+
+                    TextLg {
+                        horizontal-alignment: center;
+                        text: code;
+                        color: get-text-color();
+                        bold: true;
+                    }
+                }
+            }
+        }
+    }
+
+    TouchArea {
+        clicked() => {
+            clicked();
+        }
+    }
+}
+
+component TinyCountdownTimer inherits Rectangle {
+    in property <int> time-remaining;
+    in property <int> max-time: 30;
+    width: Size.sz8;
+    height: Size.sz8;
+
+    Arc {
+        x: -Size.sz0_5;
+        y: -Size.sz0_5;
+        size: Size.sz9;
+        start-angle: 0;
+        end-angle: time-remaining * 360 / max-time;
+        stroke-color: Palette.border-notice;
+        stroke-width: 3px;
+    }
+
+    TextSm {
+        bold: true;
+        width: parent.width;
+        height: parent.height;
+        text: time-remaining;
+        color: Palette.border-notice;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        vertical-alignment: TextVerticalAlignment.center;
+    }
+}
+
+export component MainPage inherits BasePage {
+    in property <MainProps> props;
+
+    private property <bool> is-menu-open: false;
+    private property <bool> reorder-mode: false;
+
+    function get-bottom-text() -> string {
+        if (CB.entries.length) == 0 {
+            if (props.version == CardPageVersion.main) {
+                return TR2.lookup(TrId.MainEmptyNoCodes);
+            } else if (props.version == CardPageVersion.archive) {
+                return TR2.lookup(TrId.ArchivedCodesNoArchivedCodes);
+            }
+        }
+        return "";
+    }
+
+    VerticalLayout {
+        AppHeader {
+            title: props.version == CardPageVersion.main ? TR2.lookup(TrId.MainTitle) : TR2.lookup(TrId.ArchivedCodesTitle);
+            side-padding: Size.sz8;
+
+            if props.version == CardPageVersion.main: TinyCountdownTimer {
+                time-remaining: CB.time-until-refresh;
+                max-time: 30;
+            }
+
+            if props.version == CardPageVersion.main && !reorder-mode: IconButton {
+                icon: "ellipsis";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    is-menu-open = !is-menu-open;
+                }
+            }
+
+            if props.version == CardPageVersion.main && reorder-mode: VerticalLayout {
+                alignment: center;
+                Link {
+                    label: TR2.lookup(TrId.MainEditDone);
+                    touch-factor: 1.5;
+                    importance: Importance.normal;
+                    clicked => {
+                        reorder-mode = false;
+                        card-list.exit-reorder-mode();
+                    }
+                }
+            }
+
+            if props.version == CardPageVersion.archive: IconButton {
+                icon: "chevron-left";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    CB.set-archive-mode(false);
+                    Navigate.backward();
+                }
+            }
+        }
+
+        card-list := CardList {
+            sort-mode: CB.sort-mode;
+            sort-mode-titles: [
+                TR2.lookup(TrId.ReorderAlphabetical),
+                TR2.lookup(TrId.ReorderDate),
+                TR2.lookup(TrId.ReorderCustom)
+            ];
+            search-text: CB.search-text;
+            new-text: props.version == CardPageVersion.main ? TR2.lookup(TrId.MainEmptyNewCode) : "";
+            bottom-text: get-bottom-text();
+
+            set-sort-mode(mode) => {
+                CB.sort-mode = mode;
+                CB.set-sort-mode(mode);
+            }
+
+            search(text) => {
+                CB.search-text = text;
+                CB.search(text)
+            }
+
+            new => {
+                CB.scan-qr(ScanQrCaller.main);
+            }
+
+            for entry[index] in CB.entries: Movable {
+                move-mode: reorder-mode && CB.sort-mode == 2;
+                first: index == 0;
+                last: index + 1 == CB.entries.length;
+
+                AuthEntry {
+                    label: entry.label;
+                    account: entry.account;
+                    code: entry.code;
+                    card-color: props.version == CardPageVersion.main ? Utils.index-to-card-color(entry.color) : CardColor.dark-grey;
+                    time-remaining: CB.time-until-refresh;
+                    reorder-mode: reorder-mode && CB.sort-mode == 2;
+                    first: parent.first;
+                    last: parent.last;
+
+                    clicked() => {
+                        if !reorder-mode {
+                            if props.version == CardPageVersion.main {
+                                Navigate.opened-card({ view-index: index }, { });
+                            } else {
+                                Navigate.edit({
+                                    auth: entry,
+                                    label-validation: "",
+                                    result: { level: ResultLevel.info, success: true, text: "", title: "" },
+                                    version: EditPageVersion.archive,
+                                }, { })
+                            }
+                        }
+                    }
+                }
+
+                move-position(up) => {
+                    CB.move-position(entry.index, up);
+                }
+            }
+        }
+    }
+
+    // Ellipsis menu
+    if is-menu-open: OverlayMenu {
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainThreeDotsAddCode);
+            icon: "plus";
+            first: true;
+            clicked => {
+                is-menu-open = false;
+                CB.scan-qr(ScanQrCaller.main);
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainThreeDotsSearch);
+            icon: "search";
+            clicked => {
+                is-menu-open = false;
+                card-list.show-search-bar();
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainThreeDotsReorder);
+            icon: "arrows-vertical";
+            clicked => {
+                is-menu-open = false;
+                // Clear search
+                CB.search("");
+                reorder-mode = true;
+                card-list.enter-reorder-mode();
+            }
+        }
+
+        PopupMenuItem {
+            label: TR2.lookup(TrId.MainThreeDotsCodeArchive);
+            icon: "archive";
+            last: true;
+            clicked => {
+                is-menu-open = false;
+                // Clear search
+                CB.search("");
+                CB.set-archive-mode(true);
+                Navigate.main({ version: CardPageVersion.archive }, { });
+            }
+        }
+
+        touched-off => {
+            is-menu-open = false;
+        }
+    }
+}

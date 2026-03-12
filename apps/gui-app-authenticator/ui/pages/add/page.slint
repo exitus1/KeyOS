@@ -1,0 +1,47 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AuthenticatorCallbacks as CB } from "../../authenticator-callbacks.slint";
+import { ScanQrCaller } from "../../authenticator-types.slint";
+import { Palette } from "@ui/theme.slint";
+import { Button, HeadingLg, TextMd, ShieldPage, ContentSection, ButtonSection, WrappedIcon } from "@ui/widgets.slint";
+import { AddProps } from "./props.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+
+export component AddPage inherits ShieldPage {
+    in property <AddProps> props;
+    property <bool> light-mode: true;
+
+    ContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "plus";
+            }
+        }
+
+        HeadingLg {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.MainAdd2FAHeader);
+            horizontal-alignment: center;
+        }
+
+        TextMd {
+            text: TR2.lookup(TrId.MainAdd2FASubheader);
+            color: Palette.content-secondary;
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            icon: "";
+            label: TR2.lookup(TrId.MainAdd2FAScanQrCode);
+            importance: primary;
+            clicked => {
+                CB.scan-qr(ScanQrCaller.add);
+            }
+        }
+    }
+}

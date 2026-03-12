@@ -1,0 +1,141 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, TextLg, Icon, JumboIcon, Shield, HeadingMd, TextMd, TimerCircularProgress, ButtonSection, WrappedIcon, JumboIconPageBody } from "@ui/widgets.slint";
+import { Font } from "@ui/fonts.slint";
+import { Palette, Size, Utils, UISize } from "@ui/theme.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingCallbacks, MasterSeedState, SeedGlobal } from "../../../onboarding-callbacks.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { OnboardingBasePage, OnboardingContentSection } from "../../../widgets/base-page.slint";
+import { StepLine, StepLineSection } from "@ui/widgets/step-list.slint";
+
+component MasterKeyGenerated inherits StepLine {
+    text: TR2.lookup(TrId.CreatingMasterKeyMasterKeyGenerated);
+    done: true;
+}
+
+component MasterKeyHeader inherits HeadingMd {
+    vertical-stretch: 0;
+    text: TR2.lookup(TrId.CreatingMasterKeyHeader);
+    horizontal-alignment: center;
+}
+
+component Loading inherits JumboIconPageBody {
+    property <MasterSeedState> state: SeedGlobal.master-seed-state;
+
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+
+            TimerCircularProgress {
+                indeterminate: true;
+                Icon {
+                    name: "master-key";
+                    size: 96px;
+                }
+            }
+        }
+
+        MasterKeyHeader { }
+
+        StepLineSection {
+
+            MasterKeyGenerated { }
+
+            StepLine {
+                text: self.loading ? TR2.lookup(TrId.CreatingMasterKeySavingMasterKey) : TR2.lookup(TrId.CreatingMasterKeyMasterKeySaved);
+                loading: state == MasterSeedState.SavingToSE;
+                done: state == MasterSeedState.EncryptingFs;
+            }
+
+            StepLine {
+                text: self.loading ? TR2.lookup(TrId.CreatingMasterKeyEncryptingData) : TR2.lookup(TrId.CreatingMasterKeyEncryptData);
+                loading: state == MasterSeedState.EncryptingFs;
+            }
+        }
+    }
+}
+
+component Success inherits JumboIconPageBody {
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "check";
+            }
+        }
+
+        MasterKeyHeader {
+            text: TR2.lookup(TrId.SeedMasterKeyCreatedHeader);
+        }
+
+        StepLineSection {
+
+            MasterKeyGenerated { }
+
+            StepLine {
+                text: TR2.lookup(TrId.CreatingMasterKeyMasterKeySaved);
+                done: true;
+            }
+
+            StepLine {
+                text: TR2.lookup(TrId.MasterKeyCreatedDataEncrypted);
+                done: true;
+            }
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonContinue);
+            importance: primary;
+            clicked => {
+                OnboardingCallbacks.navigate-backup();
+            }
+        }
+    }
+}
+
+component Failed inherits JumboIconPageBody {
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "close";
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            // todo: i18n
+            text: "Failed to create Master Key";
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            clicked => {
+                SeedGlobal.master-seed-state = MasterSeedState.Idle;
+                SeedGlobal.create-master-seed();
+            }
+        }
+    }
+}
+
+export component CreateMasterSeedPage inherits OnboardingBasePage {
+    init => {
+        SeedGlobal.create-master-seed();
+    }
+
+    property <MasterSeedState> state: SeedGlobal.master-seed-state;
+
+    if state == MasterSeedState.Idle || state == MasterSeedState.SavingToSE || state == MasterSeedState.EncryptingFs: Loading { }
+    if state == MasterSeedState.Success: Success { }
+    if state == MasterSeedState.Failed: Failed { }
+}

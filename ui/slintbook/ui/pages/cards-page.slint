@@ -1,0 +1,328 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {AccountCard, Button, SlideToButton, HeadingMd, TextMd, LineCard, CardCircle, CardPill, HeadingSm, Icon} from "@ui/widgets.slint";
+import {Size, CardColor} from "@ui/theme.slint";
+import {UIColors} from "@ui/palettes/ui-colors.slint";
+
+export component CardsPage inherits Page {
+    private property <string> output;
+    clip: false;
+
+    VerticalLayout {
+        spacing: Size.sz6;
+
+        HeadingSm {
+            text: "Cards";
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            LineCard {
+                card-color: CardColor.blue;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardCircle {
+                            line-color: CardColor.blue;
+                            Icon {
+                                name: "bitcoin";
+                                size: 60px;
+                                color: UIColors.primary-white;
+                            }
+                        }
+                    }
+                }
+            }
+
+            LineCard {
+                card-color: CardColor.teal;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardPill {
+                            line-color: CardColor.teal;
+
+                            TextMd {
+                                text: "Bitcoin";
+                                color: UIColors.primary-white;
+                                bold: true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            LineCard {
+                card-color: CardColor.dark-copper;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardCircle {
+                            line-color: CardColor.dark-copper;
+
+                            Icon {
+                                name: "lightning";
+                                size: 60px;
+                                color: UIColors.primary-white;
+                            }
+                        }
+                    }
+                }
+            }
+
+            LineCard {
+                card-color: CardColor.light-copper;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardPill {
+                            line-color: CardColor.light-copper;
+
+                            TextMd {
+                                text: "Lightning";
+                                color: UIColors.primary-white;
+                                bold: true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            LineCard {
+                card-color: CardColor.pine;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardCircle {
+                            line-color: CardColor.pine;
+
+                            Icon {
+                                name: "shield";
+                                size: 60px;
+                                color: UIColors.primary-white;
+                            }
+                        }
+                    }
+                }
+            }
+
+            LineCard {
+                card-color: CardColor.green;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardPill {
+                            line-color: CardColor.green;
+
+                            TextMd {
+                                text: "Shield";
+                                color: UIColors.primary-white;
+                                bold: true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            LineCard {
+                card-color: CardColor.purple;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardCircle {
+                            line-color: CardColor.purple;
+
+                            Icon {
+                                name: "nostr";
+                                size: 60px;
+                                color: UIColors.primary-white;
+                            }
+                        }
+                    }
+                }
+            }
+
+            LineCard {
+                card-color: CardColor.dark-grey;
+                width: 416px;
+                height: 144px;
+
+                HorizontalLayout {
+                    padding: Size.sz4;
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        CardPill {
+                            line-color: CardColor.dark-grey;
+
+                            TextMd {
+                                text: "NOSTR";
+                                color: UIColors.primary-white;
+                                bold: true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        HeadingSm {
+            text: "Account Cards";
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            AccountCard {
+                width: 440px;
+                height: 148px;
+                name: "Bitcoin";
+                icon: "bitcoin";
+                crypto-icon: "bitcoin";
+                crypto-balance: "100.00000000";
+                fiat-balance: "$9,124,650.97";
+                card-color: CardColor.blue;
+            }
+
+            AccountCard {
+                width: 440px;
+                height: 148px;
+                name: "Lightning";
+                icon: "lightning";
+                crypto-icon: "lightning";
+                crypto-balance: "7.00000000";
+                fiat-balance: "$430,232.45";
+                card-color: CardColor.teal;
+            }
+        }
+
+        HeadingSm {
+            text: "Card Pills";
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            CardPill {
+                line-color: CardColor.blue;
+            }
+
+            CardPill {
+                line-color: CardColor.teal;
+            }
+
+            CardPill {
+                line-color: CardColor.dark-copper;
+            }
+
+            CardPill {
+                line-color: CardColor.light-copper;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            CardPill {
+                line-color: CardColor.pine;
+            }
+
+            CardPill {
+                line-color: CardColor.green;
+            }
+
+            CardPill {
+                line-color: CardColor.purple;
+            }
+
+            CardPill {
+                line-color: CardColor.dark-grey;
+            }
+        }
+
+        HeadingSm {
+            text: "Card Circles";
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            CardCircle {
+                line-color: CardColor.blue;
+            }
+
+            CardCircle {
+                line-color: CardColor.teal;
+            }
+
+            CardCircle {
+                line-color: CardColor.dark-copper;
+            }
+
+            CardCircle {
+                line-color: CardColor.light-copper;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            CardCircle {
+                line-color: CardColor.pine;
+            }
+
+            CardCircle {
+                line-color: CardColor.green;
+            }
+
+            CardCircle {
+                line-color: CardColor.purple;
+            }
+
+            CardCircle {
+                line-color: CardColor.dark-grey;
+            }
+        }
+    }
+}

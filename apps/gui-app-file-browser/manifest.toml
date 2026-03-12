@@ -1,0 +1,17 @@
+appId = "0x46696c652042726f7773657200000000"
+
+[appName]
+en = "Files"
+
+[permissions]
+template = ["gui-app", "navigable", "fs-generic"]
+"os/power-manager" = ["SetOtgPriority"]
+"os/fs" = [
+    "GetUsbReadAccess",
+    "GetUsbWriteAccess",
+    "GetUserReadAccess",
+    "GetUserWriteAccess",
+    "GetAirlockReadAccess",
+    "GetAirlockWriteAccess",
+]
+"os/settings" = ["SubscribeAirlockMode", "SetAirlockMode"]

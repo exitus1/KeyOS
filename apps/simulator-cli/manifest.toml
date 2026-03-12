@@ -1,0 +1,10 @@
+appId = "0x7a0169aeda17aa2ff3545c5805a0404b"
+
+[appName]
+en = "Simulator CLI"
+
+[permissions]
+"os/settings" = [
+    "GetSystemTheme",
+    "SetSystemTheme",
+]

@@ -1,0 +1,17 @@
+[package]
+name = "securam-manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+atsama5d27 = { path = "../atsama5d27", default-features = false }
+crcxx = { version = "0.3.1" }
+zeroize = { version = "1.8.1", default-features = false }
+
+[features]
+bootloader = []
+recovery-os = []
+default = []
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

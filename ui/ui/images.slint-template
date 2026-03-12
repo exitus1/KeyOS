@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Linecap, GradientDirection, GradientStop, CardColor, Size} from "./types.slint";
+import {UIColors} from "./palettes/ui-colors.slint";
+
+export global Images {
+    // #IF PREVIEW
+    // pure public function common(name: string) -> image {
+{{{images}}}
+    //
+    //    // Default case if no match is found
+    //    return @image-url("@ui/images/logo.png");
+    // }
+    //
+    // pure public function nine-slice(name: string) -> image {
+{{{nine-slice-images}}}
+    //
+    //     return @image-url("@ui/images/logo.png");
+    // }
+    //
+    // pure public function icon(name: string, size: length) -> image {
+{{{icons}}}
+    //
+    //     return @image-url("@ui/icons/bullet.svg");
+    // }
+    // #ELSE
+    pure callback common(string) -> image;
+    pure callback nine-slice(string) -> image;
+    pure callback icon(string, length) -> image;
+    // #ENDIF
+}

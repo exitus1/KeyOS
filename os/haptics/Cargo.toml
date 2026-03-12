@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "haptics-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+haptics = { workspace = true }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+server = { path = "../../server" }
+xous = { path = "../../xous/xous-rs" }
+
+[target.'cfg(keyos)'.dependencies]
+drv2605 = "0.1.0"
+gpio = { workspace = true }
+i2c = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

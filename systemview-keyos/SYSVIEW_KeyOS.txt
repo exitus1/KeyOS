@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+#
+# xous (KeyOS) description file for SEGGER SystemView
+#
+# Copy this file into ~/.config/SEGGER for SystemView to access it.
+#
+
+# Syscall result type
+NamedType SyscallResult 0=Ok                  1=Error            2=MemoryAddress    3=MemoryRange
+NamedType SyscallResult 4=ReadyThreads        5=ResumeProcess    6=SID              7=CID
+NamedType SyscallResult 8=NewCID              9=MessageEnvelope  10=TID             11=PID
+NamedType SyscallResult 12=Unimplemented      13=BlockedProcess  14=Scalar1         15=Scalar2
+NamedType SyscallResult 16=RetryCall          17=None            18=MemoryReturned  19=NewProcess
+NamedType SyscallResult 20=Scalar5            21=Message         22=UnknownResult
+
+# Internal API result type
+NamedType InternalApiResult 0=Ok                    1=BadAlignment         2=BadAddress         3=OutOfMemory
+NamedType InternalApiResult 4=MemoryInUse           5=InterruptNotFound    6=InterruptInUse     7=InvalidString
+NamedType InternalApiResult 8=ServerExists          9=ServerNotFound       10=ProcessNotFound   11=ProcessNotChild
+NamedType InternalApiResult 12=ProcessTerminated    13=Timeout             14=InternalError     15=ServerQueueFull
+NamedType InternalApiResult 16=ThreadNotAvailable   17=UnhandledSyscall    18=InvalidSyscall    19=ShareViolation
+NamedType InternalApiResult 20=InvalidThread        21=InvalidPID          22=UnknownError      23=AccessDenied
+NamedType InternalApiResult 24=UseBeforeInit        25=DoubleFree          26=DebugInProgress   27=InvalidLimit
+
+# SyscallNumber     |      Name             |         # Parameters
+# ---------------------------------------------------------------------------------------------------
+42                      MapMemory                 phys=0x%08x virt=0x%08x size=%u flags=0x%08x                          | Returns %SyscallResult
+43                      Yield
+44                      ReturnToParent
+45                      ClaimInterrupt            irq=%u handler=0x%08x arg=0x%08x                                      | Returns %SyscallResult
+46                      FreeInterrupt             irq=%u                                                                | Returns %SyscallResult
+47                      SwitchTo                  pid=%u tid=%u                                                         | Returns %SyscallResult
+48                      ReadyThreads              pid=%u                                                                | Returns %SyscallResult
+49                      WaitEvent
+50                      IncreaseHeap              size=%u flags=0x%08x                                                  | Returns %SyscallResult
+51                      DecreaseHeap              size=%u                                                               | Returns %SyscallResult
+52                      UpdateMemoryFlags         start=0x%08x len=0x%08x flags=0x%08x pid=%u                           | Returns %SyscallResult
+53                      TerminatePid              pid=%u                                                                | Returns %SyscallResult
+54                      CreateServerWithAddress   sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+55                      ReceiveMessage            sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+56                      SendMessage               cid=0x%08x, ty=0x%08x, id=%u, (0x%08x, 0x%08x, 0x%08x, 0x%08x)        | Returns %SyscallResult
+57                      Connect                   sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+58                      CreateThread              call=0x%08x, sp=0x%08x, slen=0x%08x, (0x%08x, 0x%08x, 0x%08x, 0x%08x) | Returns %SyscallResult
+59                      UnmapMemory               start=0x%08x, len=0x%08x                                              | Returns %SyscallResult
+60                      ReturnMemory              sender=0x%08x, buf=0x%08x, len=0x%08x, offset=%u, valid=%u            | Returns %SyscallResult
+61                      CreateProcess             (0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x)              | Returns %SyscallResult
+62                      TerminateProcess          code=0x%08x                                                           | Returns %SyscallResult
+63                      Shutdown                  code=0x%08x
+64                      TrySendMessage            cid=0x%08x, ty=0x%08x, id=%u, (0x%08x, 0x%08x, 0x%08x, 0x%08x)        | Returns %SyscallResult
+65                      TryConnect                sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+66                      ReturnScalar1             sender=0x%08x, (0x%08x)                                               | Returns %SyscallResult
+67                      ReturnScalar2             sender=0x%08x, (0x%08x, 0x%08x)                                       | Returns %SyscallResult
+68                      TryReceiveMessage         sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+69                      CreateServer              sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+70                      ConnectForProcess         pid=%u sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                           | Returns %SyscallResult
+71                      CreateServerId                                                                                  | Returns %SyscallResult
+72                      GetThreadId                                                                                     | Returns %SyscallResult
+73                      GetProcessId                                                                                    | Returns %SyscallResult
+74                      DestroyServer             sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x)                                  | Returns %SyscallResult
+75                      Disconnect                cid=0x%08x                                                            | Returns %SyscallResult
+76                      JoinThread                tid=%u                                                                | Returns %SyscallResult
+77                      SetExceptionHandler       pc=0x%08x, sp=0x%08x                                                  | Returns %SyscallResult
+78                      AdjustProcessLimit        index=%u, current=%u, new=%u                                          | Returns %SyscallResult
+79                      VirtToPhys                addr=0x%08x                                                           | Returns %SyscallResult
+80                      ReturnScalar5             sender=0x%08x, (0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x)               | Returns %SyscallResult
+81                      ReplyAndReceiveNext       sender=0x%08x, code=%u, (0x%08x, 0x%08x, 0x%08x, 0x%08x) valid=0x%08x | Returns %SyscallResult
+82                      VirtToPhysPid             saddr=0x%08x, pid=%u                                                  | Returns %SyscallResult
+83                      HooksGetAppId             pid=%u                                                                | Returns %SyscallResult
+84                      HooksAllowMessages        start=0x%08x, len=0x%08x                                              | Returns %SyscallResult
+85                      HooksDenyMessages         start=0x%08x, len=0x%08x                                              | Returns %SyscallResult
+86                      InvalidateCache           start=0x%08x, len=0x%08x, op=%u                                       | Returns %SyscallResult
+88                      AppIdToPid                appid=0x%08x%08x%08x%08x                                              | Returns %SyscallResult
+89                      SetChildPidAppId          child=%u, appid=0x%08x%08x%08x%08x                                    | Returns %SyscallResult
+90                      MirrorMemoryToPid         src=0x%08x, len=0x%08x, pid=%u                                        | Returns %SyscallResult
+94                      RegisterChildrenTerminateHandler sid=(0x%08x, 0x%08x, 0x%08x, 0x%08x), id=%u                    | Returns %SyscallResult
+
+#
+# Internal keyOS functions/events
+#
+
+# Internal keyOS API function number     |      Name             |         # Parameters
+# ---------------------------------------------------------------------------------------------------
+256                     alloc_page                pid=%u                                             | Returns %InternalApiResult

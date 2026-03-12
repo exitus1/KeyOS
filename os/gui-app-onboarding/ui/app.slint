@@ -1,0 +1,86 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Router } from "./gen/router.slint";
+import {  Size, Palette, Images, UISize, CurrentTheme, Palettes, Utils, Importance} from "@ui/theme.slint";
+import { Button, BaseWindow, OverlayMenu, PopupMenuItem, IconButton, TextMd, TextSm, Modal } from "@ui/widgets.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Navigate } from "./gen/navigate.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+import { TR2, TrId } from "./gen/tr.slint";
+import { OnboardingCallbacks } from "./onboarding-callbacks.slint";
+
+
+export component AppWindow inherits BaseWindow {
+    in-out property <bool> show-menu: false;
+
+    Router { }
+
+    if OnboardingCallbacks.fatal-disconnect: Modal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.ScanModalPassportDisconnectedHeader);
+        text: TR2.lookup(TrId.ScanModalPassportDisconnectedContent);
+
+        Button {
+            label: TR2.lookup(TrId.ScanModalPassportDisconnectedRestartOnboarding);
+            clicked => {
+                self.loading = true;
+                self.enabled = false;
+                OnboardingCallbacks.restart-onboarding();
+            }
+        }
+    }
+
+    if OnboardingCallbacks.debug-actions.length > 0: IconButton {
+        x: UISize.screen-width / 2 - self.width / 2;
+        y: UISize.control-center-status-bar-height;
+        z: 100;
+        width: 100px;
+        icon: "";
+
+        clicked => {
+            root.show-menu = true;
+        }
+    }
+
+    if OnboardingCallbacks.debug-actions.length > 0 && show-menu: Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: Palette.overlay;
+        TouchArea {
+            clicked => {
+                root.show-menu = false;
+            }
+        }
+
+        Rectangle {
+            y: UISize.control-center-status-bar-height * 4;
+            height: parent.height - self.y;
+            background: Palette.background-primary;
+
+            VerticalLayout {
+                Flickable {
+                    VerticalLayout {
+                        spacing: 2px;
+
+                        for label[index] in OnboardingCallbacks.debug-actions: PopupMenuItem {
+                            label: label;
+                            clicked => {
+                                OnboardingCallbacks.run-debug-action(index);
+                                root.show-menu = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export * from "gen/exports.slint";
+export { Utils, Images, TR, CurrentTheme, StepModel }
+
+import { OnboardingCallbacks, SeedGlobal, KeycardBackupGlobal, KeycardRestoreGlobal, EraseGlobal } from "./onboarding-callbacks.slint";
+export { OnboardingCallbacks, SeedGlobal, KeycardBackupGlobal, KeycardRestoreGlobal, EraseGlobal }

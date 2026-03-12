@@ -1,0 +1,6 @@
+appId = "0x74726e67000000000000000000000000"
+memory = ["ADC", "TRNG"]
+syscall = ["SetThreadPriority"]
+
+[appName]
+en = "TRNG Server"

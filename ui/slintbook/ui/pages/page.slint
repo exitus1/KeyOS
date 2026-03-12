@@ -1,0 +1,22 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { ScrollView } from "std-widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+export component Page inherits Rectangle {
+    width: 100%;
+    height: 100%;
+    background: Palette.background-primary;
+    padding: Size.sz6;
+
+    HorizontalLayout {
+        padding: Size.sz6;
+        width: 100%;
+
+        Flickable {
+            width: parent.width - Size.sz10;
+            @children
+        }
+    }
+}

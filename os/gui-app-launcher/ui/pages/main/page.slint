@@ -1,0 +1,545 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { LauncherCallbacks as CB, State } from "../../launcher-callbacks.slint";
+import { VerticalBox, HorizontalBox, GridBox } from "std-widgets.slint";
+import { Font, Importance, CardColor, IconSize, Images, Size, Palette, CurrentTheme, Utils, UISize } from "@ui/theme.slint";
+import { Shield, PopupMenu, Shimmer, TimerLoader, TextSm, TextMd, Divider, HeadingMd, IconButton, HeadingLg, CircleIcon, TextLg, HeadingXl, LineCard, BasePage, Circle, Icon } from "@ui/widgets.slint";
+import { LightPalette } from "@ui/palettes/light-palette.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { MainProps } from "./props.slint";
+
+export struct AppButton {
+    id: string,
+    title: string,
+    width: length,
+    height: length,
+}
+
+component AppTile inherits Rectangle {
+    in property <string> name;
+    in property <string> icon;
+    in property <CardColor> tile-color: CardColor.light-copper;
+    in property <string> app-id;
+
+    width: 204px;
+    height: 100px;
+
+    property <bool> is-loading: State.loading-app-id == app-id;
+
+    HorizontalLayout {
+        padding-top: is-loading ? Size.sz1 : 0px;
+        padding-bottom: is-loading ? 0px : Size.sz1;
+
+        LineCard {
+            width: parent.width;
+            height: parent.height;
+            card-color: tile-color;
+
+            clicked => {
+                CB.app-clicked(240px, 400px, app-id);
+            }
+
+            Shimmer {
+                active: root.is-loading;
+
+                HorizontalLayout {
+                    padding-left: Size.sz4 + Size.sz0_5;
+                    padding-right: Size.sz4 + Size.sz0_5;
+                    spacing: Size.sz3;
+
+                    VerticalLayout {
+                        alignment: center;
+                        CircleIcon {
+                            icon: icon;
+                            line-color: tile-color;
+                            size: Size.sz16;
+                        }
+                    }
+
+                    TextMd {
+                        vertical-alignment: center;
+                        text: name;
+                        color: LightPalette.content-primary-inverse;
+                    }
+                }
+            }
+        }
+    }
+}
+
+component BitcoinTile inherits Rectangle {
+    property <bool> is-loading: State.loading-app-id == "0x426974636f696e2057616c6c65740000";
+
+    in property <string> name;
+    in property <string> price: "120,000";
+    in property <string> currency: "Bitcoin USD";
+    in property <string> last-change-percent: "+10.20%";
+    in property <string> last-price-update-time: "2 minutes ago";
+
+    height: 292px;
+    border-radius: Size.sz6;
+
+    callback clicked();
+
+    HorizontalLayout {
+        padding-top: is-loading ? Size.sz1 : 0px;
+        padding-bottom: is-loading ? 0px : Size.sz1;
+        width: parent.width;
+
+        LineCard {
+            width: parent.width;
+            height: parent.height;
+            card-color: CardColor.dark-copper;
+
+            clicked => {
+                clicked();
+            }
+
+            Shimmer {
+                active: root.is-loading;
+
+                VerticalLayout {
+                    alignment: stretch;
+                    padding: Size.sz2;
+
+                    Rectangle {
+                        border-radius: Size.sz4;
+                        border-color: Palette.border-tertiary.transparentize(0.5);
+                        border-width: Size.sz0_25;
+
+                        VerticalLayout {
+                            alignment: stretch;
+                            Rectangle {
+                                height: 136px - 75px;
+                                background: CurrentTheme.is-dark ? #111111 : Palette.background-hover;
+                                border-top-left-radius: Size.sz4;
+                                border-top-right-radius: Size.sz4;
+                                clip: true;
+
+                                HorizontalLayout {
+                                    padding-left: Size.sz4;
+                                    padding-right: Size.sz4;
+                                    padding-top: Size.sz2;
+                                    alignment: stretch;
+
+                                    HeadingXl {
+                                        horizontal-stretch: 0;
+                                        text: State.is-price-expired ? "" : "$";
+                                        color: Palette.content-tertiary;
+                                    }
+
+                                    HeadingXl {
+                                        horizontal-stretch: 1;
+                                        text: State.is-price-expired ? "" : price;
+                                        color: Palette.content-secondary;
+                                    }
+
+                                    if State.is-price-stale: VerticalLayout {
+                                        horizontal-stretch: 0;
+                                        alignment: start;
+                                        padding-top: Size.sz1;
+
+                                        TextSm {
+                                            text: State.is-price-expired ? (State.is-envoy-connected ? TR2.lookup(TrId.MainLoadingData) : TR2.lookup(TrId.MainDisconnected)) : TR2.lookup(TrId.MainLastUpdate);
+                                            horizontal-alignment: right;
+                                            color: LightPalette.content-tertiary;
+                                        }
+
+                                        TextSm {
+                                            text: State.is-price-expired ? "" : TR2.format(TrId.MainXAgo, [last-price-update-time]);
+                                            horizontal-alignment: right;
+                                            color: LightPalette.content-tertiary;
+                                        }
+                                    }
+
+                                    if !State.is-price-stale: VerticalLayout {
+                                        horizontal-stretch: 0;
+                                        alignment: start;
+                                        padding-top: Size.sz1;
+
+                                        TextSm {
+                                            text: currency;
+                                            horizontal-alignment: right;
+                                            color: LightPalette.content-tertiary;
+                                        }
+
+                                        TextSm {
+                                            text: last-change-percent;
+                                            horizontal-alignment: right;
+                                            color: LightPalette.content-tertiary;
+                                        }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                border-bottom-left-radius: Size.sz4;
+                                border-bottom-right-radius: Size.sz4;
+
+                                VerticalLayout {
+                                    Image {
+                                        image-fit: preserve;
+                                        source: State.bitcoin-graph-image;
+                                    }
+                                }
+
+                                if (State.is-price-expired && !State.is-envoy-connected): Circle {
+                                    size: Size.sz8;
+                                    y: 2px;
+                                    border-color: Palette.content-tertiary;
+                                    border-width: Size.sz0_5;
+                                    background: CurrentTheme.is-dark ? #111111 : Palette.background-hover;
+
+                                    Icon {
+                                        size: Size.sz8;
+                                        name: "close";
+                                        color: Palette.content-tertiary;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        vertical-stretch: 1;
+                        padding-left: Size.sz4;
+                        padding-right: Size.sz4;
+                        VerticalLayout {
+                            alignment: center;
+                            TextLg {
+                                text: name;
+                                color: LightPalette.content-primary-inverse;
+                                bold: true;
+                            }
+                        }
+
+                        VerticalLayout {
+                            alignment: center;
+                            CircleIcon {
+                                icon: "bitcoin";
+                                line-color: CardColor.dark-copper;
+                                size: Size.sz12 * 2;
+                                icon-size: IconSize.px64;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+component DevelopersTile inherits Rectangle {
+    callback clicked();
+
+    height: 92px;
+    background: Palette.content-secondary-inverse;
+    border-radius: Size.sz6;
+    border-color: Palette.border-tertiary;
+    border-width: Size.sz0_25;
+
+    layout := VerticalLayout {
+        alignment: center;
+        padding: Size.sz6;
+        TextMd {
+            text: TR2.lookup(TrId.MainDevelopersWelcome);
+            color: Palette.content-primary;
+            bold: true;
+        }
+
+        TextSm {
+            text: TR2.lookup(TrId.MainAppsAreComing);
+            color: Palette.content-tertiary;
+        }
+    }
+
+    touchArea := TouchArea {
+        clicked => {
+            clicked();
+        }
+    }
+
+    states [
+        pressed when touchArea.pressed: {
+            layout.padding-top: 4px;
+            layout.padding-bottom: 0px;
+        }
+    ]
+}
+
+component NavButton inherits IconButton {
+    icon-size: Size.sz12;
+    size: Size.sz12;
+}
+
+component DevelopersWelcomePopup inherits Rectangle {
+    background: Palette.black.transparentize(0.7);
+
+    PopupMenu {
+        background: Palette.content-secondary-inverse;
+        width: 424px;
+        x: root.width / 2 - self.width / 2;
+        y: root.height / 2 - self.height / 2;
+        z: 100;
+
+        VerticalLayout {
+            padding: Size.sz6;
+            padding-bottom: Size.sz10;
+            spacing: Size.sz2;
+            alignment: center;
+
+            HorizontalLayout {
+                alignment: end;
+                IconButton {
+                    icon: "close";
+                    size: Size.sz6;
+                    icon-size: Size.sz6;
+                    clicked => {
+                        State.developers-welcome-popup-open = false;
+                    }
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz6;
+
+                VerticalLayout {
+                    HeadingMd {
+                        text: TR2.lookup(TrId.MainDevsHeader);
+                        color: Palette.content-primary;
+                    }
+
+                    TextSm {
+                        text: TR2.lookup(TrId.MainDevsSubheader);
+                        color: Palette.content-tertiary;
+                    }
+                }
+
+                TextSm {
+                    padding: Size.sz6;
+                    text: TR2.lookup(TrId.MainDevsContent1);
+                    color: Palette.content-primary;
+                }
+
+                TextSm {
+                    padding: Size.sz6;
+                    text: TR2.lookup(TrId.MainDevsContent2);
+                    color: Palette.content-primary;
+                }
+
+                TextSm {
+                    padding: Size.sz6;
+                    text: TR2.lookup(TrId.MainDevsContent3);
+                    color: Palette.content-primary;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+
+                    Divider {
+                        background: Palette.border-primary;
+                        width: 50px;
+                    }
+                }
+
+                TextSm {
+                    horizontal-alignment: center;
+                    text: TR2.lookup(TrId.MainDevsVisitForInfo);
+                    color: Palette.content-primary;
+                }
+
+                TextMd {
+                    text: "https://foundation.xyz/dev";
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+
+                    Image {
+                        source: CurrentTheme.is-dark ? Images.common("images/logo-dark") : Images.common("images/logo-light");
+                        width: 88px;
+                        height: 81px;
+                    }
+                }
+            }
+        }
+    }
+
+    TouchArea {
+        clicked => {
+            State.developers-welcome-popup-open = false;
+        }
+    }
+}
+
+export component MainPage inherits BasePage {
+    in property <MainProps> props;
+
+    // background: Palette.white;
+
+    private property <bool> show-dev-info: true;
+    private property <bool> hidden-menu: false;
+
+    // Image {
+    //     y: 0px;
+    //     width: parent.width;
+    //     height: parent.height;
+    //     source: Images.common(CurrentTheme.is-dark ? "images/background-dark" : "images/background");
+    //     image-fit: cover;
+    // }
+
+    VerticalLayout {
+        // padding-top: Size.sz10;
+        padding-left: 5px;
+        padding-right: 5px;
+
+        Shield {
+            if (!hidden-menu): VerticalLayout {
+                alignment: space-between;
+                padding-left: Size.sz6;
+                padding-right: Size.sz6;
+                padding-bottom: 42px; // TODO: Define a constant?
+                spacing: Size.sz4;
+
+                BitcoinTile {
+                    price: State.bitcoin-price;
+                    currency: "Bitcoin USD";
+                    last-change-percent: State.bitcoin-price-change-percent;
+                    last-price-update-time: State.last-update-time;
+                    name: TR2.lookup(TrId.MainWallet);
+                    clicked => {
+                        CB.app-clicked(240px, 400px, "0x426974636f696e2057616c6c65740000");
+                    }
+                }
+
+                if show-dev-info: DevelopersTile {
+                    vertical-stretch: 0;
+                    clicked => {
+                        State.developers-welcome-popup-open = true;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: space-between;
+
+                    AppTile {
+                        name: TR2.lookup(TrId.MainFileBrowser);
+                        tile-color: CardColor.dark-grey;
+                        icon: "folder";
+                        app-id: "0x46696c652042726f7773657200000000";
+                    }
+
+                    AppTile {
+                        name: TR2.lookup(TrId.Main2FaCodes);
+                        tile-color: CardColor.blue;
+                        icon: "shield";
+                        app-id: "0x41757468656e74696361746f72203246";
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: space-between;
+                    AppTile {
+                        name: TR2.lookup(TrId.MainSecurityKeys);
+                        tile-color: CardColor.green;
+                        icon: "key";
+                        app-id: "0x5365637572697479204b657973000000";
+                    }
+
+                    AppTile {
+                        name: TR2.lookup(TrId.MainSeedVault);
+                        tile-color: CardColor.light-copper;
+                        icon: "acorn";
+                        app-id: "0x53656564205661756c74000000000000";
+                    }
+                }
+            }
+
+            if (State.hidden-apps.length > 0 && hidden-menu): VerticalLayout {
+                spacing: Size.sz4;
+                alignment: start;
+                padding-left: Size.sz6;
+                padding-right: Size.sz6;
+
+                HeadingLg {
+                    text: "Secret Menu";
+                    horizontal-alignment: center;
+                    color: Palette.content-primary;
+                }
+
+                Rectangle {
+                    height: 8px;
+                }
+
+                property <int> num-rows: ((State.hidden-apps.length + 1) / 2);
+
+                for row_index in num-rows: HorizontalLayout {
+                    alignment: space-between;
+
+                    property <int> base-index: row_index * 2;
+
+                    AppTile {
+                        name: State.hidden-apps[base-index].label;
+                        tile-color: Utils.index-to-card-color(base-index);
+                        icon: "shield";
+                        app-id: State.hidden-apps[base-index].app-id;
+                    }
+
+                    if (base-index + 1 < State.hidden-apps.length): AppTile {
+                        name: State.hidden-apps[base-index + 1].label;
+                        tile-color: Utils.index-to-card-color(base-index + 1);
+                        icon: "shield";
+                        app-id: State.hidden-apps[base-index + 1].app-id;
+                    }
+                }
+            }
+        }
+
+        // Bottom Navigation buttons
+        HorizontalLayout {
+            alignment: space-between;
+
+            padding-left: Size.sz5;
+            padding-right: Size.sz5;
+
+            padding-bottom: Size.sz4;
+
+            property <string> settings-app-id: "0xc192b79230473875f159d4423d74d00f";
+            property <bool> settings-app-loading: State.loading-app-id == settings-app-id;
+
+            if self.settings-app-loading: TimerLoader {
+                size: Size.sz12;
+            }
+            if !self.settings-app-loading: NavButton {
+                icon: "menu";
+                clicked => {
+                    CB.app-clicked(0, 0, settings-app-id)
+                }
+            }
+
+            if State.hidden-apps.length > 0: NavButton {
+                clicked => {
+                    hidden-menu = false;
+                }
+            }
+
+            if State.hidden-apps.length > 0: NavButton {
+                clicked => {
+                    hidden-menu = true;
+                }
+            }
+
+            NavButton {
+                icon: "scan-qr";
+                clicked => {
+                    CB.scan-clicked(false);
+                }
+            }
+        }
+    }
+
+    if State.developers-welcome-popup-open: DevelopersWelcomePopup { }
+}

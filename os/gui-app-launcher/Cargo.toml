@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "gui-app-launcher"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+production = []
+
+[dependencies]
+anyhow = { workspace = true }
+app-manager = { workspace = true }
+fs = { workspace = true }
+gui-server-api = { workspace = true }
+haptics = { workspace = true }
+hex = { workspace = true }
+i18n = { path = "../../i18n" }
+log = { workspace = true }
+log-server = { workspace = true }
+quantum-link = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+server = { workspace = true }
+slint-keyos-platform = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+keyos = { path = "../../keyos" }
+
+[build-dependencies]
+slint-keyos-platform-build = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

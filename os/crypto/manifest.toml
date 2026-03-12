@@ -1,0 +1,16 @@
+appId = "0x6f732f63727970746f00000000000000"
+memory = ["AES", "SHA", "SECURAM"]
+syscall = ["VirtToPhysPid", "SetThreadPriority"]
+extends = "../../api/crypto"
+
+[appName]
+en = "Crypto"
+
+[permissions]
+"os/dma" = [
+    "PeripheralTransferMsg",
+    "ExecuteTransferMsg",
+    "WaitTransferMsg",
+    "DropTransferMsg",
+]
+"os/power-manager" = ["SetPeripheralEnabled"]

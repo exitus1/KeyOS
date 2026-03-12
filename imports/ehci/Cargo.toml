@@ -1,0 +1,11 @@
+[package]
+name = "ehci"
+version = "0.1.1"
+edition = "2021"
+
+[dependencies]
+bitfield = "0.15.0"
+log = "0.4.21"
+rkyv = { version = "0.8", default-features = false, features = ["alloc"], optional = true }
+vcell = "0.1.3"
+zerocopy = { version = "0.8.5", features = ["alloc", "derive"] }

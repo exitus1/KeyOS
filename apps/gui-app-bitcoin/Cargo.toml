@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-bitcoin"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+async-channel = { workspace = true }
+foundation-ur = { workspace = true }
+foundation-urtypes = { workspace = true }
+fs = { workspace = true }
+hex = { workspace = true }
+i18n = { version = "0.1.0", path = "../../i18n" }
+log = { workspace = true }
+log-server = { workspace = true }
+minicbor = { version = "0.24", features = ["std", "derive"] }
+ngwallet = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+ordered-table = { path = "../../utils/ordered-table" }
+ql-utils = { workspace = true }
+quantum-link = { workspace = true }
+security = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+thiserror = { workspace = true }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }

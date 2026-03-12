@@ -1,0 +1,220 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { Button, TimerCircularProgress, TextMd, Icon, TextSm, Checkbox, HeadingLg, BasePage, PageBody, ContentSection, ButtonSection, WrappedIcon } from "@ui/widgets.slint";
+import { IconSize, Importance, Palette, Size } from "@ui/theme.slint";
+
+import { EraseDeviceProps, EraseStatus } from "props.slint";
+import { SettingGlobal } from "../../../../globals/setting-global.slint";
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+
+export component EraseDevicePage inherits BasePage {
+    in property <EraseDeviceProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.EraseDeviceTitle);
+        }
+
+        if props.status == EraseStatus.start: PageBody {
+            property <bool> understood: false;
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "info2";
+                    }
+                }
+
+                HeadingLg {
+                    text: TR2.lookup(TrId.EraseDeviceHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.EraseDeviceSubheader);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+
+                Rectangle {
+                    height: Size.sz15;
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: Size.sz4;
+                        VerticalLayout {
+                            alignment: center;
+                            Checkbox {
+                                checked <=> understood;
+                            }
+                        }
+
+                        TextSm {
+                            text: TR2.lookup(TrId.CommonButtonIUnderstand);
+                            color: Palette.content-primary;
+                            vertical-alignment: center;
+                            horizontal-alignment: center;
+                        }
+                    }
+
+                    TouchArea {
+                        clicked => {
+                            understood = !understood;
+                        }
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    enabled: understood;
+                    importance: negative;
+                    label: TR2.lookup(TrId.EraseDeviceErase);
+                    clicked => {
+                        if understood {
+                            Navigate.erase-device({ status: EraseStatus.prompt-backup }, { replace: true });
+                        }
+                    }
+                }
+            }
+        }
+
+        if props.status == EraseStatus.prompt-backup: PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-shield";
+                        inner-icon: "check";
+                    }
+                }
+
+                HeadingLg {
+                    text: TR2.lookup(TrId.EraseDeviceBackupHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.EraseDeviceBackupSubheader);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    importance: Importance.secondary;
+                    label: TR2.lookup(TrId.EraseDeviceBackupCreateBackup);
+                    clicked => {
+                        Navigate.backup({ });
+                    }
+                }
+
+                Button {
+                    importance: Importance.primary;
+                    label: TR2.lookup(TrId.CommonButtonContinue);
+                    clicked => {
+                        Navigate.erase-device({ status: EraseStatus.confirmation }, { replace: true });
+                    }
+                }
+            }
+        }
+
+        if props.status == EraseStatus.confirmation: PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "question";
+                    }
+                }
+
+                HeadingLg {
+                    text: TR2.lookup(TrId.EraseDeviceAreYouSureHeader);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.EraseDeviceAreYouSureSubheader);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    importance: negative;
+                    label: TR2.lookup(TrId.EraseDeviceErase);
+
+                    clicked => {
+                        SettingGlobal.factory-reset();
+                        Navigate.erase-device({ status: EraseStatus.progress }, { replace: true });
+                    }
+                }
+            }
+        }
+
+        if props.status == EraseStatus.progress: PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    TimerCircularProgress {
+                        indeterminate: true;
+                    }
+                }
+
+                HeadingLg {
+                    text: TR2.lookup(TrId.EraseDeviceErasingErasingPassport);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+
+        if props.status == EraseStatus.success: PageBody {
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "info2";
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz4;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: Size.sz4;
+
+                        Icon {
+                            color: Palette.content-tertiary;
+                            name: "check";
+                        }
+
+                        TextMd {
+                            text: TR2.lookup(TrId.EraseDeviceSuccessPassportErased);
+                            color: Palette.content-tertiary;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    TextMd {
+                        text: TR2.lookup(TrId.EraseDeviceSuccessRestarting);
+                        color: Palette.content-primary;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+}

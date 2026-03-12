@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+
+import { OnboardingCallbacks as CB } from "../../../onboarding-callbacks.slint";
+import { Shield, HeadingMd, TextLg, Button, IconButton, ButtonSection, WrappedIcon } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../../widgets/base-page.slint";
+import { UISize, Images, Palette, Palettes, CurrentTheme } from "@ui/theme.slint";
+import { Navigate, Animate } from "../../../gen/navigate.slint";
+import { Size } from "@ui/types.slint";
+import { TextMd } from "@ui/widgets/txt.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { ShieldSection, ShieldContent, OnboardingShieldPage, OverlayImage } from "../../../widgets/shield-page.slint";
+import { UISize } from "../../../../../../ui/ui/theme.slint";
+import { SeedGlobal } from "../../../onboarding-callbacks.slint";
+
+
+export component MasterKeyDeletedMainPage inherits OnboardingShieldPage {
+    property <bool> dark-mode <=> CurrentTheme.is-dark;
+
+    ShieldSection {
+        ShieldContent {
+            HeadingMd {
+                text: TR2.lookup(TrId.MasterKeyDeletedHeader);
+                horizontal-alignment: center;
+            }
+
+            TextMd {
+                text: TR2.lookup(TrId.MasterKeyDeletedContent);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.MasterKeyDeletedEraseDevice);
+                importance: secondary;
+                clicked => {
+                    Navigate.master-key-deleted-erase({ animate: Animate.None });
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.MasterKeyDeletedProvideMasterKey);
+                importance: primary;
+                clicked => {
+                    SeedGlobal.is-master-key-recovery = true;
+
+                    // Create the PIN if it hasn't been created before.
+                    // The PIN needs to be created for the seed recovery code to work properly
+                    if (!SeedGlobal.is-pin-set()) {
+                        Navigate.set-pin-info({ });
+                    } else {
+                        Navigate.master-key-deleted-restore({ });
+                    }
+                }
+            }
+        }
+    }
+
+    OverlayImage {
+        image: "images/three-d/keydelete";
+    }
+}

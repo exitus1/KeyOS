@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "emmc"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+aes-dma = []                # Use DMA + AES
+aes-busy-wait = []          # Busy-waiting AES
+default = ["aes-busy-wait"]
+
+[dependencies]
+crypto = { workspace = true }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+rkyv = { workspace = true }
+server = { path = "../../server" }
+thiserror = "1.0"
+ticktimer = { package = "xous-api-ticktimer", path = "../../xous/api/ticktimer" }
+xous = { path = "../../xous/xous-rs" }
+xous-ipc = { path = "../../xous/ipc" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true, default-features = false }
+power-manager = { workspace = true }
+utralib = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

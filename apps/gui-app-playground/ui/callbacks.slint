@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+enum BackupState {
+    Idle,
+    BackingUp,
+    Restoring,
+    Success,
+    Failure,
+}
+
+export global Callbacks {
+    // UI -> Rust
+    callback play-haptic-pattern(string);
+    callback set-led(int, int, int, int);
+
+    callback start-keycard-formatter();
+    in property <bool> formatter-formatting; // true while writing
+    in property <bool> formatter-success;    // true after a successful write
+
+    callback create-backup();
+    callback select-backup-file();
+    callback restore-backup();
+    callback restore-from-envoy();
+    in-out property <BackupState> backup-state: BackupState.Idle;
+    in property <string> restore-path;
+
+    callback bt-spi-test-start(int);
+    callback bt-spi-test-stop();
+    in property <string> bt-spi-test-status: "Not started";
+}

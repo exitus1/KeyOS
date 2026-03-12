@@ -1,0 +1,17 @@
+## SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+## SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "worker-test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+futures-lite = { workspace = true }
+keyos-integration-test = { path = "../keyos-integration-test" }
+log = "0.4.14"
+log-server = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+worker = { path = "../../worker", features = ["integration_test", "test_executor"] }
+xous-ticktimer = { workspace = true }

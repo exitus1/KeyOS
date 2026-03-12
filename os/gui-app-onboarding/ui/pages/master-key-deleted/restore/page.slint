@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, UISize, Importance } from "@ui/theme.slint";
+import { PageBody, HeadingMd, TextLg, TextMd, Shield, Button, NavHeader, ContentSection, WrappedIcon, ButtonSection, ErrorModal } from "@ui/widgets.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingBasePage } from "../../../widgets/base-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { OnboardingCallbacks, SeedGlobal } from "../../../onboarding-callbacks.slint";
+import { MasterKeyDeletedRestoreProps } from "props.slint";
+import { OnboardingFullShieldPage } from "../../../widgets/shield-page.slint";
+
+
+export component MasterKeyDeletedRestorePage inherits Rectangle {
+    in-out property <MasterKeyDeletedRestoreProps> props;
+
+    OnboardingFullShieldPage {
+        VerticalLayout {
+            NavHeader {
+                title: "";
+
+                clicked => {
+                    Navigate.master-key-deleted-main({ });
+                }
+            }
+
+            PageBody {
+                p-y: 0;
+                ContentSection {
+                    HorizontalLayout {
+                        alignment: center;
+                        WrappedIcon {
+                            width: 184px;
+                            height: 184px;
+                            outer-icon: "jumbo-shield";
+                            inner-icon: "arrow-up";
+                        }
+                    }
+
+                    VerticalLayout {
+                        spacing: Size.sz6;
+
+                        HeadingMd {
+                            text: TR2.lookup(TrId.MasterKeyDeletedRestoreHeader);
+                            horizontal-alignment: center;
+                        }
+
+                        TextMd {
+                            vertical-alignment: TextVerticalAlignment.bottom;
+                            text: TR2.lookup(TrId.MasterKeyDeletedRestoreContent);
+                            horizontal-alignment: center;
+                        }
+                    }
+                }
+
+                ButtonSection {
+                    Button {
+                        label: TR2.lookup(TrId.RecoverMainScanSeedQr);
+                        importance: secondary;
+                        icon: "scan-qr";
+                        clicked => {
+                            SeedGlobal.restore-from-seed-qr();
+                        }
+                    }
+
+                    Button {
+                        label: TR2.lookup(TrId.RecoverMainEnterSeedWords);
+                        icon: "edit";
+                        importance: secondary;
+                        clicked => {
+                            Navigate.restore-seed-words({ });
+                        }
+                    }
+
+                    Button {
+                        label: TR2.lookup(TrId.RecoverMainSeedFromKeycards);
+                        icon: "nfc-card";
+                        importance: primary;
+                        clicked => {
+                            Navigate.restore-keycard-backup({ });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ErrorModal {
+        visible: SeedGlobal.fingerprint-mismatch;
+        icon: "alert";
+        icon-color: Palette.content-negative;
+        title: TR2.lookup(TrId.MasterKeyDeletedRestoreModalWrongKeyHeader);
+        text: TR2.lookup(TrId.MasterKeyDeletedRestoreModalWrongKeyContent);
+        confirm-button-label: TR2.lookup(TrId.CommonButtonRetry);
+
+        confirm-clicked => {
+            SeedGlobal.fingerprint-mismatch = false;
+        }
+    }
+}

@@ -1,0 +1,235 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { BasePage, BaseWindow, TimerCircularProgress, HeadingLg, HeadingMd, Button, TextLg, TextSm, IconButton, HeadingXl } from "@ui/widgets.slint";
+import { CurrentTheme, Palette, Palettes, Images, Utils, Size } from "@ui/theme.slint";
+
+export { Utils, Images, CurrentTheme }
+
+export enum UpdateState {
+    None,
+    Loading,
+    NeedsContinue,
+    Success,
+    Failure,
+}
+
+export global State {
+    in property <UpdateState> update-state;
+    in property <[string]> update-files;
+    in property <float> update-progress-percent;
+    in property <string> update-estimated-time-remaining;
+
+    callback select-files();
+    callback clear-files();
+    callback perform-update();
+    callback continue-update();
+
+    // index, increment
+    callback shift-file(int, bool);
+    callback remove-file(int);
+}
+
+component ConfigureUpdate inherits VerticalLayout {
+    VerticalLayout {
+        spacing: Size.sz5;
+        Button {
+            label: "Select update files";
+            clicked => {
+                State.select-files();
+            }
+        }
+
+        Button {
+            label: "Clear update files";
+            importance: negative;
+            clicked => {
+                State.clear-files();
+            }
+        }
+
+        Button {
+            label: "Perform Update";
+            enabled: State.update-files.length != 0 && State.update-state == UpdateState.None;
+            clicked => {
+                State.perform-update();
+            }
+        }
+    }
+
+    if State.update-files.length != 0: VerticalLayout {
+        padding-top: Size.sz4;
+        padding-bottom: Size.sz4;
+        spacing: Size.sz6;
+
+        TextSm {
+            text: "Update Files:";
+            color: Palette.content-secondary;
+        }
+
+        for update-file[idx] in State.update-files: HorizontalLayout {
+            TextLg {
+                text: idx + ".";
+                color: Palette.content-primary;
+                vertical-alignment: center;
+                horizontal-alignment: center;
+            }
+
+            TextLg {
+                text: update-file;
+                color: Palette.content-primary;
+                vertical-alignment: center;
+                horizontal-alignment: center;
+            }
+
+            HorizontalLayout {
+                spacing: Size.sz4;
+                IconButton {
+                    icon: "chevron-down";
+                    importance: primary;
+                    touch-factor: 1.5;
+                    enabled: idx != (State.update-files.length - 1);
+                    clicked => {
+                        State.shift-file(idx, true);
+                    }
+                }
+
+                IconButton {
+                    icon: "chevron-up";
+                    importance: primary;
+                    touch-factor: 1.5;
+                    enabled: idx != 0;
+                    clicked => {
+                        State.shift-file(idx, false);
+                    }
+                }
+
+                IconButton {
+                    icon: "close";
+                    importance: negative;
+                    touch-factor: 1.5;
+                    clicked => {
+                        State.remove-file(idx);
+                    }
+                }
+            }
+        }
+    }
+}
+
+component App inherits BasePage {
+    VerticalLayout {
+        padding-top: Size.sz10;
+        padding-bottom: Size.sz10;
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+
+        spacing: Size.sz5;
+        alignment: start;
+
+        HeadingLg {
+            text: "Update Test";
+            color: Palette.content-primary;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        if State.update-state == UpdateState.None: ConfigureUpdate { }
+
+        if State.update-state == UpdateState.Loading:  VerticalLayout {
+            HeadingMd {
+                text: "Updating...";
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            TextSm {
+                text: State.update-estimated-time-remaining;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                TimerCircularProgress {
+                    indeterminate: false;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        TimerCircularProgress {
+                            indeterminate: false;
+                            percent: State.update-progress-percent / 100.0;
+                            HeadingXl {
+                                text: "\{State.update-progress-percent}%";
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                                wrap: no-wrap;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if State.update-state == UpdateState.NeedsContinue: VerticalLayout {
+            spacing: Size.sz6;
+            HeadingMd {
+                text: "Continue Update";
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                Button {
+                    label: "Continue";
+                    clicked => {
+                        State.continue-update();
+                    }
+                }
+            }
+        }
+
+        if State.update-state == UpdateState.Failure:  VerticalLayout {
+            spacing: Size.sz6;
+            HeadingMd {
+                text: "Update Failed";
+                color: Palette.content-negative;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                Button {
+                    label: "Retry";
+                    clicked => {
+                        State.update-state = UpdateState.None;
+                    }
+                }
+            }
+        }
+
+        if State.update-state == UpdateState.Success:  VerticalLayout {
+            spacing: Size.sz6;
+            HeadingMd {
+                text: "Update Successfully applied";
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                Button {
+                    label: "Done";
+                    clicked => {
+                        State.update-state = UpdateState.None;
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component AppWindow inherits BaseWindow {
+    app := App { }
+}

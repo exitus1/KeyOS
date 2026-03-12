@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "slintbook"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+
+[dependencies.slint]
+workspace = true
+features = [
+    "compat-1-2",
+    "unsafe-single-threaded",
+    "renderer-software",
+    "backend-winit",
+    "serde",
+    "libm",
+]
+
+[dependencies.slint-build]
+workspace = true
+
+[build-dependencies]
+slint-keyos-platform-common = { path = "../../slint-keyos-platform/common" }
+
+[build-dependencies.slint-build]
+workspace = true

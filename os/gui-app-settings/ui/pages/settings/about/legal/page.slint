@@ -1,0 +1,69 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSection,
+    MenuSectionLayout,
+    MenuActionItem,
+    HLine,
+    BasePage,
+    PageBody
+} from "@ui/widgets.slint";
+
+import { LegalProps } from "props.slint";
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+
+export component LegalPage inherits BasePage {
+    in property <LegalProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.LegalTitle);
+        }
+
+        PageBody {
+            MenuSection {
+                MenuSectionLayout {
+                    MenuActionItem {
+                        first: true;
+                        label: TR2.lookup(TrId.LegalTermsOfUse);
+                        clicked => {
+                            Navigate.terms-of-use({ });
+                        }
+                    }
+
+                    HLine { }
+
+                    MenuActionItem {
+                        label: TR2.lookup(TrId.LegalWarranty);
+                        clicked => {
+                            Navigate.warranty({ });
+                        }
+                    }
+
+                    HLine { }
+
+                    MenuActionItem {
+                        label: TR2.lookup(TrId.LegalRegulatory);
+                        clicked => {
+                            Navigate.regulatory({ });
+                        }
+                    }
+
+                    HLine { }
+
+                    MenuActionItem {
+                        last: true;
+                        label: TR2.lookup(TrId.LegalOsLicences);
+                        clicked => {
+                            Navigate.licenses({ });
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

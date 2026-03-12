@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: © 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Page } from "./page.slint";
+import { Divider, HeadingMd, Qrcode } from "@ui/widgets.slint";
+import { Size } from "@ui/theme.slint";
+
+export component QrcodePage inherits Page {
+    VerticalLayout {
+        alignment: start;
+        spacing: Size.sz6;
+
+        HeadingMd {
+            text: "foundation.xyz";
+            height: Size.sz12;
+        }
+
+        Qrcode {
+            data: "https://foundation.xyz/";
+        }
+
+        Divider { }
+
+        HeadingMd {
+            text: "Download Envoy";
+            height: Size.sz12;
+        }
+
+        Qrcode {
+            data: "https://foundation.xyz/download/";
+        }
+    }
+}

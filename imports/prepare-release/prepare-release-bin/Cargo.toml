@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "prepare-release-bin"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "prepare-release"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+colored = "2.1"
+hex = "0.4"
+regex = "1.10"
+semver = "1.0"
+tempfile = "3.10"

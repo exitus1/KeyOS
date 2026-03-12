@@ -1,0 +1,30 @@
+appId = "0x6e1c39e09f90a7b54fca316887968e13"
+memory = ["SRAM0"]
+
+[appName]
+en = "Recovery Worker Server"
+
+[servers."os/recovery-worker"]
+GetBootloaderInfo = { id = 0, type = "archive", cfg = "keyos" }
+GetKeyOsInfo = { id = 1, type = "archive", cfg = "keyos" }
+GetRecoveryInfo = { id = 2, type = "archive", cfg = "keyos" }
+ReadArchive = { id = 3, type = "archive", cfg = "keyos" }
+GetArchiveState = { id = 4, type = "archive", cfg = "keyos" }
+SubscribeProgress = { id = 5, type = "scalarEvent", cfg = "keyos" }
+GetAppBinVerificationState = { id = 6, type = "archive", cfg = "keyos" }
+CopyArchive = { id = 7, type = "scalar", cfg = "keyos" }
+StartRecovery = { id = 8, type = "scalar", cfg = "keyos" }
+GetLastError = { id = 9, type = "archive", cfg = "keyos" }
+
+[permissions]
+template = ["fs-generic", "crypto-sha"]
+"os/fs" = [
+    "GetUsbReadAccess",
+    "GetBootReadAccess",
+    "GetBootWriteAccess",
+    "GetSystemReadAccess",
+    "GetSystemWriteAccess",
+    "WriteBlocks",
+]
+"os/power-manager" = ["Reboot"]
+"os/security" = ["GetFirmwareTimestamp", "SetFirmwareTimestamp", "GetBootloaderBuildDate"]

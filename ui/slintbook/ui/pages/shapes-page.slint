@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Arc, HeadingLg, TimerLoader} from "@ui/widgets.slint";
+import {Size, Palette} from "@ui/theme.slint";
+
+export component ShapesPage inherits Page {
+
+    VerticalLayout {
+        alignment: start;
+        spacing: Size.sz6;
+        HeadingLg {
+            text: "Arcs";
+            height: 50px;
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz6;
+            Arc {
+                size: 240px;
+                start-angle: 0.0;
+                end-angle: 290.0;
+                stroke-width: Size.sz10;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 30px;
+            Arc {
+                size: 240px;
+                start-angle: -90.0;
+                end-angle: 220.0;
+                stroke-width: Size.sz5;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 30px;
+            TimerLoader {
+                background: Palette.content-primary;
+            }
+
+            TimerLoader {
+                size: 48px;
+                background: Palette.content-primary;
+            }
+
+            TimerLoader {
+                size: 64px;
+                background: Palette.content-primary;
+            }
+        }
+    }
+}

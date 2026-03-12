@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "fuse"
+version = "0.1.0"
+edition = "2024"
+description = "Fuse allocation and management routines"
+
+[dependencies]
+
+[target.'cfg(target_arch = "arm")'.dependencies]
+atsama5d27 = { workspace = true }

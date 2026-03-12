@@ -1,0 +1,85 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import "./RobotoMono-Regular.ttf";
+
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+import { Button, IconButton, Input, TextMd } from "@ui/widgets.slint";
+import { Palette, Size, Importance, UISize } from "@ui/theme.slint";
+
+export global Globals {
+    callback send-message(string);
+    in property <string> last-message: "";
+    in property <int> last-message-len: 0;
+}
+
+component App {
+    HorizontalLayout {
+        VerticalBox {
+            width: UISize.screen-width;
+
+            label-out := TextMd {
+                text: "Send Bluetooth message";
+            }
+
+            HorizontalLayout {
+                spacing: Size.sz4;
+                out-msg := Input {
+                    placeholder: "Your message";
+                }
+            }
+
+            HorizontalBox {
+                button_reset := Button {
+                    label: "Reset";
+                    importance: Importance.secondary;
+                    clicked => {
+                        out-msg.text = "";
+                    }
+                }
+
+                button_submit := Button {
+                    label: "Send";
+                    importance: Importance.primary;
+                    clicked => {
+                        Globals.send-message(out-msg.text);
+                        out-msg.text = "";
+                    }
+                }
+            }
+
+            label-in := TextMd {
+                text: Globals.last-message-len > 0 ? "Received " + Globals.last-message-len + " bytes" : "Last Bluetooth message";
+            }
+
+            HorizontalLayout {
+                spacing: Size.sz4;
+                Text {
+                    font-size: 24px;
+                    font-family: "Roboto Mono";
+                    wrap: word-wrap;
+                    text: Globals.last-message != "" ? Globals.last-message : "< no Bluetooth data yet >";
+                }
+            }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    in property <string> last-message <=> Globals.last-message;
+    in property <int> last-message-len <=> Globals.last-message-len;
+
+    background: grey;
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+
+    app := App { }
+
+    // Allow unfocusing textboxes by clicking out of them
+    FocusScope {
+        init => {
+            self.focus()
+        }
+    }
+}

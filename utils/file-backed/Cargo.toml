@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "file-backed"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fs = { workspace = true }
+log = "0.4.14"
+serde = "1.0"
+serde_json = "1.0"
+server = { path = "../../server" }

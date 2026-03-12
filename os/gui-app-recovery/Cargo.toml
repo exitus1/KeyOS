@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-recovery"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+recovery-os = ["slint-keyos-platform/recovery-os"]
+default = []
+
+[dependencies]
+anyhow = "1.0"
+chrono = "0.4"
+fs = { workspace = true }
+futures-lite = { workspace = true }
+gui-server-api = { workspace = true }
+hex = "0.4.3"
+i18n = { path = "../../i18n" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+num-traits = "0.2"
+power-manager = { workspace = true }
+recovery-worker = { path = "../../os/recovery-worker" }
+rust-i18n = "3.1.2"
+security = { workspace = true }
+serde = "1.0"
+serde_json = "1.0.114"
+server = { path = "../../server" }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+tar = { path = "../../imports/tar-rs" }
+thiserror = "1.0"
+xous = { path = "../../xous/xous-rs" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+cosign2 = { path = "../../imports/cosign2/cosign2", default-features = false }
+crypto = { workspace = true }
+fs = { workspace = true }
+fw-utils = { path = "../../utils/fw-utils" }
+mass-storage-server = { path = "../../os/mass-storage-server" }
+micro-ecc-sys = { path = "../../imports/micro-ecc-sys", default-features = false }
+securam-manager = { path = "../../imports/securam-manager" }
+usb = { workspace = true }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

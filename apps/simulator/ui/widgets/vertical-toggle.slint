@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { UISize, Palette, Size, Importance } from "@ui/theme.slint";
+import { Icon } from "./icon.slint";
+import { TextLg, TextMd, TextSm, TextXs } from "./txt.slint";
+
+export component ToggleButton inherits HorizontalLayout {
+    in-out property <brush> background;
+    in-out property <string> label;
+    in property <brush> label-color;
+
+    callback clicked();
+
+    alignment: center;
+    Rectangle {
+        width: 100%;
+        border-radius: Size.sz2;
+        background: background;
+        TextXs {
+            text: label;
+            color: label-color;
+        }
+
+        touch := TouchArea {
+            clicked => {
+                clicked();
+            }
+        }
+    }
+}
+
+export component VerticalToggle inherits VerticalLayout {
+    width: 100px;
+    height: Size.sz16;
+
+    // Private properties
+    private property <brush> label-color: importance == Importance.primary ? Palette.content-primary-inverse : Palette.background-brand;
+    private property <brush> bg-color: importance == Importance.primary ? Palette.background-brand : (importance == Importance.secondary ? Palette.background-primary : Palette.transparent);
+
+    // Public properties
+    in property <bool> toggle-up: true;
+    in property <string> label;
+    in property <string> top-option;
+    in property <string> bottom-option;
+    in property <Importance> importance: Importance.primary;
+    in property <bool> enabled: true;
+    in property <brush> text-color: Palette.content-tertiary;
+    in property <length> text-font-size: Size.sz11;
+
+    private property <length> option-height: Size.sz8;
+
+    // Callbacks
+    callback toggled(bool);
+
+    HorizontalLayout {
+        width: root.width;
+        alignment: center;
+        HorizontalLayout { // Not sure why it won't center without this extra HL
+            alignment: center;
+            Rectangle {
+                width: Size.sz16;
+                background: Palette.background-pressed;
+                border-radius: Size.sz2;
+                clip: true;
+                VerticalLayout {
+                    padding: 0px;
+                    ToggleButton {
+                        background: toggle-up ? bg-color : Palette.transparent;
+                        label-color: label-color;
+                        height: option-height;
+                        label: top-option;
+                        width: 100%;
+                        clicked => {
+                            if (!toggle-up) {
+                                toggled(true);
+                            }
+                        }
+                    }
+
+                    ToggleButton {
+                        background: !toggle-up ? bg-color : Palette.transparent;
+                        label-color: label-color;
+                        height: option-height;
+                        label: bottom-option;
+                        width: 100%;
+                        clicked => {
+                            if (toggle-up) {
+                                toggled(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if label != "": TextXs {
+        vertical-alignment: center;
+        horizontal-alignment: center;
+        text: root.label;
+        color: Palette.content-primary;
+        horizontal-stretch: 0;
+    }
+}

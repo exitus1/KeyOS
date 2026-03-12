@@ -1,0 +1,11 @@
+appId = "0x74726e672d746573742d636c69656e74"
+
+[appName]
+en = "TRNG test client"
+
+[permissions]
+template = ["fs-generic"]
+"os/fs" = [
+    "GetSystemReadAccess",
+    "GetSystemWriteAccess",
+]

@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "gui-server"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+recovery-os = []
+default = []
+
+[dependencies]
+app-manager = { workspace = true }
+bt = { workspace = true }
+camera = { path = "../camera" }
+fs = { workspace = true }
+gui-server-api = { workspace = true }
+haptics = { workspace = true }
+libblur = { workspace = true, default-features = false }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+power-manager = { workspace = true }
+rgb-led = { workspace = true }
+security = { workspace = true }
+server = { path = "../../server" }
+settings = { workspace = true }
+simple-easing = "1.0.1"
+xous = { path = "../../xous/xous-rs" }
+xous-ticktimer = { package = "xous-api-ticktimer", path = "../../xous/api/ticktimer" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+embedded-hal = "1.0"
+ft3269 = { workspace = true }
+gpio = { workspace = true }
+i2c = { workspace = true }
+spi = { workspace = true }
+utralib = { workspace = true }
+
+[target.'cfg(not(keyos))'.dependencies]
+bytemuck = "1.21.0"
+fast_image_resize = { version = "4.2.3", features = ["image"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+image_swizzle = "0.2.0"
+rayon = "1.10.0"
+shared_memory = { version = "0.12.4", features = ["logging"] }
+softbuffer = { workspace = true }                                          # Fork with added support for transparent pixels on macOS
+winit = { version = "0.30.2", features = ["rwh_05"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

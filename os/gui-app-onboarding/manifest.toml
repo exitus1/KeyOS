@@ -1,0 +1,79 @@
+appId = "0xdac5321775d449c11bc9c90f38067f8f"
+
+[appName]
+en = "Onboarding"
+
+[permissions]
+template = ["gui-app", "fs-generic"]
+"os/app-manager" = ["LaunchAppBlocking"]
+"os/bt" = ["GetBtAddr", "SubscribeBleState"]
+"os/haptics" = ["Vibrate"]
+"os/fs" = ["FormatEncryptedVolume", "Remove", "GetSystemWriteAccess", "GetUsbReadAccess", "GetSystemReadAccess"]
+"os/gui-server" = ["SwitchToLauncher"]
+"os/keycard" = [
+    "IdentifyKeycard",
+    "GenerateShards",
+    "PopShard",
+    "PushShard",
+    "ResetShards",
+    "LoadShardFromKeycard",
+    "StoreShardToKeycard",
+    "RestoreMasterSeed",
+    "DetectKeycard",
+]
+"os/quantum-link" = [
+    "BackupShard",
+    "CheckFirmwareUpdate",
+    "EnvoyMagicBackupEnabled",
+    "EnvoyTimezone",
+    "GetXidDocument",
+    "NotifyFirmwareInstall",
+    "NotifyOnboardingState",
+    "RestoreShard",
+    "StartFirmwareUpdate",
+    "StartRestoreMagicBackup",
+    "SubscribePairingEvent",
+    "SubscribePublishedAccountUpdate",
+    "SubscribeSecurityCheckState",
+    "SubscribeConnectionStatus",
+]
+"os/ql-prestart" = ["StartWithoutFilesystem"]
+"os/security" = [
+    "GetSeed",
+    "SetSeedAndPin",
+    "LoggedIn",
+    "IsPinSet",
+    "GetOsVersionInfo",
+    "GetDeviceId",
+    "GetMasterKeyState",
+    "Lockout",
+    "GetSeedFingerprint",
+    "ComputeSeedFingerprint",
+]
+"os/settings" = [
+    "SetSystemTheme",
+    "GetPrimeColor",
+    "GetMagicBackupEnabled",
+    "SetOnboardingStatus",
+    "GetOnboardingStatus",
+    "GetDeviceName",
+    "SetDeviceName",
+    "SetMagicBackupEnabled",
+    "SetTimeZone",
+    "LookupTimeZone",
+]
+"os/update" = [
+    "ApplyDownloadedUpdate",
+    "ClearUpdateApplied",
+    "ContinueUpdate",
+    "FirmwareVersion",
+    "GetUpdateApplied",
+    "GetUpdateStatus",
+    "StartUpdate",
+    "SubscribeUpdateProgress",
+]
+"os/backup" = [
+    "SubscribeRestoreProgress",
+]
+"os/power-manager" = ["Reboot", "StatusSubscribe", "SetOtgPriority"]
+"os/usb" = ["IsEnabled", "SetEnabled"]

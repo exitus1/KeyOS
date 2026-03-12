@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette } from "@ui/theme.slint";
+import { Dialog } from "@ui/widgets.slint";
+
+export struct KeycardBackupError {
+    error: bool,
+
+    title: string,
+    message: string,
+    ok-text: string,
+    cancel-text: string,    
+}
+
+export component KeycardBackupErrorDialog inherits Rectangle {
+    in property <KeycardBackupError> error;
+
+    callback clicked(bool);
+
+    if error.error: Rectangle {
+        background: Palette.overlay;
+
+        Dialog {
+            icon: "alert";
+            icon-color: Palette.content-notice;
+            width: 352px;
+
+            title: error.title;
+            message: error.message;
+            ok-text: error.ok-text;
+            cancel-text: error.cancel-text;
+
+            show-ok: self.ok-text != "";
+            show-cancel: self.cancel-text != "";
+
+            on-ok => {
+                clicked(true);
+            }
+            on-cancel => {
+                clicked(false);
+            }
+        }
+    }
+}

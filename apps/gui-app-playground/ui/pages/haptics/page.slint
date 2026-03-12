@@ -1,0 +1,206 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { Button, HeadingLg, HeadingMd, TextMd, BasePage, IconButton } from "@ui/widgets.slint";
+import { Palette, Size, UISize } from "@ui/theme.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+
+export component HapticsPagePage inherits BasePage {
+    private property <string> current-pattern: "StrongClick100";
+
+    private property <[string]> patterns: [
+        "StrongClick100",
+        "StrongClick60",
+        "StrongClick30",
+        "SharpClick100",
+        "SharpClick60",
+        "SharpClick30",
+        "SoftBump100",
+        "SoftBump60",
+        "SoftBump30",
+        "DoubleClick100",
+        "DoubleClick60",
+        "TripleClick100",
+        "SoftFuzz60",
+        "StrongBuzz100",
+        "Alert750ms",
+        "Alert1000ms",
+        "StrongClickOne100",
+        "StrongClickTwo80",
+        "StrongClickThree60",
+        "StrongClickFour30",
+        "MediumClickOne100",
+        "MediumClickTwo80",
+        "MediumClickThree60",
+        "SharpTickOne100",
+        "SharpTickTwo80",
+        "SharpTickThree60",
+        "ShortDoubleClickStrongOne100",
+        "ShortDoubleClickStrongTwo80",
+        "ShortDoubleClickStrongThree60",
+        "ShortDoubleClickStrongFour30",
+        "ShortDoubleClickMediumOne100",
+        "ShortDoubleClickMediumTwo80",
+        "ShortDoubleClickMediumThree60",
+        "ShortDoubleSharpTickOne100",
+        "ShortDoubleSharpTickTwo80",
+        "ShortDoubleSharpTickThree60",
+        "LongDoubleSharpClickStrongOne100",
+        "LongDoubleSharpClickStrongTwo80",
+        "LongDoubleSharpClickStrongThree60",
+        "LongDoubleSharpClickStrongFour30",
+        "LongDoubleSharpClickMediumOne100",
+        "LongDoubleSharpClickMediumTwo80",
+        "LongDoubleSharpClickMediumThree60",
+        "LongDoubleSharpTickOne100",
+        "LongDoubleSharpTickTwo80",
+        "LongDoubleSharpTickThree60",
+        "BuzzOne100",
+        "BuzzTwo80",
+        "BuzzThree60",
+        "BuzzFour40",
+        "BuzzFive20",
+        "PulsingStrongOne100",
+        "PulsingStrongTwo60",
+        "PulsingMediumOne100",
+        "PulsingMediumTwo60",
+        "PulsingSharpOne100",
+        "PulsingSharpTwo60",
+        "TransitionClickOne100",
+        "TransitionClickTwo80",
+        "TransitionClickThree60",
+        "TransitionClickFour40",
+        "TransitionClickFive20",
+        "TransitionClickSix10",
+        "TransitionHumOne100",
+        "TransitionHumTwo80",
+        "TransitionHumThree60",
+        "TransitionHumFour40",
+        "TransitionHumFive20",
+        "TransitionHumSix10",
+        "TransitionRampDownLongSmoothOne100to0",
+        "TransitionRampDownLongSmoothTwo100to0",
+        "TransitionRampDownMediumSmoothOne100to0",
+        "TransitionRampDownMediumSmoothTwo100to0",
+        "TransitionRampDownShortSmoothOne100to0",
+        "TransitionRampDownShortSmoothTwo100to0",
+        "TransitionRampDownLongSharpOne100to0",
+        "TransitionRampDownLongSharpTwo100to0",
+        "TransitionRampDownMediumSharpOne100to0",
+        "TransitionRampDownMediumSharpTwo100to0",
+        "TransitionRampDownShortSharpOne100to0",
+        "TransitionRampDownShortSharpTwo100to0",
+        "TransitionRampUpLongSmoothOne0to100",
+        "TransitionRampUpLongSmoothTwo0to100",
+        "TransitionRampUpMediumSmoothOne0to100",
+        "TransitionRampUpMediumSmoothTwo0to100",
+        "TransitionRampUpShortSmoothOne0to100",
+        "TransitionRampUpShortSmoothTwo0to100",
+        "TransitionRampUpLongSharpOne0to100",
+        "TransitionRampUpLongSharpTwo0to100",
+        "TransitionRampUpMediumSharpOne0to100",
+        "TransitionRampUpMediumSharpTwo0to100",
+        "TransitionRampUpShortSharpOne0to100",
+        "TransitionRampUpShortSharpTwo0to100",
+        "TransitionRampDownLongSmoothOne50to0",
+        "TransitionRampDownLongSmoothTwo50to0",
+        "TransitionRampDownMediumSmoothOne50to0",
+        "TransitionRampDownMediumSmoothTwo50to0",
+        "TransitionRampDownShortSmoothOne50to0",
+        "TransitionRampDownShortSmoothTwo50to0",
+        "TransitionRampDownLongSharpOne50to0",
+        "TransitionRampDownLongSharpTwo50to0",
+        "TransitionRampDownMediumSharpOne50to0",
+        "TransitionRampDownMediumSharpTwo50to0",
+        "TransitionRampDownShortSharpOne50to0",
+        "TransitionRampDownShortSharpTwo50to0",
+        "TransitionRampUpLongSmoothOne0to50",
+        "TransitionRampUpLongSmoothTwo0to50",
+        "TransitionRampUpMediumSmoothOne0to50",
+        "TransitionRampUpMediumSmoothTwo0to50",
+        "TransitionRampUpShortSmoothOne0to50",
+        "TransitionRampUpShortSmoothTwo0to50",
+        "TransitionRampUpLongSharpOne0to50",
+        "TransitionRampUpLongSharpTwo0to50",
+        "TransitionRampUpMediumSharpOne0to50",
+        "TransitionRampUpMediumSharpTwo0to50",
+        "TransitionRampUpShortSharpOne0to50",
+        "TransitionRampUpShortSharpTwo0to50",
+        "LongBuzzForProgrammaticStopping100",
+        "SmoothHumOne50",
+        "SmoothHumTwo40",
+        "SmoothHumThree30",
+        "SmoothHumFour20",
+        "SmoothHumFive10",
+    ];
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 20px;
+        height: 100%;
+        alignment: stretch;
+
+        HorizontalLayout {
+            alignment: space-between;
+            HorizontalLayout {
+                spacing: 10px;
+                IconButton {
+                    icon: "chevron-left";
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+
+                HeadingLg {
+                    text: "Haptics Playground";
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle {
+            border-radius: 12px;
+            border-color: Palette.border-primary;
+            border-width: 1px;
+            vertical-stretch: 1;
+            HorizontalLayout {
+                padding: 4px;
+
+                Flickable {
+                    VerticalLayout {
+                        for pattern in patterns: Rectangle {
+                            border-radius: 8px;
+                            background: current-pattern == pattern ? Palette.background-brand : Palette.transparent;
+                            HorizontalLayout {
+                                padding: 8px;
+                                TextMd {
+                                    padding: 8px;
+                                    text: pattern;
+                                    color: Palette.content-primary;
+                                    width: 100%;
+                                    TouchArea {
+                                        clicked => {
+                                            current-pattern = pattern;
+                                            Callbacks.play-haptic-pattern(pattern);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Button {
+            label: "Play";
+            icon: "play";
+            importance: primary;
+            clicked => {
+                Callbacks.play-haptic-pattern(current-pattern);
+            }
+        }
+    }
+}

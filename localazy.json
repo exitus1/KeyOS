@@ -1,0 +1,11 @@
+{
+  "writeKey": "your-apps-write-key",
+  "readKey": "a7218789248518481712-70a80acec043c03061e7ee37d30b0ba0af74022c83b7eea2de76ea4688b162a8",
+
+  "upload": {},
+  "download": {
+    "files": "ui/ui/i18n/sources/${lang}/${file}",
+    "includeSourceLang": true
+  },
+  "transformations": []
+}

@@ -1,0 +1,17 @@
+appId = "0x73696d756c61746f7200000000000000"
+
+[appName]
+en = "Hosted Mode Simulator"
+
+[permissions]
+"os/gui-server" = [
+    "GetDeviceFrame",
+    "GetScreenFrame",
+    "SetScaleFactor",
+    "Shutdown",
+]
+"os/settings" = [
+    "GetSystemTheme",
+    "SetSystemTheme",
+    "SubscribeSystemTheme",
+]

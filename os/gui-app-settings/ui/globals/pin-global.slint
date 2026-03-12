@@ -1,0 +1,21 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+export global PinGlobal {
+    // true - pin, false - passphrase
+    in property <bool> is-pin-entry: true;
+
+    out property <int> minimum-pin-length: 6;
+
+    // A temporary store for the latest security words acquired via verify flow
+    in property <[string]> last-security-words: [];
+
+    // attempt to log the user in with the standard dialog; when want-words is true,
+    // on success this fills last-security-words and returns true. Otherwise it returns
+    // true/false and leaves last-security-words unchanged.
+    callback verify-pin(string, bool) -> bool;
+
+    // new pin
+    // (pin, is-pin)
+    callback change-pin(string, bool) -> bool;
+}

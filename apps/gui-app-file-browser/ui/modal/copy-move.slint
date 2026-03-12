@@ -1,0 +1,228 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Drawer, Icon, IconButton, ModalWindow, TextMd, Button } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { FileList } from "../file-list.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+import { ModalGlobal, FileAction } from "./global.slint";
+import { LocationSwitcher } from "../location-switcher.slint";
+
+
+component ProgressBar inherits Rectangle {
+    width: 256px;
+    height: Size.sz8;
+
+    in property <percent> progress;
+
+    Rectangle {
+        height: 3px;
+        width: root.width;
+        x: 0;
+        y: (root.height - self.height) / 2;
+        border-radius: Size.sz0_5;
+        background: Palette.border-tertiary;
+
+        Rectangle {
+            height: parent.height;
+            width: parent.width * root.progress;
+            x: 0;
+            border-radius: Size.sz0_5;
+            background: Palette.border-primary;
+        }
+    }
+}
+
+export component CopyMoveModal inherits Rectangle {
+    background: Palette.overlay-50;
+
+    property <length> drawer-height: 600px;
+
+    function get-action-label() -> string {
+        if (ModalGlobal.loading) {
+            if (ModalGlobal.copy-move-action == FileAction.Copy) {
+                return TR2.lookup(TrId.MainPastingData);
+            } else {
+                return TR2.lookup(TrId.MainMovingData);
+            }
+        }
+        if (ModalGlobal.copy-move-action == FileAction.Copy) {
+            return TR2.lookup(TrId.MainPasteHere);
+        } else {
+            return TR2.lookup(TrId.MainMoveHere);
+        }
+    }
+
+    // touch area to stop touches from going through
+    TouchArea {
+        enabled: true;
+    }
+
+    // touch area above the drawer to close it
+    TouchArea {
+        enabled: true;
+        y: 0;
+        height: parent.height - drawer-height;
+        clicked => {
+            ModalGlobal.copy-move-close();
+        }
+    }
+
+    Rectangle {
+        height: drawer-height;
+        y: parent.height - self.height;
+
+        background: Palette.background-primary;
+        border-top-left-radius: Size.sz10;
+        border-top-right-radius: Size.sz10;
+
+        property <length> p-x: Size.sz6;
+
+        VerticalLayout {
+            padding-top: Size.sz2;
+            padding-bottom: Size.sz8;
+            padding-left: p-x;
+            padding-right: p-x;
+
+            spacing: Size.sz0_5;
+
+            header := Rectangle {
+                height: Size.sz14;
+
+                if ModalGlobal.copy-move-current-path != "": HorizontalLayout {
+                    alignment: start;
+                    VerticalLayout {
+                        alignment: center;
+                        padding-left: Size.sz4;
+                        IconButton {
+                            icon: "chevron-left";
+                            size: Size.sz8;
+                            importance: Importance.normal;
+                            visible: self.enabled;
+                            enabled: ModalGlobal.copy-move-current-path != "";
+                            clicked => {
+                                ModalGlobal.copy-move-exit-folder();
+                            }
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: end;
+                    VerticalLayout {
+                        alignment: center;
+                        padding-right: Size.sz4;
+                        IconButton {
+                            icon: "close";
+                            importance: Importance.normal;
+                            size: Size.sz8;
+                            clicked => {
+                                ModalGlobal.copy-move-close();
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                height: Size.sz16;
+
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: Size.sz4;
+                    height: parent.height;
+                    width: parent.width;
+                    padding-left: p-x;
+                    padding-right: p-x;
+
+                    VerticalLayout {
+                        alignment: center;
+                        Icon {
+                            name: "check-circle";
+                            color: Palette.content-tertiary;
+                        }
+                    }
+
+                    TextMd {
+                        text: ModalGlobal.copy-move-summary;
+                        color: Palette.content-tertiary;
+                        wrap: no-wrap;
+                        overflow: elide;
+                        width: 350px;
+                        vertical-alignment: center;
+                    }
+                }
+
+                Rectangle {
+                    height: 1px;
+                    y: parent.height - self.height;
+                    width: parent.width;
+                    background: Palette.content-tertiary;
+                }
+            }
+
+            FileList {
+                model: ModalGlobal.copy-move-file-lists[ModalGlobal.copy-move-location-idx].files;
+                is-select-mode: false;
+                long-press-enabled: false;
+                entry-pressed(name, is-folder) => {
+                    if (is-folder) {
+                        ModalGlobal.copy-move-enter-folder(name);
+                    }
+                }
+            }
+        }
+
+        HorizontalLayout {
+            y: parent.height - Size.sz8 - self.height;
+            alignment: center;
+
+            VerticalLayout {
+                spacing: Size.sz3;
+                alignment: end;
+
+                if ModalGlobal.loading: ProgressBar {
+                    progress: ModalGlobal.copy-move-progress;
+                }
+
+                Button {
+                    width: 256px;
+                    label: get-action-label();
+                    icon: "copy";
+                    loading: ModalGlobal.loading;
+                    importance: Importance.primary;
+                    enabled: ModalGlobal.copy-move-action-enabled && !ModalGlobal.loading;
+                    clicked => {
+                        ModalGlobal.copy-move-confirmed();
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        TouchArea {
+            enabled: locations.menu-open;
+            clicked => {
+                locations.menu-open = false;
+            }
+        }
+
+        locations := LocationSwitcher {
+            x: header.absolute-position.x - root.absolute-position.x + (header.width - self.width) / 2;
+            y: header.absolute-position.y - root.absolute-position.y + (header.height - self.height) / 2;
+            locations: ModalGlobal.copy-move-allowed-locations;
+            selected_index: ModalGlobal.copy-move-location-idx;
+            breadcrumbs: ModalGlobal.build-breadcrumbs(
+                    ModalGlobal.copy-move-location-idx,
+                    ModalGlobal.copy-move-current-path,
+                );
+            location-changed(idx) => {
+                ModalGlobal.copy-move-location-changed(idx);
+            }
+            breadcrumb-selected(name, index) => {
+                ModalGlobal.copy-move-breadcrumb-selected(name, index);
+            }
+        }
+    }
+}

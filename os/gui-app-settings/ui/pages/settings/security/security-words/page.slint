@@ -1,0 +1,130 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { Size, Palette, Importance } from "@ui/theme.slint";
+import { Chip, TextSm, Link, Button, ButtonSection, TextMd, TextLg, LoginLayout, BasePage, PageBody, ContentSection, PinEntry } from "@ui/widgets.slint";
+
+import { Animate, Navigate, RoutePath } from "../../../../gen/navigate.slint";
+import { SettingsNavHeader } from "../../../../widgets/nav-header.slint";
+import { QrOverlay } from "../../../../widgets/qr-code.slint";
+import { PinGlobal } from "../../../../globals/pin-global.slint";
+import { SettingGlobal } from "../../../../globals/setting-global.slint";
+import { Callbacks } from "../../../../callbacks.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+import { SecurityWordsProps } from "./props.slint";
+
+component Word inherits Rectangle {
+    in property <string> word;
+
+    width: 120px;
+    height: Size.sz11;
+
+    background: Palette.background-primary-alternative;
+    border-radius: Size.sz11 / 2;
+    TextLg {
+        text: word;
+        color: Palette.content-secondary;
+        bold: true;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+export component SecurityWordsPage inherits BasePage {
+    private property <bool> showing: false;
+    private property <string> pin: "";
+    private property <string> qr-url: "";
+
+    init => {
+        // if security words are already enabled or we already have them from verify flow, skip the info state.
+        if SettingGlobal.show-security-words {
+            if !PinGlobal.verify-pin(TR2.lookup(TrId.SecurityWordsTitle), true) {
+                Navigate.backward();
+            } else {
+                showing = true;
+            }
+        }
+    }
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.SecurityWordsTitle);
+        }
+
+        if !root.showing: LoginLayout {
+            ContentSection {
+                TextSm {
+                    text: TR2.lookup(TrId.SecurityWordsIntroduction);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+
+                Link {
+                    label: TR2.lookup(TrId.CommonButtonLearnMore);
+                    clicked => {
+                        root.qr-url = "https://foundation.xyz/security-words";
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.SecurityWordsEnable);
+                    clicked => {
+                        if PinGlobal.verify-pin(TR2.lookup(TrId.SecurityWordsTitle), true) {
+                            root.showing = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if root.showing: LoginLayout {
+            ContentSection {
+                TextSm {
+                    text: TR2.lookup(TrId.SecurityWordsContent);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: TR2.lookup(TrId.SecurityWordsSecurityWords);
+                    horizontal-alignment: center;
+                }
+
+                if PinGlobal.last-security-words.length >= 2: HorizontalLayout {
+                    spacing: Size.sz4;
+                    alignment: center;
+
+                    for word in PinGlobal.last-security-words: Word {
+                        word: word;
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.SecurityWordsDisable);
+                    importance: Importance.secondary;
+                    clicked => {
+                        SettingGlobal.set-show-security-words(false);
+                        Navigate.backward();
+                    }
+                }
+
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonConfirm);
+                    clicked => {
+                        SettingGlobal.set-show-security-words(true);
+                        Navigate.backward();
+                    }
+                }
+            }
+        }
+    }
+
+    if root.qr-url != "": QrOverlay {
+        url <=> root.qr-url;
+    }
+}

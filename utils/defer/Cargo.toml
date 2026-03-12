@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "defer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

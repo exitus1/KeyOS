@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, Icon, ContentSection, HeadingMd, TextSm, Input, ButtonSection } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+
+import { ModalGlobal } from "./global.slint";
+import { TextInputModal } from "./widgets.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+export component RenameModal inherits TextInputModal {
+    property <bool> loading: ModalGlobal.loading;
+    property <bool> name-valid: ModalGlobal.validate-rename(input.text) && input.text != ModalGlobal.rename-text;
+
+    VerticalLayout {
+        padding: Size.sz6;
+        alignment: start;
+        spacing: Size.sz6;
+
+        HorizontalLayout {
+            alignment: center;
+            Icon {
+                name: "info";
+                size: Size.sz12;
+                color: Palette.content-brand;
+            }
+        }
+
+        ContentSection {
+            spacing: Size.sz4;
+            HeadingMd {
+                text: TR2.lookup(TrId.MainModalRenameTitle);
+                horizontal-alignment: center;
+            }
+
+            TextSm {
+                text: TR2.lookup(TrId.MainModalRenameContent);
+                color: Palette.content-secondary;
+                horizontal-alignment: center;
+            }
+        }
+
+        input := Input {
+            show-clear-btn: true;
+            text: ModalGlobal.rename-text;
+            accepted => {
+                ModalGlobal.rename-confirmed(input.text);
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.MainRename);
+                importance: Importance.primary;
+                enabled: !root.loading && root.name-valid;
+                loading: root.loading;
+                clicked => {
+                    ModalGlobal.rename-confirmed(input.text);
+                }
+            }
+        }
+    }
+}

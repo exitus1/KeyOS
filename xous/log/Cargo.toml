@@ -1,0 +1,21 @@
+[package]
+authors = ["Sean Cross <sean@xobs.io>"]
+description = "Log output program"
+edition = "2018"
+name = "xous-log"
+version = "0.1.25"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/betrusted-io/xous-core/"
+homepage = "https://betrusted.io/xous-book/"
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+log = "0.4.14"
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+xous = { path = "../xous-rs" }
+xous-api-log = { package = "xous-api-log", path = "../api/log" }
+xous-ipc = { path = "../ipc" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

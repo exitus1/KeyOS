@@ -1,0 +1,194 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {ListView} from "std-widgets.slint";
+import {CurrentTheme, Importance, Images, Palette, Palettes, Size, UISize, Utils} from "@ui/theme.slint";
+import {HeadingLg, TextMd, SegmentedControl } from "@ui/widgets.slint";
+
+// Import all pages
+import {TypographyPage} from "pages/typography-page.slint";
+import {LocalizationsPage} from "pages/localizations-page.slint";
+import {CardsPage} from "pages/cards-page.slint";
+import {ColorsPage} from "pages/colors-page.slint";
+import {ContainersPage} from "pages/containers-page.slint";
+import {ButtonsPage} from "pages/buttons-page.slint";
+import {IconButtonsPage} from "pages/icon-buttons-page.slint";
+import {IconsPage} from "pages/icons-page.slint";
+import {InputsPage} from "pages/inputs-page.slint";
+import {JumboIconsPage} from "pages/jumbo-icons-page.slint";
+import {LinksPage} from "pages/links-page.slint";
+import {TogglesPage} from "pages/toggles-page.slint";
+import {NavSortSearchPage} from "pages/nav-sort-search-page.slint";
+import {MiscellaneousPage} from "pages/miscellaneous-page.slint";
+import {ProgressPage} from "pages/progress-page.slint";
+import {QrcodePage} from "pages/qrcode-page.slint";
+import {ShapesPage} from "pages/shapes-page.slint";
+import {SvgPage} from "pages/svg-page.slint";
+import {SettingsDataPage} from "pages/settings/settings-data.slint";
+
+// Local re-exports for Rust access
+export { Utils, Images, CurrentTheme }
+
+struct PageInfo {
+    title: string,
+}
+
+export component SlintBook inherits Window {
+    preferred-width: 1320px;
+    preferred-height: 960px;
+    min-width: 600px;
+    min-height: 400px;
+    max-width: 3000px;
+    max-height: 2000px;
+    default-font-family: "Montserrat";
+
+    // property<string> curr_page : "Typography";
+    // property<string> curr_page : "Localizations";
+    // property<string> curr_page : "Colors";
+    // property<string> curr_page : "Containers";
+    // property<string> curr_page : "Buttons";
+    // property<string> curr_page : "IconButtons";
+    // property<string> curr_page : "Icons";
+    // property <string> curr_page: "Jumbo Icons";
+    property <string> curr_page: "Links";
+    // property<string> curr_page : "Inputs";
+    // property<string> curr_page : "Toggles";
+    // property<string> curr_page : "Nav/Sort/Search";
+    // property<string> curr_page : "Miscellaneous";
+    // property<string> curr_page : "Progress";
+    // property<string> curr_page : "SVG";
+    // property<string> curr_page : "Shapes";
+    // property <string> curr_page: "Cards";
+
+    property <[PageInfo]> pages: [
+        { title: "Typography" },
+        { title: "Localizations" },
+        { title: "Cards" },
+        { title: "Colors" },
+        { title: "Control Center" },
+        { title: "Containers" },
+        { title: "Buttons" },
+        { title: "IconButtons" },
+        { title: "Links" },
+        { title: "Icons" },
+        { title: "Jumbo Icons" },
+        { title: "Inputs" },
+        { title: "Toggles" },
+        { title: "Nav/Sort/Search" },
+        { title: "Miscellaneous" },
+        { title: "Progress" },
+        { title: "QR Code" },
+        { title: "SVG" },
+        { title: "Shapes" },
+        { title: "Settings Data" },
+    ];
+
+    HorizontalLayout {
+        spacing: 0px;
+
+        Rectangle {
+            background: Palette.background-primary;
+            padding: 0;
+            min-width: 200px;
+            horizontal-stretch: 1;
+
+            VerticalLayout {
+                alignment: stretch;
+
+                VerticalLayout {
+                    spacing: Size.sz2;
+                    Rectangle {
+                        height: 50px;
+                        background: Palette.background-notice;
+                        TextMd {
+                            color: Palette.white;
+                            text: "Theme";
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                            bold: true;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        // height: 60px;
+                        padding-left: Size.sz2;
+                        padding-right: Size.sz2;
+                        padding-bottom: Size.sz2;
+                        SegmentedControl {
+                            labels: ["Light", "Dark"];
+                            selected_index: CurrentTheme.palette == Palettes.light ? 0 : 1;
+                            changed(s, index) => {
+                                if (index == 0) {
+                                    CurrentTheme.palette = Palettes.light;
+                                } else {
+                                    CurrentTheme.palette = Palettes.dark;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    height: 50px;
+                    background: Palette.background-notice;
+                    TextMd {
+                        color: Palette.white;
+                        text: "Components";
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        bold: true;
+                    }
+                }
+
+                for page in pages: Rectangle {
+                    height: Size.sz10;
+                    background: root.curr_page == page.title ? Palette.background-brand : Palette.background-primary;
+                    TouchArea {
+                        clicked => {
+                            root.curr_page = page.title
+                        }
+
+                        TextMd {
+                            font-size: Size.sz4;
+                            color: root.curr_page == page.title ? Palette.white : Palette.content-primary;
+                            text: page.title;
+                        }
+                    }
+                }
+                Rectangle {
+                    vertical-stretch: 1;
+                }
+            }
+        }
+
+        Rectangle {
+            width: 1px;
+            background: Palette.background-primary-alternative;
+        }
+
+        Rectangle {
+            horizontal-stretch: 19;
+            background: Palette.background-primary;
+
+            if root.curr_page == "Typography": TypographyPage { }
+            if root.curr_page == "Cards": CardsPage { }
+            if root.curr_page == "Colors": ColorsPage { }
+            if root.curr_page == "Containers": ContainersPage { }
+            if root.curr_page == "Buttons": ButtonsPage { }
+            if root.curr_page == "IconButtons": IconButtonsPage { }
+            if root.curr_page == "Icons": IconsPage { }
+            if root.curr_page == "Icons": InputsPage { }
+            if root.curr_page == "Jumbo Icons": JumboIconsPage { }
+            if root.curr_page == "Links": LinksPage { }
+            if root.curr_page == "Toggles": TogglesPage { }
+            if root.curr_page == "Nav/Sort/Search": NavSortSearchPage { }
+            if root.curr_page == "Miscellaneous": MiscellaneousPage { }
+            if root.curr_page == "Localizations": LocalizationsPage { }
+            if root.curr_page == "Progress": ProgressPage { }
+            if root.curr_page == "QR Code": QrcodePage { }
+            if root.curr_page == "SVG": SvgPage { }
+            if root.curr_page == "Shapes": ShapesPage { }
+            if root.curr_page == "Settings Data": SettingsDataPage { }
+        }
+    }
+}

@@ -1,0 +1,46 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, UISize, Size } from "@ui/theme.slint";
+import { SetPinSuccessProps } from "props.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { HeadingMd, TextMd, Button, ButtonSection, WrappedIcon, JumboIconPageBody } from "@ui/widgets.slint";
+import { OnboardingBasePage,  OnboardingContentSection } from "../../../widgets/base-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { SeedGlobal } from "../../../onboarding-callbacks.slint";
+
+export component SetPinSuccessPage inherits OnboardingBasePage {
+    in property <SetPinSuccessProps> props;
+
+    JumboIconPageBody {
+        OnboardingContentSection {
+            HorizontalLayout {
+                alignment: center;
+                WrappedIcon {
+                    outer-icon: "jumbo-circle";
+                    inner-icon: "lock";
+                }
+            }
+
+            HeadingMd {
+                vertical-stretch: 0;
+                text: props.is-pin ? TR2.lookup(TrId.PinSuccessHeader) : TR2.lookup(TrId.PasswordSuccessHeader);
+                horizontal-alignment: center;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonButtonDone);
+                importance: primary;
+                clicked => {
+                    if (SeedGlobal.is-master-key-recovery) {
+                        Navigate.master-key-deleted-restore({ replace: true });
+                    } else {
+                        Navigate.master-seed({ });
+                    }
+                }
+            }
+        }
+    }
+}

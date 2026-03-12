@@ -1,0 +1,420 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Page } from "./page.slint";
+import { TextXs, Icon, HeadingMd, TextMd, Switch, Button, IconToggle, SegmentedSelector,
+         SegmentedControl, RadioButton, RadioGroup, Checkbox, CheckboxGroup, RadioCardGroup
+       } from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+export component TogglesPage inherits Page {
+    private property <string> output;
+    private property <int> counter: 0;
+    private property <length> left-margin: 190px;
+
+    VerticalLayout {
+        spacing: 10px;
+        VerticalLayout {
+            spacing: 30px;
+            HeadingMd {
+                text: "Output: " + output;
+                height: 50px;
+            }
+
+            VerticalLayout {
+                alignment: start;
+                spacing: 20px;
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "On/Checked";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    Switch {
+                        changed => {
+                            counter += 1;
+                            output = "Switch changed " + counter + " times";
+                        }
+                    }
+
+                    Switch {
+                        enabled: false;
+                    }
+
+                    sw3 := Switch {
+                        indeterminate: true;
+                        indeterminate_icon: "filter2";
+                        changed => {
+                            counter += 1;
+                            output = "Switch changed " + counter + " times";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Off/Unchecked";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    Switch {
+                        checked: true;
+                        changed => {
+                            counter += 1;
+                            output = "Switch changed " + counter + " times";
+                        }
+                    }
+
+                    Switch {
+                        checked: true;
+                        enabled: false;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Indeterminate";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    sw1 := Switch {
+                        checked: true;
+                        indeterminate: true;
+                        indeterminate_icon: "filter2";
+                        changed => {
+                            counter += 1;
+                            output = "Switch changed " + counter + " times";
+                        }
+                    }
+
+                    sw2 := Switch {
+                        checked: true;
+                        enabled: false;
+                        indeterminate: true;
+                        indeterminate_icon: "filter2";
+                        changed => {
+                            counter += 1;
+                            output = "Switch changed " + counter + " times";
+                        }
+                    }
+
+                    Button {
+                        label: "Toggle\nIndeterminate";
+                        width: 300px;
+                        clicked => {
+                            sw1.indeterminate = !sw1.indeterminate;
+                            sw2.indeterminate = !sw2.indeterminate;
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Lock Icons";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    IconToggle {
+                        checked: true;
+                        colorize: transparent;
+                    }
+
+                    IconToggle {
+                        checked: false;
+                        colorize: transparent;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+                    width: 250px;
+
+                    TextMd {
+                        text: "Segmented Selectors";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    SegmentedSelector {
+                        segments: [{ label: "Activity", icon: "history" }, { label: "Tags", icon: "tag" }];
+                        selected_index: 0;
+                        width: 250px;
+                    }
+
+                    SegmentedSelector {
+                        segments: [{ label: "Activity", icon: "history" }, { label: "Tags", icon: "tag" }];
+                        selected_index: 1;
+                        width: 250px;
+                    }
+
+                    SegmentedSelector {
+                        segments: [
+                            { label: "Activity", icon: "history" },
+                            { label: "Tags", icon: "tag" },
+                            { label: "Alert", icon: "alert" }
+                        ];
+                        selected_index: 2;
+                        width: 250px;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Segmented Selectors (Disabled)";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    SegmentedSelector {
+                        segments: [
+                            { label: "Activity", icon: "history" },
+                            { label: "Tags", icon: "tag" },
+                            { label: "Alert", icon: "alert" }
+                        ];
+                        selected_index: 0;
+                        enabled: false;
+                        width: 250px;
+                    }
+
+                    SegmentedSelector {
+                        segments: [
+                            { label: "Activity", icon: "history" },
+                            { label: "Tags", icon: "tag" },
+                            { label: "Alert", icon: "alert" }
+                        ];
+                        selected_index: 1;
+                        enabled: false;
+                        width: 250px;
+                    }
+
+                    SegmentedSelector {
+                        segments: [
+                            { label: "Activity", icon: "history" },
+                            { label: "Tags", icon: "tag" },
+                            { label: "Alert", icon: "alert" }
+                        ];
+                        selected_index: 2;
+                        enabled: false;
+                        width: 250px;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Segmented Selectors (Text only)";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    SegmentedControl {
+                        labels: ["Bootloader", "KeyOS", "Recovery"];
+                        selected_index: 0;
+                        width: 424px;
+                    }
+
+                    SegmentedControl {
+                        labels: ["Bootloader", "KeyOS", "Recovery"];
+                        selected_index: 1;
+                        width: 424px;
+                        enabled: false;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Radio Buttons";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    RadioButton {
+                        enabled: true;
+                        checked: false;
+                        clicked => {
+                            counter += 1;
+                            output = "Radio 1 clicked";
+                        }
+                    }
+
+                    RadioButton {
+                        enabled: true;
+                        checked: true;
+                        clicked => {
+                            counter += 1;
+                            output = "Radio 2 clicked";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Radio Buttons            (Disabled)";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    RadioButton {
+                        enabled: false;
+                        checked: false;
+                        clicked => {
+                            counter += 1;
+                            output = "Radio 3 clicked";
+                        }
+                    }
+
+                    RadioButton {
+                        enabled: false;
+                        checked: true;
+                        clicked => {
+                            counter += 1;
+                            output = "Radio 4 clicked";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "RadioGroup: Value=" + rg.selected-value;
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    rg := RadioGroup {
+                        model: [{ name: "1min", value: "1" }, { name: "2mins", value: "2" }, { name: "5mins", value: "5" }];
+                    }
+
+                    rg2 := RadioGroup {
+                        labels-right: true;
+                        model: [{ name: "1min", value: "1" }, { name: "2mins", value: "2" }, { name: "5mins", value: "5" }];
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Checkboxes";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    Checkbox {
+                        enabled: true;
+                        checked: false;
+                        clicked => {
+                            counter += 1;
+                            output = "Checkbox 1 clicked";
+                        }
+                    }
+
+                    Checkbox {
+                        enabled: true;
+                        checked: true;
+                        clicked => {
+                            counter += 1;
+                            output = "Checkbox 2 clicked";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Checkboxes (Disabled)";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    Checkbox {
+                        enabled: false;
+                        checked: false;
+                        clicked => {
+                            counter += 1;
+                            output = "Checkbox 3 clicked";
+                        }
+                    }
+
+                    Checkbox {
+                        enabled: false;
+                        checked: true;
+                        clicked => {
+                            counter += 1;
+                            output = "Checkbox 4 clicked";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    CheckboxGroup {
+                        model: [
+                            { name: "Enable backups", value: "Enable backups", checked: false, enabled: true },
+                            {
+                                name: "Show Security Words",
+                                value: "Show security words",
+                                checked: true,
+                                enabled: true
+                            },
+                            { name: "Auto Brightness", value: "Auto Brightness", checked: false, enabled: true }
+                        ];
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 20px;
+
+                    TextMd {
+                        text: "Radio Cards";
+                        vertical-alignment: center;
+                        width: left-margin;
+                    }
+
+                    RadioCardGroup {
+                        model: [
+                            { label: "Better\nPerformance", icon: "performance", value: "performance" },
+                            { label: "Improved\nPrivacy", icon: "shield", value: "privacy" },
+                            { label: "Third-Rail\nOption", icon: "biometrics", value: "biometrics" },
+                        ];
+                    }
+                }
+            }
+        }
+    }
+}

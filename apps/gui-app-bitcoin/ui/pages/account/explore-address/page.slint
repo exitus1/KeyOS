@@ -1,0 +1,306 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AppHeader, BasePage, Chip, Drawer, Icon, IconButton, NavHeader, PageBody, QrCodeCard, RadioButton, TextLg, TextSm, CompressedBtcAddress, BtcAddress } from "@ui/widgets.slint";
+import { Size, Palette, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Utils } from "@ui/utils.slint";
+import { DarkPalette } from "@ui/palettes/dark-palette.slint";
+
+import { AccountProps } from "../props.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { KeychainKind, AddressType, Callbacks, AccountView } from "../../../callbacks.slint";
+import { DarkOverlay } from "../../../widgets/dark-overlay.slint";
+import { ListView } from "std-widgets.slint";
+
+component RadioItem inherits Rectangle {
+    in property <string> text;
+    in property <bool> checked;
+
+    callback clicked();
+
+    height: Size.sz14;
+
+    HorizontalLayout {
+        alignment: start;
+        spacing: Size.sz4;
+
+        VerticalLayout {
+            alignment: center;
+            RadioButton {
+                checked: root.checked;
+                clicked => {
+                    root.clicked();
+                }
+            }
+        }
+
+        TextSm {
+            text: root.text;
+            vertical-alignment: center;
+        }
+    }
+
+    TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+component AddressSwitch inherits Rectangle {
+    in property <bool> enabled;
+    in property <string> icon;
+
+    callback clicked();
+
+    height: Size.sz15;
+
+    VerticalLayout {
+        alignment: center;
+        HorizontalLayout {
+            alignment: center;
+            Icon {
+                name: root.icon;
+                color: enabled ? DarkPalette.content-primary : DarkPalette.content-tertiary;
+                size: Size.sz10;
+            }
+        }
+    }
+
+    TouchArea {
+        enabled: root.enabled;
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+export component ExploreAddressPage inherits BasePage {
+    in-out property <AccountProps> props;
+
+    property <[string]> addresses: Callbacks.account-addresses(props.account-id, keychain, address-type);
+
+    property <int> selected-address: -1;
+    property <bool> can-subtract: selected-address > 0;
+    property <bool> can-add: selected-address < addresses.length - 1;
+
+    property <KeychainKind> keychain: KeychainKind.External;
+    property <AccountView> account: Callbacks.account-details(props.account-id);
+    property <AddressType> address-type: account.is-multisig ? account.multi.addresses : AddressType.P2tr;
+
+    function subtract-address() {
+        if can-subtract {
+            selected-address = selected-address - 1;
+        }
+    }
+
+    function add-address() {
+        if can-add {
+            selected-address = selected-address + 1;
+        }
+    }
+
+    property <length> item-height: Size.sz14;
+
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.ExploreAddressesTitle);
+            clicked => {
+                Navigate.backward();
+            }
+
+            right-icon: "filter2";
+            right-clicked => {
+                drawer.open = true;
+            }
+        }
+
+        ListView {
+            viewport-height: 1000 * item-height;
+            viewport-width: parent.width;
+            height: 688px;
+            width: parent.width;
+
+            vertical-scrollbar-policy: always-off;
+            mouse-drag-pan-enabled: true;
+
+            for address[index] in addresses: Rectangle {
+                width: root.width;
+                clip: true;
+                height: item-height;
+
+                HorizontalLayout {
+                    padding-left: Size.sz8;
+
+                    alignment: start;
+                    spacing: Size.sz4;
+                    TextSm {
+                        vertical-alignment: center;
+                        horizontal-alignment: right;
+                        text: "\{index}:";
+                        width: 36px;
+                        overflow: clip;
+                        wrap: no-wrap;
+                    }
+
+                    VerticalLayout {
+                        alignment: center;
+                        CompressedBtcAddress {
+                            address: address;
+                        }
+                    }
+                }
+
+                TouchArea {
+                    clicked => {
+                        selected-address = index
+                    }
+                }
+            }
+        }
+    }
+
+    DarkOverlay {
+        open: selected-address > -1;
+        title: TR2.format(TrId.ExploreAddressesDetailTitle, [selected-address]);
+        closed => {
+            selected-address = -1;
+        }
+
+        HorizontalLayout {
+            alignment: center;
+
+            VerticalLayout {
+                width: 424px;
+                alignment: start;
+                spacing: Size.sz3;
+
+                BtcAddress {
+                    address: addresses[selected-address];
+                    primary-color: DarkPalette.content-primary;
+                    secondary-color: DarkPalette.content-tertiary;
+                }
+
+                VerticalLayout {
+                    alignment: start;
+
+                    AddressSwitch {
+                        enabled: can-subtract;
+                        icon: "chevron-up";
+                        clicked => {
+                            subtract-address();
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: center;
+
+                        QrCodeCard {
+                            data: addresses[selected-address];
+                        }
+                    }
+
+                    AddressSwitch {
+                        enabled: can-add;
+                        icon: "chevron-down";
+                        clicked => {
+                            add-address();
+                        }
+                    }
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.ExploreAddressesDetailContent);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+    }
+
+    drawer := Drawer {
+        drawer-height: 520px;
+
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz10;
+
+            VerticalLayout {
+                alignment: start;
+                spacing: Size.sz4;
+
+                TextLg {
+                    text: TR2.lookup(TrId.ExploreAddressesMenuAddress);
+                    bold: true;
+                }
+
+                HorizontalLayout {
+                    spacing: Size.sz2;
+                    external := Chip {
+                        text: TR2.lookup(TrId.ExploreAddressesMenuReceive);
+                        selected: keychain == KeychainKind.External;
+                        clicked => {
+                            keychain = KeychainKind.External;
+                        }
+                    }
+
+                    internal := Chip {
+                        text: TR2.lookup(TrId.ExploreAddressesMenuChange);
+                        selected: keychain == KeychainKind.Internal;
+                        clicked => {
+                            keychain = KeychainKind.Internal;
+                        }
+                    }
+                }
+            }
+
+            VerticalLayout {
+                alignment: start;
+                spacing: Size.sz4;
+
+                TextLg {
+                    text: "Type";
+                    bold: true;
+                }
+
+                VerticalLayout {
+                    alignment: start;
+                    spacing: Size.sz2;
+
+                    RadioItem {
+                        text: Callbacks.address-type-to-string(AddressType.P2wpkh);
+                        checked: address-type == AddressType.P2wpkh;
+                        clicked => {
+                            address-type = AddressType.P2wpkh;
+                        }
+                    }
+
+                    RadioItem {
+                        text: Callbacks.address-type-to-string(AddressType.P2ShWpkh);
+                        checked: address-type == AddressType.P2ShWpkh;
+                        clicked => {
+                            address-type = AddressType.P2ShWpkh;
+                        }
+                    }
+
+                    RadioItem {
+                        text: Callbacks.address-type-to-string(AddressType.P2pkh);
+                        checked: address-type == AddressType.P2pkh;
+                        clicked => {
+                            address-type = AddressType.P2pkh;
+                        }
+                    }
+
+                    RadioItem {
+                        text: Callbacks.address-type-to-string(AddressType.P2tr);
+                        checked: address-type == AddressType.P2tr;
+                        clicked => {
+                            address-type = AddressType.P2tr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

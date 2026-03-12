@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "cryptoauthlib"
+version = "0.2.2"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = "0.4.14"
+xous = { path = "../xous/xous-rs" }
+xous-ticktimer = { package = "xous-api-ticktimer", path = "../xous/api/ticktimer" }
+server = { path = "../server" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { path = "../imports/atsama5d27" }
+dma = { workspace = true }
+utralib = { workspace = true }
+
+[build-dependencies]
+cmake = "=0.1.45"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

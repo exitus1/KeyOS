@@ -1,0 +1,17 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Router } from "gen/router.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+
+import { Images, CurrentTheme, Palettes, Utils, UISize } from "@ui/theme.slint";
+import { BaseWindow } from "@ui/widgets.slint";
+import { Callbacks } from "callbacks.slint";
+import { GenericAlertGlobal, AppCrashedGlobal } from "globals/globals.slint";
+
+export component AppWindow inherits BaseWindow {
+    Router { }
+}
+
+export { GenericAlertGlobal, AppCrashedGlobal, CurrentTheme, Callbacks, TR, Utils, Images }
+export * from "gen/exports.slint";

@@ -1,0 +1,23 @@
+appId = "0x0a000000000000000000000000000000"
+
+[appName]
+en = "Lock Screen"
+
+[permissions]
+template = ["gui-app", "navigable"]
+"os/gui-server" = ["ShowControlCenter", "LoginSuccess"]
+"os/security" = [
+    "Login",
+    "GetAttemptsRemaining",
+    "GetSecurityWords",
+    "GetPinEntryMode",
+]
+"os/settings" = [
+    "SubscribeTimeZone",
+    "SubscribeUseStandardTimeFormat",
+    "SubscribeShowSecurityWords",
+    "GetTimeZone",
+    "GetUseStandardTimeFormat",
+    "GetShowSecurityWords",
+]
+"os/haptics" = ["Vibrate"]

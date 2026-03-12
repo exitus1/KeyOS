@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "ctap-hid"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+test-app = ["fido/test-app"]
+
+[dependencies]
+fido = { path = "../fido" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+num-derive = "0.4"
+num-traits = "0.2"
+rand = "0.8"
+rgb-led = { workspace = true }
+rkyv = { workspace = true }
+server = { path = "../../server" }
+thiserror = "1.0"
+usb = { workspace = true }
+xous = { path = "../../xous/xous-rs" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

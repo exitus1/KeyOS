@@ -1,0 +1,71 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, UISize, Importance } from "@ui/theme.slint";
+import { PageBody, HeadingMd, TextLg, TextMd, Shield, Button, NavHeader, ContentSection, WrappedIcon, ButtonSection } from "@ui/widgets.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingFullShieldPage } from "../../../widgets/shield-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { OnboardingCallbacks } from "../../../onboarding-callbacks.slint";
+
+
+export component MasterKeyDeletedErasePage inherits OnboardingFullShieldPage {
+    VerticalLayout {
+        NavHeader {
+            title: "";
+
+            clicked => {
+                Navigate.backward();
+            }
+        }
+
+        PageBody {
+            p-y: 0;
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        width: 184px;
+                        height: 184px;
+                        outer-icon: "jumbo-shield";
+                        inner-icon: "close";
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz6;
+
+                    HeadingMd {
+                        text: TR2.lookup(TrId.MasterKeyDeletedEraseHeader);
+                        horizontal-alignment: center;
+                    }
+
+                    TextMd {
+                        vertical-alignment: TextVerticalAlignment.bottom;
+                        text: TR2.lookup(TrId.MasterKeyDeletedEraseContent);
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.MasterKeyDeletedEraseProceedFactoryReset);
+                    importance: negative;
+                    clicked => {
+                        OnboardingCallbacks.erase-device();
+                    }
+                }
+
+                Button {
+                    label: TR2.lookup(TrId.MasterKeyDeletedEraseIHaveMasterKey);
+                    importance: primary;
+                    clicked => {
+                        Navigate.master-key-deleted-restore({ });
+                    }
+                }
+            }
+        }
+    }
+}

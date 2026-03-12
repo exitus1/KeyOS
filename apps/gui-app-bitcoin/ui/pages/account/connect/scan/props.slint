@@ -1,0 +1,8 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+@rust-attr(route(path = "/scan-connect/{connector-id}?{join-multisig}"))
+export struct ScanConnectProps {
+    connector-id: string,
+    join-multisig: bool,
+}

@@ -1,0 +1,32 @@
+[package]
+authors = ["bunnie <bunnie@kosagi.com>"]
+description = "Provide high-resolution, non-rollover system time"
+edition = "2021"
+name = "xous-ticktimer"
+version = "0.1.32"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/betrusted-io/xous-core/"
+homepage = "https://betrusted.io/xous-book/"
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../api/log" }
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+xous = { path = "../xous-rs" }
+xous-api-ticktimer = { path = "../api/ticktimer" }
+xous-ipc = { path = "../ipc" }
+xous-names = { package = "xous-api-names", path = "../api/names" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+utralib = { workspace = true }
+
+[build-dependencies]
+chrono = "0.4"
+# default = []
+# default = ["debug-print"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

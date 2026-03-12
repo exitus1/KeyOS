@@ -1,0 +1,6 @@
+appId = "0x7469636b74696d657200000000000000"
+memory = ["TC1", "RSTC"]
+syscall = ["ClaimInterrupt", "SetThreadPriority"]
+
+[appName]
+en = "Ticktimer"

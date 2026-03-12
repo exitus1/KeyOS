@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, IconButton, TextSm } from "@ui/widgets.slint";
+import { Importance, Size, Palette } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+import { PickerGlobal } from "./global.slint";
+import { FileList, FileListLoading } from "../file-list.slint";
+import { LocationSwitcher } from "../location-switcher.slint";
+
+export component PickerBody inherits Rectangle {
+    private property <int> num-files: PickerGlobal.file-lists[PickerGlobal.location-idx].files.length;
+    private property <int> num-files-filtered: PickerGlobal.file-lists[PickerGlobal.location-idx].num-files-filtered;
+    private property <bool> loading: PickerGlobal.file-lists[PickerGlobal.location-idx].loading;
+    private property <bool> error: PickerGlobal.file-lists[PickerGlobal.location-idx].error;
+
+    VerticalLayout {
+        y: 0px;
+        padding-left: Size.sz6;
+        padding-right: Size.sz6;
+        spacing: Size.sz6 - 2px;
+
+        header := Rectangle {
+            HorizontalLayout {
+                alignment: start;
+                VerticalLayout {
+                    alignment: center;
+                    IconButton {
+                        icon: "chevron-left";
+                        importance: Importance.tertiary;
+                        icon-color: Palette.content-primary;
+                        visible: self.enabled;
+                        enabled: PickerGlobal.current-path != "";
+                        clicked => {
+                            PickerGlobal.back();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!loading && !error && num-files != 0): FileList {
+            model: PickerGlobal.file-lists[PickerGlobal.location-idx].files;
+            is-select-mode: false;
+            long-press-enabled: false;
+
+            entry-pressed(name, is-folder) => {
+                PickerGlobal.entry-pressed(name, is-folder);
+            }
+        }
+
+        if (!error && loading): FileListLoading {
+            are-folders-allowed: PickerGlobal.is-folders-allowed;
+        }
+
+        if (error && !loading): VerticalLayout {
+            height: parent.height;
+            padding: Size.sz6;
+
+            HorizontalLayout {
+                alignment: center;
+                TextSm {
+                    text: TR2.lookup(TrId.ErrorContent);
+                    color: Palette.content-notice;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        if (!error && !loading && num-files == 0): VerticalLayout {
+            height: parent.height;
+            padding: Size.sz6;
+
+            HorizontalLayout {
+                alignment: center;
+                TextSm {
+                    text: TR2.lookup(TrId.EmptyFolderEmpty) + TR2.format(TrId.EmptyFilesFiltered, [num-files-filtered]);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+    }
+
+    if PickerGlobal.is-dir-selection-mode: HorizontalLayout {
+        y: parent.height - Size.sz8 - self.height;
+        alignment: center;
+
+        VerticalLayout {
+            alignment: end;
+
+            Button {
+                width: 256px;
+                label: TR2.lookup(TrId.CommonButtonSave);
+                importance: Importance.primary;
+                enabled: !error;
+                clicked => {
+                    PickerGlobal.select-directory();
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        TouchArea {
+            enabled: locations.menu-open;
+            clicked => {
+                locations.menu-open = false;
+            }
+        }
+
+        locations := LocationSwitcher {
+            x: header.absolute-position.x - root.absolute-position.x + (header.width - self.width) / 2;
+            y: header.absolute-position.y - root.absolute-position.y + (header.height - self.height) / 2;
+            locations: PickerGlobal.allowed-locations;
+            selected_index: PickerGlobal.location-idx;
+            breadcrumbs: PickerGlobal.build-breadcrumbs(PickerGlobal.location-idx, PickerGlobal.current-path);
+            location-changed(index) => {
+                PickerGlobal.location-changed(index);
+            }
+            breadcrumb-selected(name, index) => {
+                PickerGlobal.breadcrumb-selected(name, index);
+            }
+        }
+    }
+}

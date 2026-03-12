@@ -1,0 +1,147 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { 
+    TextSm,
+    TextMd, 
+    Icon, 
+    NavHeader,
+    MenuSection,
+    MenuSectionContainer,
+    MenuSectionLayout,
+    MenuActionItem,
+    HLine,
+    BasePage,
+    PageBody,
+    ContentSection
+} from "@ui/widgets.slint";
+import { CurrentTheme, Palette, Size, Images } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+import { Navigate } from "../gen/navigate.slint";
+import { Callbacks } from "../callbacks.slint";
+import { RootSettingsProps } from "./props.slint";
+import { QlGlobal } from "../globals/ql-global.slint";
+import { BackupGlobal } from "../globals/backup-global.slint";
+
+component QlPaired inherits HorizontalLayout {
+    padding-left: Size.sz4;
+    padding-right: Size.sz4;
+    spacing: Size.sz4;
+
+    VerticalLayout {
+        alignment: center;
+        Image {
+            source: Images.common("images/brand-foundation");
+            colorize: QlGlobal.ql-live ? transparent : Palette.content-tertiary;
+            width: Size.sz8;
+            height: Size.sz8;
+        }
+    }
+
+    VerticalLayout {
+        alignment: center;
+        TextMd {
+            text: QlGlobal.ql-live ? TR2.lookup(TrId.MainEnvoyConnected) : TR2.lookup(TrId.MainEnvoyNotConnected);
+            color: Palette.content-primary;
+            horizontal-alignment: left;
+        }
+
+        TextSm {
+            text: BackupGlobal.last-backup-time-ago;
+            color: Palette.content-tertiary;
+            horizontal-alignment: left;
+        }
+    }
+
+    VerticalLayout {
+        alignment: center;
+        Icon {
+            name: "chevron-right";
+            color: Palette.content-tertiary;
+        }
+    }
+}
+
+component QlUnpaired inherits HorizontalLayout {
+    padding-left: Size.sz4;
+    padding-right: Size.sz4;
+    VerticalLayout {
+        alignment: center;
+        TextMd {
+            text: TR2.lookup(TrId.MainNoEnvoyEnvoyNotConnected);
+            color: Palette.content-tertiary;
+        }
+    }
+
+    VerticalLayout {
+        alignment: center;
+        Icon {
+            name: "chain";
+            color: Palette.content-link;
+        }
+    }
+}
+
+component QlStatus inherits MenuSectionContainer {
+    height: 100px;
+    if QlGlobal.ql-paired: QlPaired { }
+    if !QlGlobal.ql-paired: QlUnpaired { }
+    TouchArea {
+        clicked => {
+            Navigate.quantum-link({ });
+        }
+    }
+}
+
+export component RootSettingsPage inherits BasePage {
+    in property <RootSettingsProps> props;
+
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.MainTitle);
+            left-icon: "menu-down";
+            clicked => {
+                Callbacks.close-settings();
+            }
+        }
+
+        PageBody {
+            ContentSection {
+                QlStatus { }
+
+                MenuSection {
+                    title: TR2.lookup(TrId.MainGeneral);
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            first: true;
+                            label: TR2.lookup(TrId.MainSettings);
+                            clicked => {
+                                Navigate.settings({ });
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuActionItem {
+                            label: TR2.lookup(TrId.MainBackup);
+                            clicked => {
+                                Navigate.backup({ });
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuActionItem {
+                            last: true;
+                            label: TR2.lookup(TrId.MainUpdate);
+                            clicked => {
+                                Navigate.update({ });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

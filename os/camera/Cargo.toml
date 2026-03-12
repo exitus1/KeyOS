@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "camera"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gui-server-api = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { path = "../../server" }
+settings = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-names = { package = "xous-api-names", path = "../../xous/api/names" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+gpio = { workspace = true }
+i2c = { workspace = true }
+ovm7690-rs = { workspace = true }
+power-manager = { workspace = true }
+utralib = { workspace = true }
+
+[target.'cfg(not(keyos))'.dependencies]
+image = { version = "0.25" }
+nokhwa = { version = "0.10", features = ["input-native"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

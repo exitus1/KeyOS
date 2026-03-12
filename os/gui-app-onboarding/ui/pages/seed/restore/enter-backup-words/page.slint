@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Button, Icon, Shield, HeadingMd, TextSm, AppHeader, IconButton, Input } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../../../widgets/base-page.slint";
+import { Font } from "@ui/fonts.slint";
+import { Palette, Size, Utils, CardColor, UISize } from "@ui/theme.slint";
+import { EnterBackupWordsProps } from "props.slint";
+import { VerticalBox } from "std-widgets.slint";
+import { Navigate } from "../../../../gen/navigate.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+export component EnterBackupWordsPage inherits OnboardingBasePage {
+    in property <EnterBackupWordsProps> props;
+    in-out property <[string]> word: ["", "", "", "", "", ""];
+    in-out property <bool> allWordsFilled: true;
+    in-out property <bool> isWordValid: true;
+    in-out property <bool> isFirstElementEmpty: true;
+    in-out property <bool> isChecked:true;
+
+    VerticalLayout {
+        alignment: stretch;
+        spacing: Size.sz6;
+        padding: Size.sz6;
+
+        AppHeader {
+            title: TR2.lookup(TrId.RecoverFileBackupCodeTitle);
+
+            IconButton {
+                icon: "chevron-left";
+                importance: tertiary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+        }
+
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz6;
+            padding: Size.sz4;
+            VerticalLayout {
+                spacing: Size.sz4;
+                alignment: start;
+
+                for row in 3: HorizontalLayout {
+                    spacing: 16px;
+                    alignment: stretch;
+
+                    for col in 2: VerticalLayout {
+                        alignment: center;
+                        spacing: 16px;
+                        width: 180px;
+
+                        wordInput := Input {
+                            show-clear-btn: false;
+                            text: word[row * 2 + col];
+                        }
+                    }
+                }
+            }
+
+            if word[0] == "": HeadingMd {
+                vertical-stretch: 0;
+                text: TR2.lookup(TrId.RecoverFileBackupWordsSwitchToBackupCode);
+                visible: isFirstElementEmpty;
+                color: Palette.content-brand;
+                horizontal-alignment: center;
+                TouchArea {
+                    clicked => {
+                        Navigate.enter-backup-code({ });
+                    }
+                }
+            }
+        }
+
+        Rectangle { }
+
+        Button {
+            label: TR2.lookup(TrId.CommonButtonContinue);
+            enabled: allWordsFilled && isChecked && isWordValid;
+            clicked => {
+                Navigate.restore-file-backup-restoring({ });
+            }
+        }
+    }
+}

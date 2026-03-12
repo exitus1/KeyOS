@@ -1,0 +1,164 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+use std::sync::mpsc;
+
+use ctap_hid::messages::SimuUsbReceiveCallback;
+
+ctap_hid::use_api!();
+fido::use_api!();
+
+fn main() {
+    log_server::init_wait(env!("CARGO_CRATE_NAME")).unwrap();
+    log::set_max_level(log::LevelFilter::Debug);
+
+    log::info!("fido tests starting");
+
+    let mut fido = FidoApi::default();
+    let mut ctap_hid = CtapHidApi::default();
+
+    /* Test only API */
+    let (sender, receiver) = mpsc::channel();
+    ctap_hid.register_simu_usb_receiver(SimuUsbReceiver(sender)).expect("register callback");
+    fido.reset_state().ok();
+
+    /* Public API */
+    let selected_sec_key_idx = fido.selected_security_key_index().unwrap();
+    log::info!("initial live security key index: {selected_sec_key_idx:?}");
+    assert_eq!(selected_sec_key_idx, None);
+
+    fido.select_security_key(Some(1000));
+    log::info!("step 0 select_security_key(1000) - invalid index, should not change selection");
+    // Verify selection didn't change (still None) after invalid index
+    let selected_sec_key_idx = fido.selected_security_key_index().unwrap();
+    assert_eq!(selected_sec_key_idx, None);
+    // set_live with invalid index is fire-and-forget (logs warning on server side)
+    fido.set_live(1000, true);
+    log::info!("step 0 set_live(1000,_) - invalid index, should log warning on server");
+
+    fido.create_security_key();
+
+    let selected_sec_key_idx = fido.selected_security_key_index().unwrap();
+    log::info!("step 1 live security key index: {selected_sec_key_idx:?}");
+    assert_eq!(selected_sec_key_idx, None);
+
+    fido.select_security_key(Some(0));
+    log::info!("step 2 select_security_key(0) - valid index");
+    let selected_sec_key_idx = fido.selected_security_key_index().unwrap();
+    log::info!("step 2 live security key index: {selected_sec_key_idx:?}");
+    assert_eq!(selected_sec_key_idx, Some(0));
+
+    fido.set_live(0, true);
+    log::info!("step 3 set_live(0,true)");
+    // Small delay to ensure async operation completes before checking
+    std::thread::sleep(std::time::Duration::from_millis(10));
+    let res = fido.is_live(0);
+    log::info!("step 3 is_live(0) result: {res:?}");
+    assert!(res.is_ok());
+    assert_eq!(res.unwrap(), true);
+
+    fido.set_live(0, false);
+    log::info!("step 4 set_live(0,false)");
+    // Small delay to ensure async operation completes before checking
+    std::thread::sleep(std::time::Duration::from_millis(10));
+    let res = fido.is_live(0);
+    log::info!("step 4 is_live(0) result: {res:?}");
+    assert!(res.is_ok());
+    assert_eq!(res.unwrap(), false);
+
+    // Simulate USB HID communication
+    log::info!("simulate receiving CTAPHID_INIT");
+    let hid_pkt_init = [
+        0xff, 0xff, 0xff, 0xff, 0x86, 0x00, 0x08, 0x08, 0x04, 0x09, 0x27, 0x1d, 0x91, 0x1d, 0x1c, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ];
+    ctap_hid.process_hid_packet(&hid_pkt_init);
+
+    // CTAPHID_INIT response
+    let resp = receiver.recv().unwrap();
+
+    log::info!("simulate receiving CTAPHID_CBOR authenticatorGetInfo");
+    let hid_pkt_cbor_get_info = [
+        resp[15], resp[16], resp[17], resp[18], 0x90, 0x00, 0x01, 0x04, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ];
+    ctap_hid.process_hid_packet(&hid_pkt_cbor_get_info);
+
+    // CTAPHID_CBOR authenticatorGetInfo response
+    let _resp2 = receiver.recv().unwrap();
+
+    log::info!("simulate receiving CTAPHID_CBOR authenticatorMakeCredential");
+    let hid_pkt_cbor_make_credential = [
+        [
+            resp[15], resp[16], resp[17], resp[18], 0x90, 0x01, 0x52, 0x01, 0xa5, 0x01, 0x58, 0x20, 0xb5,
+            0x13, 0xda, 0x7f, 0x27, 0xfc, 0x46, 0x81, 0x96, 0x9b, 0xb1, 0x94, 0xdc, 0x76, 0xb3, 0x72, 0xc8,
+            0xce, 0xe2, 0xea, 0x4f, 0xf0, 0x29, 0x6c, 0x41, 0xb6, 0xfb, 0x4c, 0xcb, 0x5f, 0xc9, 0x85, 0x02,
+            0xa2, 0x62, 0x69, 0x64, 0x6a, 0x67, 0x69, 0x74, 0x6c, 0x61, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x64,
+            0x6e, 0x61, 0x6d,
+        ],
+        [
+            resp[15], resp[16], resp[17], resp[18], 0x00, 0x65, 0x66, 0x47, 0x69, 0x74, 0x4c, 0x61, 0x62,
+            0x03, 0xa3, 0x62, 0x69, 0x64, 0x58, 0x40, 0xac, 0x5b, 0xda, 0x27, 0xc2, 0x1a, 0x67, 0x30, 0xb2,
+            0xbf, 0xef, 0x25, 0x13, 0xe7, 0xe4, 0x72, 0x67, 0x14, 0x31, 0xff, 0xfa, 0x8a, 0xcf, 0x1c, 0xae,
+            0x07, 0xec, 0xa1, 0x9f, 0x16, 0x12, 0xd5, 0x05, 0xbc, 0x4f, 0x33, 0x2b, 0x9f, 0xfb, 0x74, 0xd5,
+            0x25, 0xaa, 0x99,
+        ],
+        [
+            resp[15], resp[16], resp[17], resp[18], 0x01, 0x5c, 0x6e, 0x75, 0x73, 0xae, 0x97, 0x03, 0xa2,
+            0xfa, 0x7b, 0xca, 0xd2, 0x47, 0x5a, 0xd1, 0x8b, 0xff, 0xed, 0xe9, 0xc7, 0x64, 0x6e, 0x61, 0x6d,
+            0x65, 0x6c, 0x66, 0x69, 0x73, 0x63, 0x61, 0x5f, 0x66, 0x61, 0x63, 0x69, 0x6c, 0x65, 0x6b, 0x64,
+            0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x6c, 0x66, 0x69, 0x73, 0x63, 0x61,
+            0x5f, 0x66, 0x61,
+        ],
+        [
+            resp[15], resp[16], resp[17], resp[18], 0x02, 0x63, 0x69, 0x6c, 0x65, 0x04, 0x83, 0xa2, 0x63,
+            0x61, 0x6c, 0x67, 0x26, 0x64, 0x74, 0x79, 0x70, 0x65, 0x6a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63,
+            0x2d, 0x6b, 0x65, 0x79, 0xa2, 0x63, 0x61, 0x6c, 0x67, 0x38, 0x24, 0x64, 0x74, 0x79, 0x70, 0x65,
+            0x6a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x2d, 0x6b, 0x65, 0x79, 0xa2, 0x63, 0x61, 0x6c, 0x67,
+            0x39, 0x01, 0x00,
+        ],
+        [
+            resp[15], resp[16], resp[17], resp[18], 0x03, 0x64, 0x74, 0x79, 0x70, 0x65, 0x6a, 0x70, 0x75,
+            0x62, 0x6c, 0x69, 0x63, 0x2d, 0x6b, 0x65, 0x79, 0x05, 0x81, 0xa2, 0x62, 0x69, 0x64, 0x58, 0x40,
+            0x92, 0x5c, 0x1a, 0xfe, 0x50, 0x36, 0xc0, 0x75, 0xe3, 0xf3, 0x10, 0xd8, 0x6b, 0x53, 0xe9, 0x11,
+            0x7a, 0x8b, 0xac, 0xe9, 0xf1, 0xa8, 0x03, 0x3e, 0xc9, 0x2f, 0xcf, 0xd4, 0x67, 0x33, 0x4c, 0xb7,
+            0xdb, 0x74, 0x0c,
+        ],
+        [
+            resp[15], resp[16], resp[17], resp[18], 0x04, 0x6e, 0x07, 0x54, 0xd0, 0xbf, 0xad, 0x76, 0xe8,
+            0x80, 0xa9, 0x28, 0x67, 0x79, 0x92, 0x45, 0xe9, 0xdb, 0xa6, 0x97, 0x78, 0x4a, 0xbf, 0x5d, 0x06,
+            0xa5, 0x2d, 0x61, 0x1a, 0xf9, 0x64, 0x74, 0x79, 0x70, 0x65, 0x6a, 0x70, 0x75, 0x62, 0x6c, 0x69,
+            0x63, 0x2d, 0x6b, 0x65, 0x79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
+    ];
+    for hid_pkt in hid_pkt_cbor_make_credential {
+        ctap_hid.process_hid_packet(&hid_pkt);
+    }
+
+    // CTAPHID_CBOR authenticatorMakeCredential response
+    let _resp3 = receiver.recv().unwrap();
+
+    log::info!("fido tests passed");
+}
+
+struct SimuUsbReceiver(mpsc::Sender<Vec<u8>>);
+impl server::ServerMessages for SimuUsbReceiver {
+    const NAME: &'static str = "";
+
+    fn messages() -> &'static [server::MessageDef<Self>] { &[] }
+}
+impl server::Server for SimuUsbReceiver {}
+
+impl server::ArchiveHandler<SimuUsbReceiveCallback> for SimuUsbReceiver {
+    fn handle(
+        &mut self,
+        SimuUsbReceiveCallback(msg): SimuUsbReceiveCallback,
+        _sender: xous::PID,
+        _context: &mut server::ServerContext<Self>,
+    ) {
+        log::trace!("USB received packet: {msg:02x?}");
+        self.0.send(msg).unwrap();
+    }
+}

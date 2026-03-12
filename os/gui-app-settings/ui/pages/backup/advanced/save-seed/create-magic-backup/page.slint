@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { KeycardBackupPage } from "@ui/pages/keycard-backup/keycard-backup-page.slint";
+import { BasePage, PageBody } from "@ui/widgets.slint";
+import { KeycardBackupErrorDialog } from "@ui/pages/keycard-backup/keycard-backup-error.slint";
+
+import { Navigate } from "../../../../../gen/navigate.slint";
+import { TrId, TR2 } from "../../../../../gen/tr.slint";
+import { KeycardBackupGlobal } from "../../../../../globals/keycard-backup-global.slint";
+import { SettingsNavHeader } from "../../../../../widgets/nav-header.slint";
+
+export component CreateMagicBackupPage inherits BasePage {
+    VerticalLayout {
+        SettingsNavHeader { }
+
+        PageBody {
+            alignment: stretch;
+            KeycardBackupPage {
+                magic: true;
+                steps: KeycardBackupGlobal.steps;
+                saving-to-keycard: KeycardBackupGlobal.saving-to-keycard;
+
+                header-text: self.backup-created ? TR2.lookup(TrId.KeycardBackupMagicCreatedHeader) : TR2.lookup(TrId.KeycardBackupMagicCreatingHeader);
+                button-label: self.backup-created ? TR2.lookup(TrId.CommonButtonContinue) : TR2.lookup(TrId.CommonButtonCreating);
+
+                start-backup => {
+                    KeycardBackupGlobal.start-magic-backup();
+                }
+                continue => {
+                    Navigate.backward();
+                }
+            }
+        }
+    }
+
+    KeycardBackupErrorDialog {
+        error: KeycardBackupGlobal.error;
+        clicked(confirm) => {
+            KeycardBackupGlobal.error-clicked(confirm);
+        }
+    }
+}

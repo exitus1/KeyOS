@@ -1,0 +1,143 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Divider,
+        TextXs, TextSm, TextMd, TextLg, TextXl,
+        HeadingXs, HeadingSm, HeadingMd, HeadingLg, HeadingXl} from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { Page } from "./page.slint";
+
+export component TypographyPage inherits Page {
+    background: Palette.background-primary;
+    VerticalLayout {
+        spacing: Size.sz3;
+        alignment: start;
+        VerticalLayout {
+            spacing: Size.sz3;
+
+            HeadingXl {
+                text: "Heading X-Large";
+            }
+
+            HeadingLg {
+
+                text: "Heading Large";
+            }
+
+            HeadingMd {
+                text: "Heading Medium";
+            }
+
+            HeadingSm {
+                text: "Heading Small";
+            }
+
+            HeadingXs {
+                text: "Heading X-Small";
+            }
+
+            Divider { }
+
+            HorizontalLayout {
+                alignment: start;
+                spacing: Size.sz6;
+                TextXl {
+                    text: "Text X-Large";
+                    width: 450px;
+                }
+
+                TextXl {
+                    text: "Text X-Large Bold";
+                    bold: true;
+                }
+            }
+
+            HorizontalLayout {
+                alignment: start;
+                spacing: Size.sz6;
+                TextLg {
+                    text: "Text Large";
+                    width: 450px;
+                }
+
+                TextLg {
+                    text: "Text Large Bold";
+                    bold: true;
+                }
+            }
+
+            HorizontalLayout {
+                spacing: Size.sz6;
+                TextMd {
+                    text: "Text Medium";
+                    width: 450px;
+                }
+
+                TextMd {
+                    text: "Text Medium Bold";
+                    bold: true;
+                }
+            }
+
+            HorizontalLayout {
+                spacing: Size.sz6;
+                TextSm {
+                    text: "Text Small";
+                    width: 450px;
+                }
+
+                TextSm {
+                    text: "Text Small Bold";
+                    bold: true;
+                }
+            }
+
+            HorizontalLayout {
+                spacing: Size.sz6;
+                TextXs {
+                    text: "Text X-Small";
+                    width: 450px;
+                }
+
+                TextXs {
+                    text: "Text X-Small Bold ";
+                    bold: true;
+                }
+            }
+        }
+
+        Divider { }
+
+        HorizontalLayout {
+            spacing: Size.sz3;
+            TextMd {
+                text: "This is a paragraph of text. It is a bit longer than the other text elements on this page. It is used to show how text will wrap when it reaches the end of the container.";
+                width: 450px;
+            }
+
+            TextMd {
+                text: "This is a paragraph of text. It is a bit longer than the other text elements on this page. It is used to show how text will wrap when it reaches the end of the container.";
+                width: 450px;
+                bold: true;
+            }
+        }
+
+        Divider { }
+
+        HorizontalLayout {
+            spacing: Size.sz3;
+            TextMd {
+                text: "This is a paragraph of text. It is a bit longer than the other text elements on this page. It is used to show how text will wrap when it reaches the end of the container.";
+                width: 450px;
+                color: Palette.content-negative;
+            }
+
+            TextMd {
+                text: "This is a paragraph of text. It is a bit longer than the other text elements on this page. It is used to show how text will wrap when it reaches the end of the container.";
+                width: 450px;
+                bold: true;
+                color: Palette.content-positive-bold;
+            }
+        }
+    }
+}

@@ -1,0 +1,355 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Battery, SliderBrightness, Icon, HeadingSm, TextXs, TextMd, TextSm, TextTime, SlideToButton } from "@ui/widgets.slint";
+import { UISize, Size, Palette, Importance } from "@ui/theme.slint";
+import { DarkPalette } from "@ui/palettes/dark-palette.slint";
+import { LightPalette } from "@ui/palettes/light-palette.slint";
+import { TR2, TrId } from "./gen/tr.slint";
+
+export global State {
+    in-out property <float> brightness: 80;
+
+    in property <bool> is-bluetooth-enabled: false;
+    in property <bool> is-camera-enabled: false;
+    in property <bool> is-nfc-enabled: false;
+    in property <bool> is-usb-enabled: false;
+
+    in property <bool> is-bluetooth-in-use: true;
+    in property <bool> is-camera-in-use: true;
+    in property <bool> is-nfc-in-use: true;
+    in property <bool> is-usb-in-use: true;
+}
+
+export global Callbacks {
+    callback brightness-changed(float);
+    callback bluetooth-enabled-changed(bool);
+    callback camera-enabled-changed(bool);
+    callback nfc-enabled-changed(bool);
+    callback usb-enabled-changed(bool);
+    callback shut-down();
+}
+
+component ControlCenterIconButton inherits Rectangle {
+    in property <string> icon;
+    in property <string> label;
+    in property <bool> enabled: true;
+    width: 102px;
+    height: 90px;
+
+    callback clicked();
+
+    VerticalLayout {
+        spacing: Size.sz3;
+
+        HorizontalLayout {
+            alignment: center;
+
+            // TODO: break out into filter-button
+            Rectangle {
+                width: Size.sz14;
+                height: Size.sz14;
+                border-radius: Size.sz10;
+                background: DarkPalette.background-primary;
+
+                Icon {
+                    name: enabled ? icon : (icon + "-off");
+                    color: enabled ? DarkPalette.content-primary : DarkPalette.content-tertiary;
+                    size: Size.sz6;
+                }
+            }
+        }
+
+        TextSm {
+            text: label;
+            color: DarkPalette.content-primary;
+            horizontal-alignment: center;
+        }
+    }
+
+    TouchArea {
+        height: parent.height + Size.sz8;
+        y: -Size.sz4;
+
+        clicked => {
+            clicked()
+        }
+    }
+}
+
+export component ControlCenter inherits VerticalLayout {
+    width: UISize.screen-width;
+    height: is-expanded ? (is-shut-down-mode ? 244px : UISize.control-center-expanded-height) : UISize.control-center-status-bar-height;
+
+    alignment: space-between;
+    in property <int> battery: 75;
+    in property <bool> is-charging;
+
+    property <brush> content-color: Palette.content-primary;
+    property <brush> bg-color: Palette.background-primary;
+
+    in property <string> time;
+    in property <string> day-of-week;
+    in property <string> date;
+    in property <string> system-msg;
+
+    in property <bool> is-expanded: false;
+    in property <bool> is-shut-down-mode: false;
+
+    if !is-expanded: Rectangle {
+        background: bg-color;
+
+        VerticalLayout {
+            alignment: start;
+            HorizontalLayout {
+                alignment: space-between;
+                height: Size.sz10;
+                vertical-stretch: 0;
+                spacing: Size.sz2;
+                padding-left: Size.sz7;
+                padding-right: Size.sz7;
+
+                TextMd {
+                    height: Size.sz10;
+                    horizontal-stretch: 0;
+                    vertical-alignment: center;
+                    horizontal-alignment: right;
+                    text: time;
+                    bold: true;
+                    color: content-color;
+                }
+
+                HorizontalLayout {
+                    spacing: Size.sz2;
+                    // Icons
+                    if State.is-nfc-in-use: VerticalLayout {
+                        alignment: center;
+                        Icon {
+                            name: "nfc";
+                            color: content-color;
+                            size: Size.sz6;
+                        }
+                    }
+                    if State.is-bluetooth-in-use: VerticalLayout {
+                        alignment: center;
+                        Icon {
+                            name: "bluetooth";
+                            color: content-color;
+                            size: Size.sz6;
+                        }
+                    }
+                    if State.is-camera-in-use: VerticalLayout {
+                        alignment: center;
+                        Icon {
+                            name: "camera";
+                            color: content-color;
+                            size: Size.sz6;
+                        }
+                    }
+                    if State.is-usb-in-use: VerticalLayout {
+                        alignment: center;
+                        Icon {
+                            name: "usb";
+                            color: content-color;
+                            size: Size.sz6;
+                        }
+                    }
+                    VerticalLayout {
+                        alignment: center;
+                        Battery {
+                            is-charging: is-charging;
+                            bg-color: bg-color;
+                            fill-color: content-color;
+                            percentage: battery;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if is-expanded: Rectangle {
+        // Fixed background image
+        if !is-shut-down-mode: Image {
+            y: 0px;
+            height: 430px;
+            source: @image-url("../assets/control-center-bg.png");
+        }
+
+        if is-shut-down-mode: Image {
+            y: 0px;
+            height: 292px;
+            source: @image-url("../assets/control-center-bg-small.png");
+        }
+
+        VerticalLayout {
+            height: 100%;
+            width: 100%;
+            padding-top: Size.sz6;
+            padding-bottom: Size.sz2;
+            padding-left: Size.sz7;
+            padding-right: Size.sz7;
+            spacing: Size.sz6;
+
+            HorizontalLayout {
+                height: 62px;
+                padding-top: Size.sz1;
+
+                HorizontalLayout {
+                    padding-top: Size.sz2;
+                    padding-bottom: Size.sz2;
+                    alignment: space-between;
+
+                    VerticalLayout {
+                        TextSm {
+                            text: date;
+                            color: DarkPalette.content-primary;
+                            wrap: TextWrap.no-wrap;
+                            overflow: TextOverflow.clip;
+                            vertical-alignment: center;
+                        }
+
+                        TextMd {
+                            text: time;
+                            bold: true;
+                            color: DarkPalette.content-primary;
+                            wrap: TextWrap.no-wrap;
+                            overflow: TextOverflow.clip;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    VerticalLayout {
+                        HorizontalLayout {
+                            spacing: Size.sz2;
+
+                            TextMd {
+                                text: battery + "%";
+                                color: DarkPalette.content-primary;
+                                wrap: TextWrap.no-wrap;
+                                overflow: TextOverflow.clip;
+                                horizontal-alignment: right;
+                                vertical-alignment: center;
+                            }
+
+                            VerticalLayout {
+                                alignment: center;
+                                Battery {
+                                    is-charging: is-charging;
+                                    bg-color: DarkPalette.background-primary;
+                                    fill-color: DarkPalette.content-primary;
+                                    charging-color: DarkPalette.content-brand;
+                                    percentage: battery;
+                                }
+                            }
+                        }
+
+                        TextSm {
+                            text: system-msg;
+                            color: DarkPalette.content-tertiary;
+                            wrap: TextWrap.no-wrap;
+                            overflow: TextOverflow.clip;
+                            horizontal-alignment: right;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+
+            if !is-shut-down-mode: HorizontalLayout {
+                alignment: center;
+
+                Rectangle {
+                    height: 150px;
+                    width: 424px;
+
+                    Image {
+                        width: parent.width;
+                        height: parent.height;
+                        source: @image-url("../assets/button-container.png", nine-slice(0 32));
+                    }
+
+                    HorizontalLayout {
+                        padding-left: Size.sz2;
+                        padding-right: Size.sz2;
+                        padding-top: Size.sz6;
+                        padding-bottom: Size.sz6;
+
+                        ControlCenterIconButton {
+                            icon: "camera";
+                            label: TR2.lookup(TrId.ButtonCamera);
+                            enabled: State.is-camera-enabled;
+                            clicked => {
+                                Callbacks.camera-enabled-changed(!State.is-camera-enabled);
+                            }
+                        }
+
+                        ControlCenterIconButton {
+                            icon: "nfc";
+                            label: TR2.lookup(TrId.ButtonNfc);
+                            enabled: State.is-nfc-enabled;
+                            clicked => {
+                                Callbacks.nfc-enabled-changed(!State.is-nfc-enabled);
+                            }
+                        }
+
+                        ControlCenterIconButton {
+                            icon: "bluetooth";
+                            label: TR2.lookup(TrId.ButtonBluetooth);
+                            enabled: State.is-bluetooth-enabled;
+                            clicked => {
+                                Callbacks.bluetooth-enabled-changed(!State.is-bluetooth-enabled);
+                            }
+                        }
+
+                        ControlCenterIconButton {
+                            icon: "usb";
+                            label: TR2.lookup(TrId.ButtonUsb);
+                            enabled: State.is-usb-enabled;
+                            clicked => {
+                                Callbacks.usb-enabled-changed(!State.is-usb-enabled);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !is-shut-down-mode: SliderBrightness {
+                width: 100%;
+                height: Size.sz12;
+                is-dark: true;
+                value <=> State.brightness;
+                changed(val) => {
+                    Callbacks.brightness-changed(val);
+                }
+            }
+
+            if is-shut-down-mode: Rectangle {
+                height: 68px;
+                SlideToButton {
+                    label: TR2.lookup(TrId.CommonButtonShutDown);
+                    icon: "arrow-right";
+                    activated-label: TR2.lookup(TrId.SlideToShutDownShuttingDown);
+                    activated-color: DarkPalette.content-disabled;
+                    width: 100%;
+                    is-dark: true;
+
+                    activated(val) => {
+                        Callbacks.shut-down();
+                    }
+                }
+            }
+            HorizontalLayout {
+                padding-top: Size.sz4;
+                alignment: center;
+
+                Rectangle {
+                    width: 40px;
+                    height: 4px;
+                    border-radius: 2px;
+                    background: DarkPalette.content-primary;
+                }
+            }
+        }
+    }
+}

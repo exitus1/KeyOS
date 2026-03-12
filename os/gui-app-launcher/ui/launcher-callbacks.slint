@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export struct HiddenApp {
+    label: string,
+    app-id: string,
+}
+
+export global LauncherCallbacks {
+    callback app-clicked(length, length, string);
+    callback scan-clicked(bool);
+    pure callback app-id-to-title(string) -> string;
+}
+
+export global State {
+    in property <string> loading-app-id: "";
+    in property <bool> developers-welcome-popup-open: false;
+
+    in property <bool> is-price-stale: true;
+    in property <bool> is-price-expired: true;
+    in property <string> last-update-time: "";
+    in property <bool> is-envoy-connected: false;
+    in property <image> bitcoin-graph-image;
+    in property <string> bitcoin-price: "";
+    in property <string> bitcoin-price-change-percent: "";
+
+    in property <[HiddenApp]> hidden-apps: [];
+}

@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "mass-storage-emulation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fatfs = { workspace = true, features = ["std", "alloc"] }
+fs = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+mass-storage = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+thiserror = { workspace = true }
+usb = { workspace = true }
+worker = { workspace = true }
+xous = { workspace = true }
+
+[features]
+production = []
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

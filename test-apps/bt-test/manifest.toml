@@ -1,0 +1,15 @@
+appId = "0x62742d74657374000000000000000000"
+
+[appName]
+en = "BLE Server Test"
+
+[permissions]
+"os/bt" = [
+    "SubscribeBle",
+    "GetState",
+    "EnableBle",
+    "DisableBle",
+    "GetBtAddr",
+    "Reset",
+    "SendBle",
+]

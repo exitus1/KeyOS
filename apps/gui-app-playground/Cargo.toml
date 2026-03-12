@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-playground"
+version = "0.1.0"
+edition = "2021"
+authors = ["Foundation Devices, Inc. <hello@foundation.xyz>"]
+license = "GPL-3.0-or-later"
+
+[dependencies]
+backup = { workspace = true }
+bt = { workspace = true }
+haptics = { workspace = true }
+keycard = { path = "../../os/keycard" }
+log = { workspace = true }
+log-server = { workspace = true }
+nfc = { path = "../../os/nfc" }
+quantum-link = { workspace = true }
+rgb-led = { workspace = true }
+serde = { workspace = true }
+server = { workspace = true }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build", default-features = false }

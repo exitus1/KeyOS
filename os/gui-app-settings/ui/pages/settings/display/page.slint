@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { Icon, TextMd, TextSm, TextLg, TextXl, SliderBrightness, Switch, MenuSectionLayout, MenuItemLayout, HLine, BasePage, PageBody, ContentSection, ButtonSection } from "@ui/widgets.slint";
+import { IconSize, Palette, Palettes, Importance, Timings, CurrentTheme } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { MenuSection, MenuActionItem } from "@ui/widgets/settings-menu.slint";
+
+import { DisplayProps } from "props.slint";
+import { SettingGlobal } from "../../../globals/setting-global.slint";
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+
+export component DisplayPage inherits BasePage {
+    in property <DisplayProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.DisplayTitle);
+        }
+
+        PageBody {
+            ContentSection {
+                /* // TODO: don't expose it to the user before SFT-3944 is implemented
+                HorizontalLayout {
+                    alignment: space-between;
+                    TextLg {
+                        text: TR2.lookup(TrId.DisplayAutomaticBrightness);
+                    }
+
+                    auto := Switch {
+                        checked: false;
+                        knob-color: white;
+                    }
+                }*/
+
+                b := SliderBrightness {
+                    // enabled: true; // TODO(SFT-3944)
+                    // opacity: auto.checked ? 0.3 : 1.0; // TODO(SFT-3944)
+                    value <=> SettingGlobal.screen-brightness;
+                    minimum: 5;
+                    changed => {
+                        SettingGlobal.set-screen-brightness(b.value);
+                    }
+                    animate opacity {
+                        duration: Timings.prop-change;
+                        easing: ease-in-out;
+                    }
+                }
+
+                MenuSection {
+                    title: TR2.lookup(TrId.DisplayAppearance);
+                    MenuSectionLayout {
+                        MenuItemLayout {
+                            first: true;
+                            icon: "sun";
+                            label: TR2.lookup(TrId.DisplayLight);
+                            clicked => {
+                                SettingGlobal.set-dark-mode(false);
+                            }
+                            if !CurrentTheme.is-dark: Icon {
+                                name: "check";
+                                color: Palette.content-primary;
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuItemLayout {
+                            last: true;
+                            icon: "moon";
+                            label: TR2.lookup(TrId.DisplayDark);
+                            clicked => {
+                                SettingGlobal.set-dark-mode(true);
+                            }
+                            if CurrentTheme.is-dark: Icon {
+                                name: "check";
+                                color: Palette.content-primary;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

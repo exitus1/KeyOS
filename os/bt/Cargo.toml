@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "bt-server"
+version = "0.1.0"
+edition = "2021"
+description = "Bluetooth Server"
+publish = false
+
+[dependencies]
+bitflags = { workspace = true }
+bt = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+cargo_metadata = { workspace = true }
+cosign2 = { workspace = true }
+crc = { workspace = true }
+crypto = { workspace = true }
+embedded-hal = { workspace = true }
+fw-utils = { workspace = true }
+fw_consts = { git = "https://github.com/Foundation-Devices/prime-ble-firmware.git", tag = "host-protocol_v4.0.0", package = "consts" }
+getrandom = { workspace = true }
+gpio = { workspace = true }
+host-protocol = { git = "https://github.com/Foundation-Devices/prime-ble-firmware.git", tag = "host-protocol_v4.0.0" }
+postcard = { workspace = true }
+security = { workspace = true }
+spi = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }
+
+[features]
+production = []

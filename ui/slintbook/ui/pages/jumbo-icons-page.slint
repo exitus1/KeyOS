@@ -1,0 +1,51 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Page } from "./page.slint";
+import { HeadingMd, TextXs, JumboIcon, Icon } from "@ui/widgets.slint";
+import { Palette, Size, UISize } from "@ui/theme.slint";
+
+export component JumboIconsPage inherits Page {
+    VerticalLayout {
+        alignment: start;
+        spacing: Size.sz3;
+        padding-top: Size.sz3;
+        HeadingMd {
+            text: "Jumbo Icons";
+            height: Size.sz12;
+        }
+
+        HorizontalLayout {
+            alignment: start;
+            spacing: Size.sz8;
+
+            JumboIcon {
+                name: "jumbo-circle";
+
+                Icon {
+                    name: "bitcoin";
+                    size: 96px;
+                    color: Palette.content-brand;
+                }
+            }
+
+            JumboIcon {
+                name: "jumbo-shield";
+
+                Icon {
+                    name: "check";
+                    size: 96px;
+                    color: Palette.content-brand;
+                }
+            }
+
+            JumboIcon {
+                name: "jumbo-download";
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+        }
+    }
+}

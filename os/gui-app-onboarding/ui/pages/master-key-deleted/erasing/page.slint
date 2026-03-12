@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, UISize, Importance } from "@ui/theme.slint";
+import { UIColors } from "@ui/palettes/ui-colors.slint";
+import { AppHeader, TimerCircularProgress, WrappedIcon,  StepList, PageBody } from "@ui/widgets.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingBasePage, OnboardingContentSection } from "../../../widgets/base-page.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { EraseGlobal } from "../../../onboarding-callbacks.slint";
+
+export component MasterKeyDeletedErasingPage inherits OnboardingBasePage {
+    VerticalLayout {
+        AppHeader {
+            title: TR2.lookup(TrId.MasterKeyDeletedErasingTitle);
+        }
+
+        PageBody {
+            OnboardingContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    if EraseGlobal.progress != 100%: TimerCircularProgress {
+                        size: 184px;
+                        back-color: UIColors.neutral-700;
+                        percent: EraseGlobal.progress;
+                    }
+                    if EraseGlobal.progress == 100%: WrappedIcon {
+                        outer-icon: "jumbo-circle";
+                        inner-icon: "check";
+                    }
+                }
+
+                StepList {
+                    steps: EraseGlobal.erasing-steps;
+                }
+            }
+        }
+    }
+}

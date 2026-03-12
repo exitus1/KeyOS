@@ -1,0 +1,14 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { StepModel } from "@ui/widgets/step-list.slint";
+
+export global VerifyKeycardBackupGlobal {
+    callback start();
+
+    in property <[StepModel]> steps;
+    in property <bool> reading-from-keycard;
+    in property <string> error;
+
+    out property <bool> complete: steps[steps.length - 1].completed;
+}

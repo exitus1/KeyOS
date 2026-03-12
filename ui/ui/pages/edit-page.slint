@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Importance } from "@ui/theme.slint";
+import { Button, ButtonSection } from "@ui/widgets.slint";
+
+@rust-attr(derive(serde::Serialize, serde::Deserialize))
+export enum EditPageVersion {
+    add,
+    edit,
+    archive,
+}
+
+export component EditButtonSection inherits ButtonSection {
+    in property <EditPageVersion> version;
+    in property <bool> allow-delete: false;
+    in property <bool> has-changes;
+    in property <bool> has-errors;
+
+    in property <string> save-label;
+    in property <string> archive-text;
+    in property <string> delete-text: "";
+    in property <string> restore-text;
+
+    callback save();
+    callback edit();
+    callback archive();
+    callback delete();
+    callback restore();
+
+    if version == EditPageVersion.add || (version == EditPageVersion.edit && has-changes): Button {
+        icon: "";
+        label: save-label;
+        enabled: !has-errors;
+        importance: Importance.primary;
+
+        clicked => {
+            if version == EditPageVersion.add {
+                save();
+            } else {
+                edit();
+            }
+        }
+    }
+
+    if version == EditPageVersion.edit && !has-changes: Button {
+        icon: "archive";
+        label: archive-text;
+        enabled: !has-changes;
+        importance: Importance.secondary;
+
+        clicked => {
+            archive();
+        }
+    }
+
+    if version == EditPageVersion.archive && allow-delete: Button {
+        icon: "";
+        label: delete-text;
+        importance: Importance.negative;
+
+        clicked => {
+            delete();
+        }
+    }
+
+    if version == EditPageVersion.archive: Button {
+        icon: "export";
+        label: restore-text;
+        importance: Importance.primary;
+
+        clicked => {
+            restore();
+        }
+    }
+}

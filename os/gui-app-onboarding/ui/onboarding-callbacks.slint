@@ -1,0 +1,174 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { CurrentTheme } from "@ui/theme.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { FwUpdateState, FwUpdateError } from "@ui/pages/fw-update-page.slint";
+import { KeycardBackupError } from "@ui/pages/keycard-backup/keycard-backup-error.slint";
+
+export enum SecurityCheckState {
+    Idle,
+    Loading,
+    Passed,
+    Failed,
+    Error
+}
+
+export enum FirmwareCheckState {
+    Idle,
+    Loading,
+    NoUpdateAvailable,
+    UpdateAvailable,
+    Failed
+}
+
+export global OnboardingCallbacks {
+    // ========== Bluetooth/Connection State ==========
+    // if we are connected via bluetooth
+    in property <bool> bt-connected;
+
+    in property <bool> fatal-disconnect;
+    callback restart-onboarding();
+
+    // bluetooth pairing scan
+    pure callback qr-data() -> string;
+    // animated qr code data for quantum link pairing
+    pure callback animated-qr-data() -> [string];
+
+    // ========== Security Status ==========
+    in-out property <SecurityCheckState> security-state;
+
+    // ========== Firmware Update ==========
+    in-out property <string> current-keyos-version;
+    // only present if update is available
+    in-out property <string> new-keyos-version;
+
+    callback check-firmware-update();
+    in property <FirmwareCheckState> firmware-check-state;
+    in property <bool> update-sufficient-battery;
+
+    callback download-firmware-update();
+    callback update-from-file();
+
+    in property <FwUpdateState> fw-update-state;
+    in property <FwUpdateError> fw-update-error;
+    in property <float> fw-update-progress;
+    in property <string> fw-update-eta;
+
+    // ========== Connect Wallet ==========
+    callback start-wallet-connect();
+    in property <bool> wallet-connected;
+    in property <string> account-name;
+    callback finish-onboarding();
+
+    // ========== Erase ==========
+    callback erase-device();
+
+    // ========== UI Preferences ==========
+    callback set-dark-mode(bool);
+
+    // ========== Debug ==========
+    in property <[string]> debug-actions: [];
+    callback run-debug-action(int);
+
+    // ========== Helpers ==========
+    callback navigate-backup();
+}
+
+export enum MasterSeedState {
+    Idle,
+    SavingToSE,
+    EncryptingFs,
+    Success,
+    Failed
+}
+
+export enum RestoreBackupState {
+    Idle,
+    NotFound,
+    Downloading,
+    Restoring,
+    Restored,
+    Error
+}
+
+export struct SeedWordChallenge {
+    word-index: int,           // Which word position we're verifying (0-based)
+    options: [string],         // The 4 multiple choice options
+    correct-option-index: int  // Which option is correct (0-3)
+}
+
+export global SeedGlobal {
+    in property <MasterSeedState> master-seed-state;
+    in property <RestoreBackupState> restore-backup-state;
+
+    // Store the pin to be set later
+    // params:(pin, is-pin)
+    callback set-pin(string, bool);
+
+    // Returns `true` if a pendign PIN has been set
+    pure callback is-pin-set() -> bool;
+
+    // requires `set-pin()` to be called first
+    callback create-master-seed();
+
+    callback restore-from-seed-qr();
+    callback restore-from-seed-words([string]);
+    callback retry-restore-magic-backup();
+
+    // BIP39 seed word validation callbacks
+    pure callback validate-seed-word(string) -> bool;
+    pure callback validate-full-seed([string]) -> bool;
+
+    // ========== Manual seed Backup ==========
+    // Get the seed words for display
+    pure callback get-seed-words() -> [string];
+    // Generate verification challenges (configurable number)
+    pure callback generate-seed-word-challenges(num-challenges: int) -> [SeedWordChallenge];
+    // Get QR code images
+    pure callback get-standard-seed-qr() -> image;
+    pure callback get-compact-seed-qr() -> image;
+
+    // ========== Master Key Recovery ==========
+    // This flag tells the PIN setup flow to navigate to the seed recovery screen after the PIN is set
+    in property <bool> is-master-key-recovery: false;
+    in property <bool> fingerprint-mismatch: false;
+}
+
+export global KeycardBackupGlobal {
+    callback start-manual-keycard-backup();
+    callback start-magic-backup();
+
+    in property <[StepModel]> steps;
+    out property <bool> backup-created: steps[steps.length - 1].completed;
+    // whether a keycards has been detected and we are writing to it
+    in property <bool> saving-to-keycard;
+
+    in property <KeycardBackupError> error;
+    callback error-clicked(bool);
+}
+
+export enum KeycardRestoreKind {
+    Manual,
+    Magic,
+    // was magic backup, but restored from cards
+    TwoCards,
+}
+
+export global KeycardRestoreGlobal {
+    callback start-keycard-restore();
+
+    in property <[StepModel]> steps;
+
+    // whether a keycard has been detected and we are reading from it
+    in property <bool> reading-from-keycard;
+
+    // restore result
+    in property <KeycardRestoreKind> restore-kind;
+    in property <bool> different-device-id;
+}
+
+export global EraseGlobal {
+    in property <float> progress: 0%;
+    in property <[StepModel]> erasing-steps: [];
+}

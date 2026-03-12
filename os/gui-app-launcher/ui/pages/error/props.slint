@@ -1,0 +1,11 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+@rust-attr(route(path = "/error?{crashed-app-id}&{crashed-pid}&{error-message}&{error-title}&{long-error-message}"))
+export struct ErrorProps {
+    crashed-app-id: string,
+    crashed-pid: int,
+    error-message: string,
+    error-title: string,
+    long-error-message: string,
+}

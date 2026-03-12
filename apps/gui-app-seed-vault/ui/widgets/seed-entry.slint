@@ -1,0 +1,78 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Callbacks as CB } from "../callbacks.slint";
+import { SeedView, SeedViewType } from "../types.slint";
+import { CardColor, IconSize, Palette, Size, Utils } from "@ui/theme.slint";
+import { LineCard, TextLg, TextSm, CircleIcon } from "@ui/widgets.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+export component SeedEntry inherits Rectangle {
+    in property <SeedView> seed;
+    in property <bool> reorder-mode: false;
+    in property <bool> archive-mode: false;
+    in property <bool> first: false;
+    in property <bool> last: false;
+
+    property <bool> solo: first && last;
+
+    height: IconSize.px96;
+    property <CardColor> card-color: archive-mode ? CardColor.dark-grey : Utils.index-to-card-color(seed.color);
+
+    callback clicked();
+
+    function get-description() -> string {
+        if (seed.seed-type == SeedViewType.bitcoin-12) {
+            return TR2.lookup(TrId.CreateItem12WordSeed);
+        } else if (seed.seed-type == SeedViewType.bitcoin-24) {
+            return TR2.lookup(TrId.CreateItem24WordSeed);
+        } else if (seed.seed-type == SeedViewType.password) {
+            return TR2.lookup(TrId.CreateItemPassword);
+        } else if (seed.seed-type == SeedViewType.nostr-key) {
+            return TR2.lookup(TrId.CreateItemNostrKey);
+        }
+        return "";
+    }
+
+    LineCard {
+        horizontal-stretch: 1;
+        height: parent.height;
+        width: (reorder-mode && !solo) ? 352px : 448px;
+        card-color: root.card-color;
+
+        HorizontalLayout {
+            VerticalLayout {
+                alignment: center;
+                padding-left: Size.sz6;
+                CircleIcon {
+                    icon: CB.get-icon(seed.seed-type);
+                    line-color: root.card-color;
+                }
+            }
+
+            VerticalLayout {
+                padding-left: Size.sz6;
+                padding-top: Size.sz5;
+                padding-bottom: Size.sz4;
+                horizontal-stretch: 1;
+
+                TextLg {
+                    text: seed.label;
+                    color: Palette.white;
+                    bold: true;
+                }
+
+                TextSm {
+                    text: get-description();
+                    color: Palette.white;
+                }
+            }
+        }
+    }
+
+    TouchArea {
+        clicked() => {
+            clicked();
+        }
+    }
+}

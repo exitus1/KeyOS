@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "backup-server"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+backup = { workspace = true }
+chrono = { version = "0.4", default-features = false }
+crypto = { workspace = true }
+defer = { workspace = true }
+file-backed = { workspace = true }
+fs = { workspace = true }
+futures-lite = { workspace = true }
+getrandom = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+quantum-link = { workspace = true }
+rkyv = { workspace = true }
+security = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+sha2 = { workspace = true }
+shared-fut = { workspace = true }
+tar = { workspace = true }
+thiserror = { workspace = true }
+whence = { workspace = true }
+worker = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[dev-dependencies]
+fs = { workspace = true, features = ["test"] }
+aes = "0.8"
+cbc = "0.1"
+simple_logger = { version = "5" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

@@ -1,0 +1,177 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {HeadingMd, TextMd, RoundContainer, Modal, Panel, Dialog} from "@ui/widgets.slint";
+import {UISize, Palette, Size} from "@ui/theme.slint";
+
+export component ContainersPage inherits Page {
+    background: Palette.background-disabled;
+
+    VerticalLayout {
+        spacing: Size.sz6;
+        HeadingMd {
+            text: "Panel (with shadow)";
+        }
+
+        HorizontalLayout {
+            padding: Size.sz8;
+            spacing: Size.sz8;
+            Panel {
+                width: 120px;
+                height: 100px;
+                border-radius: Size.sz6;
+                level: 1;
+
+                TextMd {
+                    text: "Level 1";
+                }
+            }
+
+            Panel {
+                width: 120px;
+                height: 100px;
+                border-radius: Size.sz6;
+                level: 2;
+
+                TextMd {
+                    text: "Level 2";
+                }
+            }
+
+            Panel {
+                width: 120px;
+                height: 100px;
+                border-radius: Size.sz6;
+                level: 3;
+
+                TextMd {
+                    text: "Level 3";
+                }
+            }
+        }
+
+        HorizontalLayout {
+            padding: Size.sz8;
+            spacing: Size.sz8;
+
+            Panel {
+                width: 120px;
+                height: 100px;
+                border-radius: Size.sz6;
+                level: 4;
+
+                TextMd {
+                    text: "Level 4";
+                }
+            }
+
+            Panel {
+                width: 120px;
+                height: 100px;
+                border-radius: Size.sz6;
+                level: 5;
+
+                TextMd {
+                    text: "Level 5";
+                }
+            }
+
+            Panel {
+                width: 120px;
+                height: 100px;
+                border-radius: Size.sz6;
+                level: 6;
+
+                TextMd {
+                    text: "Level 6";
+                }
+            }
+        }
+
+        HeadingMd {
+            text: "Dialog";
+            height: Size.sz15;
+        }
+
+        VerticalLayout {
+            alignment: start;
+            padding: Size.sz6;
+            spacing: Size.sz6;
+            width: UISize.screen-width;
+            Dialog {
+                title: "Invalid Signature";
+                message: "The firmware was not signed by Foundation. ";
+                ok-text: "Reboot";
+                show-ok: true;
+                cancel-text: "Shutdown";
+                show-cancel: true;
+            }
+
+            Dialog {
+                title: "File Hash";
+                message: "3b4a1288 1d11f33c ff968a24 d7c53723 a8232cde 9a8d91e2 9fdbd6a9 5ae6adf0";
+                ok-text: "Confirm";
+                show-ok: true;
+            }
+        }
+
+        HeadingMd {
+            text: "RoundContainer";
+            height: Size.sz15;
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            RoundContainer {
+                width: 440px;
+                height: 550px;
+            }
+
+            RoundContainer {
+                width: 440px;
+                height: 550px;
+                HeadingMd {
+                    text: "CONTENT";
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    horizontal-alignment: left;
+                    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.";
+                }
+            }
+        }
+
+        Rectangle {
+            height: Size.sz10;
+        }
+
+        HeadingMd {
+            text: "Modal";
+            height: 50px;
+        }
+
+        HorizontalLayout {
+            spacing: 30px;
+            Modal {
+                width: 440px;
+                height: 550px;
+            }
+
+            Modal {
+                width: 440px;
+                height: 550px;
+                HeadingMd {
+                    horizontal-alignment: center;
+                    text: "CONTENT";
+                }
+
+                TextMd {
+                    horizontal-alignment: center;
+                    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.";
+                }
+            }
+        }
+    }
+}

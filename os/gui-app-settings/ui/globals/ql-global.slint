@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global QlGlobal {
+    in property <bool> bt-connected: false;
+    in property <bool> ql-paired: false;
+    in property <bool> ql-live: false;
+    in property <string> paired-device-name: "";
+
+    // bluetooth pairing scan
+    pure callback qr-data() -> string;
+    // animated qr code data for quantum link pairing
+    pure callback animated-qr-data() -> [string];
+
+    callback disconnect();
+}

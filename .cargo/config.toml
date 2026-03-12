@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-FileCopyrightText: 2022 bunnie <bunnie@kosagi.com>
+# SPDX-FileCopyrightText: 2020 Sean Cross <sean@xobs.io>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[unstable]
+trim-paths = true
+
+[alias]
+xtask = "run --package xtask --"
+
+[env]
+CC_armv7a_unknown_xous_elf = "arm-none-eabi-gcc"
+
+[net]
+git-fetch-with-cli = true
+
+[target.'armv7a-unknown-xous-elf']
+rustflags = [
+    "--cfg", "keyos",
+    '--cfg=curve25519_dalek_backend="serial"',
+    '-Z', 'stack-protector=strong',
+]
+
+[build]
+rustflags = ['--cfg=curve25519_dalek_backend="serial"']

@@ -1,0 +1,9 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+export global EraseGlobal {
+    in property <bool> is-erasing-settings: false;
+    in property <bool> is-error: false;
+    in property <float> erase-progress: 0%;
+    out property <bool> is-complete: erase-progress >= 100%;
+}

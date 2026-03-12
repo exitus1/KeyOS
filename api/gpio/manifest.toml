@@ -1,0 +1,6 @@
+[servers."os/gpio"]
+ClaimPin = { id = 0, type = "blockingScalar" }
+EnableIrq = { id = 2, type = "scalarEvent" }
+SetPin = { id = 4, type = "blockingScalar" }
+GetPin = { id = 5, type = "blockingScalar" }
+SetIrq = { id = 6, type = "blockingScalar" }

@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Lint
+on: 
+  workflow_call:
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+jobs:
+  reuse:
+    name: Is compliant (reuse)?
+    runs-on: ubuntu-latest
+    steps:
+       - uses: actions/checkout@v3
+       - uses: ./.github/actions/setup-nix
+         with:
+           use-cache: 'false'
+       - run: nix run .#reuse -- --version
+       - run: nix run .#reuse -- lint
+
+  format-rust:
+    name: Check Rust formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix
+        with:
+          use-cache: 'false'
+      
+      - run: nix shell .#rust-keyos --command cargo fmt --all -- --check
+     
+  format-slint:
+    name: Check Slint formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix
+        with:
+          use-cache: 'false'
+           
+      - run: nix shell .#slint-lsp-upstream --command ./scripts/check-slint.sh
+
+  format-toml:
+    name: Check TOML formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix
+        with:
+          use-cache: 'false'
+      - run: nix shell .#taplo .#just --command just toml-fmt --check
+
+  format-nix:
+    name: Check Nix formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-nix
+        with:
+          use-cache: 'false'
+      - run: nix fmt -- . --check
+

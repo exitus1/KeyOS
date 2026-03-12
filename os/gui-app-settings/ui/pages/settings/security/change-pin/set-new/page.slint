@@ -1,0 +1,228 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+import { TR2, TrId } from "../../../../../gen/tr.slint";
+
+import {
+    BasePage,
+    Button,
+    HeadingMd,
+    LoginLayout,
+    NavHeader,
+    PasswordEntry,
+    PinEntry,
+    TextSm
+} from "@ui/widgets.slint";
+import { Palette, Size, Importance, Utils } from "@ui/theme.slint";
+
+import { Navigate, Animate } from "../../../../../gen/navigate.slint";
+import { PinGlobal } from "../../../../../globals/pin-global.slint";
+
+component ChangeAuthHeader inherits NavHeader {
+    in-out property <bool> is-confirming: false;
+    in-out property <bool> verification-failed: false;
+    title: TR2.lookup(TrId.ChangePinTitle);
+
+    clicked => {
+        if root.is-confirming {
+            root.is-confirming = false;
+            root.verification-failed = false;
+        } else {
+            Navigate.backward();
+        }
+    }
+}
+
+component ChangePin inherits Rectangle {
+    in property <int> minimum-length: 6;
+    callback change-pin(string);
+    callback switch-to-password();
+
+    private property <string> new-pin: "";
+    private property <bool> is-confirming: false;
+    private property <bool> verification-failed: false;
+
+    init => {
+        pin-entry.focus();
+    }
+
+    focus-scope := FocusScope {
+        focus-changed-event() => {
+            pin-entry.focus();
+        }
+    }
+
+    VerticalLayout {
+        alignment: start;
+
+        ChangeAuthHeader {
+            is-confirming <=> root.is-confirming;
+            verification-failed <=> root.verification-failed;
+        }
+
+        LoginLayout {
+            HeadingMd {
+                text: root.is-confirming ? TR2.lookup(TrId.VerifyPinHeader) : TR2.lookup(TrId.ChangePinNewHeader);
+                horizontal-alignment: center;
+            }
+
+            pin-entry := PinEntry {
+                accepted => {
+                    if (root.is-confirming) {
+                        if (self.pin == root.new-pin) {
+                            root.change-pin(self.pin);
+                        } else {
+                            root.verification-failed = true;
+                            self.pin = "";
+                        }
+                    } else if (self.pin-length >= root.minimum-length) {
+                        root.is-confirming = true;
+                        root.new-pin = self.pin;
+                        self.pin = "";
+                    }
+                }
+            }
+
+            if root.verification-failed: TextSm {
+                text: TR2.lookup(TrId.VerifyPinMismatchContent);
+                horizontal-alignment: center;
+                color: Palette.content-lightcopper-brand;
+            }
+
+            if !root.verification-failed && !root.is-confirming && pin-entry.pin-length < root.minimum-length: TextSm {
+                text: TR2.lookup(TrId.ChangePinNewSixDigitsRequired);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            if pin-entry.pin-length > 8 && pin-entry.pin-length <= 11: TextSm {
+                text: TR2.lookup(TrId.ChangePinNewUpToTwelveDigits);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            if pin-entry.pin-length > 11: TextSm {
+                text: TR2.lookup(TrId.ChangePinNewMaxDigitsReached);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            if !root.is-confirming && pin-entry.pin == "": Button {
+                label: TR2.lookup(TrId.ChangePinSwitchToPassword);
+                importance: Importance.tertiary;
+                clicked => {
+                    root.switch-to-password();
+                }
+            }
+        }
+    }
+}
+
+component ChangePassword inherits Rectangle {
+    in property <int> minimum-length: 6;
+    callback change-pin(string);
+    callback switch-to-pin();
+
+    private property <string> new-pin: "";
+    private property <bool> is-confirming: false;
+    private property <bool> verification-failed: false;
+    private property <int> password-length: Utils.string-length(password-entry.password);
+
+    init => {
+        password-entry.focus();
+    }
+
+    focus-scope := FocusScope {
+        focus-changed-event() => {
+            password-entry.focus();
+        }
+    }
+
+    VerticalLayout {
+        alignment: start;
+
+        ChangeAuthHeader {
+            is-confirming <=> root.is-confirming;
+            verification-failed <=> root.verification-failed;
+        }
+
+        LoginLayout {
+            HeadingMd {
+                text: root.is-confirming ? TR2.lookup(TrId.VerifyPasswordHeader) : TR2.lookup(TrId.ChangePasswordHeader);
+                horizontal-alignment: center;
+            }
+
+            password-entry := PasswordEntry {
+                accepted => {
+                    if (root.is-confirming) {
+                        if (self.password == root.new-pin) {
+                            root.change-pin(self.password);
+                        } else {
+                            root.verification-failed = true;
+                            self.password = "";
+                        }
+                    } else if (root.password-length >= root.minimum-length) {
+                        root.is-confirming = true;
+                        root.new-pin = self.password;
+                        self.password = "";
+                    }
+                }
+            }
+
+            if root.verification-failed: TextSm {
+                text: TR2.lookup(TrId.VerifyPasswordMismatchContent);
+                horizontal-alignment: center;
+                color: Palette.content-lightcopper-brand;
+            }
+
+            if !root.verification-failed && !root.is-confirming && root.password-length < root.minimum-length: TextSm {
+                text: TR2.lookup(TrId.ChangePinNewSixDigitsRequired);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            VerticalLayout {
+                alignment: start;
+                padding-top: Size.sz3;
+                visible: !root.is-confirming && password-entry.password == "";
+                Button {
+                    label: TR2.lookup(TrId.ChangePasswordSwitchToPin);
+                    importance: Importance.tertiary;
+                    clicked => {
+                        root.switch-to-pin();
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component ChangePinSetNewPage inherits BasePage {
+    private property <bool> is-pin: true;
+
+    function change-pin(pin: string, is-pin: bool) {
+        if (PinGlobal.change-pin(pin, is-pin)) {
+            Navigate.change-pin-success({ replace: true, animate: Animate.None });
+        } else {
+            // invalid state. we are not logged in.
+            Navigate.backward();
+        }
+    }
+
+    if root.is-pin: ChangePin {
+        change-pin(pin) => {
+            root.change-pin(pin, true);
+        }
+        switch-to-password => {
+            root.is-pin = false;
+        }
+    }
+
+    if !root.is-pin: ChangePassword {
+        change-pin(pin) => {
+            root.change-pin(pin, false);
+        }
+        switch-to-pin => {
+            root.is-pin = true;
+        }
+    }
+}

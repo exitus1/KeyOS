@@ -1,0 +1,12 @@
+appId = "0x6c6f672d66696c650000000000000000"
+syscall = [ "SetThreadPriority",]
+
+[appName]
+en = "Log to files"
+
+[permissions]
+template = [ "fs-generic" ]
+"os/fs" = [
+    "GetUserReadAccess",
+    "GetUserWriteAccess",
+]

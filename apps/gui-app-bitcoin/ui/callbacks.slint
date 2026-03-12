@@ -1,0 +1,115 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TR2, TrId } from "gen/tr.slint";
+import { CardColor } from "@ui/theme.slint";
+export { CardColor }
+
+export enum Network {
+    Bitcoin,
+    Testnet4,
+}
+
+export enum NetworkKind {
+    Main,
+    Test,
+}
+
+export enum AddressType {
+    P2pkh,
+    P2sh,
+    P2wpkh,
+    P2wsh,
+    P2tr,
+    P2ShWpkh,
+    P2ShWsh,
+}
+
+export struct MultiSigSignerView {
+    fingerprint: string,
+    derivation-path: string,
+    public-key: string,
+}
+
+export struct MultiSigView {
+    policy-threshold: int,
+    policy-total-keys: int,
+    addresses: AddressType,
+    network-kind: NetworkKind,
+    signers: [MultiSigSignerView],
+}
+
+export struct SingleSigView {
+    account-number: int,
+    fingerprint: string,
+    public-key: string,
+}
+
+export struct AccountView {
+    id: string,
+    name: string,
+    is-multisig: bool,
+    network: Network,
+    color: CardColor,
+    archived: bool,
+
+    single: SingleSigView,
+    multi: MultiSigView,
+}
+
+// WalletApp enum removed - using string-based interface now
+
+export enum KeychainKind {
+    External,
+    Internal,
+}
+
+export global Callbacks {
+    callback scan-clicked();
+    callback select-file();
+
+    in-out property <[AccountView]> accounts: [];
+    pure callback account-details(account-id: string) -> AccountView;
+    pure callback account-addresses(account-id: string, keychain: KeychainKind, address: AddressType) -> [string];
+
+    callback update-account-name(account-id: string, name: string);
+
+    public function set-archive-mode(mode: bool) {
+        self.set-archive-mode-inner(mode);
+        self.archive-mode = mode;
+    }
+
+    callback set-archive-mode-inner(bool);
+    in-out property <bool> archive-mode;
+
+    callback update-account-archived(account-id: string, archived: bool);
+    callback delete-account(account-id: string);
+
+    public pure function address-type-to-string(t: AddressType) -> string {
+        if (t == AddressType.P2wpkh) {
+            return TR2.lookup(TrId.ExploreAddressesMenuSegwit);
+        } else if (t == AddressType.P2wsh) {
+            return TR2.lookup(TrId.ExploreAddressesMenuSegwit);
+        } else if (t == AddressType.P2pkh) {
+            return TR2.lookup(TrId.ExploreAddressesMenuLegacy);
+        } else if (t == AddressType.P2tr) {
+            return TR2.lookup(TrId.ExploreAddressesMenuTaproot);
+        } else if (t == AddressType.P2sh) {
+            return TR2.lookup(TrId.ExploreAddressesMenuSegwit);
+        } else if (t == AddressType.P2ShWsh) {
+            return TR2.lookup(TrId.ExploreAddressesMenuWrappedSegwit);
+        } else if (t == AddressType.P2ShWpkh) {
+            return TR2.lookup(TrId.ExploreAddressesMenuWrappedSegwit);
+        }
+        return TR2.lookup(TrId.ExploreAddressesMenuSegwit);
+    }
+
+    public pure function network-to-string(n: Network) -> string {
+        if (n == Network.Bitcoin) {
+            return "";
+        } else if (n == Network.Testnet4) {
+            return TR2.lookup(TrId.AccountsTestnet);
+        }
+        return TR2.lookup(TrId.AccountsTestnet);
+    }
+}

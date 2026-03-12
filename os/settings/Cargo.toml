@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "settings-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fs = { workspace = true }
+hex = { version = "0.4" }
+jiff = { workspace = true }
+jiff-tzdb = { version = "0.1.5" }
+log = { workspace = true }
+log-server = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+paste = { workspace = true }
+rkyv = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+server = { workspace = true }
+settings = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-names = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+fuse = { workspace = true }
+utralib = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

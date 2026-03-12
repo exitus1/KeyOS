@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "log-usb-file"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log-file = { path = "../file" }

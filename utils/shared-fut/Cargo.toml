@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2025 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "shared-fut"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+slab = "0.4"

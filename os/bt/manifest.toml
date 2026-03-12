@@ -1,0 +1,16 @@
+appId = "0xe704b7547cb840965eea399a11c2f20f"
+syscall = ["SetThreadPriority"]
+extends = "../../api/bt"
+
+[appName]
+en = "Bluetooth Service"
+
+[servers."os/bt"]
+SubscriberDisconnected = { id = 64, type = "scalar" }
+
+[permissions]
+template = ["gpio"]
+"os/crypto" = ["Hmac"]
+"os/security" = ["GetBluetoothChallengeSecret", "SetBluetoothCheckSecretSent", "SetBluetoothDeviceId"]
+"os/settings" = ["SubscribeBluetoothEnabled", "SubscribeDeviceName"]
+"os/spi" = ["ClaimPeripheral", "SpiXfer", "NrfReadData"]

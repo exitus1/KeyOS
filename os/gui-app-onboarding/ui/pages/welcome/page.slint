@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+
+import { OnboardingCallbacks as CB } from "../../onboarding-callbacks.slint";
+import { NavHeader, Shield, HeadingMd, TextLg, Button, ButtonSection } from "@ui/widgets.slint";
+import { OnboardingBasePage } from "../../widgets/base-page.slint";
+import { UISize, Images, Palette , CurrentTheme, Palettes} from "@ui/theme.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { Size } from "@ui/types.slint";
+import { TextMd } from "@ui/widgets/txt.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { ShieldSection, ShieldContent, OnboardingShieldPage, OverlayImage } from "../../widgets/shield-page.slint";
+
+
+export component WelcomePage inherits OnboardingShieldPage {
+    property <bool> dark-mode <=> CurrentTheme.is-dark;
+
+    NavHeader {
+        y: 0;
+        left-icon: "";
+        right-icon: dark-mode ? "sun" : "moon";
+        right-clicked => {
+            if (dark-mode) {
+                CB.set-dark-mode(false);
+                CurrentTheme.palette = Palettes.light;
+            } else {
+                CB.set-dark-mode(true);
+                CurrentTheme.palette = Palettes.dark;
+            }
+        }
+    }
+
+    ShieldSection {
+        ShieldContent {
+            padding-top: 110px;
+
+            HeadingMd {
+                text: TR2.lookup(TrId.MainHeader);
+                horizontal-alignment: center;
+            }
+
+            TextMd {
+                text: TR2.lookup(TrId.MainSubheader);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.MainTermsOfUse);
+                importance: tertiary;
+                clicked => {
+                    Navigate.terms-of-use({ });
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonGetStarted);
+                importance: primary;
+                clicked => {
+                    Navigate.scan-qr({ });
+                }
+            }
+        }
+    }
+
+    OverlayImage {
+        image: "images/three-d/prime";
+    }
+}

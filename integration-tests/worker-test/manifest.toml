@@ -1,0 +1,27 @@
+appId = "0x7125fc9cbec5889fc16bd387cd382dd5"
+
+[appName]
+en = "async worker test"
+
+[servers."test/worker-server"]
+ArchiveIncrementTick = { id = 1, type = "archive" }
+ScalarTickSub = { id = 2, type = "scalarEvent" }
+ArchiveTickSub = { id = 3, type = "archiveEvent" }
+Shutdown = { id = 4, type = "scalar" }
+ArchiveDropAllSubs = { id = 5, type = "archive" }
+ArchiveTick = { id = 6, type = "archive" }
+ArchiveDrop = { id = 7, type = "archive" }
+ScalarDoubleData = { id = 8, type = "blockingScalar" }
+ScalarDropRequest = { id = 9, type = "blockingScalar" }
+ScalarSubFallible = { id = 10, type = "scalarEvent" }
+ArchiveSubFallible = { id = 11, type = "archiveEvent" }
+ScalarInterval = { id = 12, type = "blockingScalar" }
+
+[servers."test/disposable"]
+ScalarEcho = { id = 1, type = "blockingScalar" }
+ArchiveEcho = { id = 2, type = "archive" }
+ShutdownDisposable = { id = 3, type = "scalar" }
+
+[servers."test/retry"]
+RetryEcho = { id = 1, type = "blockingScalar" }
+ShutdownRetry = { id = 2, type = "scalar" }

@@ -1,0 +1,232 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { IconButton, SearchInput, TextSm, BasePage, HeadingMd } from "@ui/widgets.slint";
+import { Importance, Images, Size, Palette, CurrentTheme } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+
+import { BrowserGlobal, SortMode, SortDirection } from "./global.slint";
+import { FilePopupMenu, SelectModePopupMenu, SortPopupMenu } from "./popup.slint";
+import { LocationSwitcher } from "../location-switcher.slint";
+import { ActiveModal, ModalGlobal} from "../modal/global.slint";
+import { CopyMoveModal } from "../modal/copy-move.slint";
+import { CreateFolderModal } from "../modal/create-folder.slint";
+import { DeleteModal } from "../modal/delete.slint";
+import { RenameModal } from "../modal/rename.slint";
+import { FileList, FileListLoading } from "../file-list.slint";
+
+export { Images, CurrentTheme }
+
+component BrowserBody inherits Rectangle {
+    private property <int> num-files: BrowserGlobal.active-list.files.length;
+    private property <int> num-files-filtered: BrowserGlobal.active-list.num-files-filtered;
+    private property <bool> loading: BrowserGlobal.active-list.loading;
+    private property <bool> error: BrowserGlobal.active-list.error;
+
+    VerticalLayout {
+        y: 0px;
+        spacing: Size.sz6 - 2px;
+        alignment: start;
+
+        header := Rectangle {
+            HorizontalLayout {
+                alignment: start;
+                VerticalLayout {
+                    alignment: center;
+                    IconButton {
+                        icon: "chevron-left";
+                        importance: Importance.tertiary;
+                        icon-color: Palette.content-primary;
+                        visible: self.enabled;
+                        enabled: BrowserGlobal.current-path != "" && !BrowserGlobal.is-select-mode;
+                        clicked => {
+                            BrowserGlobal.back();
+                        }
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                alignment: end;
+                VerticalLayout {
+                    alignment: center;
+                    IconButton {
+                        icon: "ellipsis";
+                        importance: Importance.tertiary;
+                        touch-factor: 1.3;
+                        clicked => {
+                            BrowserGlobal.is-file-menu-open = !BrowserGlobal.is-file-menu-open;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (BrowserGlobal.is-search-mode): HorizontalLayout {
+            spacing: Size.sz4;
+
+            SearchInput {
+                placeholder: TR2.lookup(TrId.CommonFillerTextSearch);
+                text: BrowserGlobal.search-query;
+
+                edited(query) => {
+                    BrowserGlobal.search-query = query;
+                    BrowserGlobal.reload-files();
+                }
+            }
+
+            IconButton {
+                icon: BrowserGlobal.sort-direction == SortDirection.Ascending ? "sort-ascending" : "sort-descending";
+                importance: BrowserGlobal.sort-mode == SortMode.Alphabetical && BrowserGlobal.sort-direction == SortDirection.Descending ? Importance.secondary : Importance.primary;
+                touch-factor: 1.3;
+                clicked => {
+                    BrowserGlobal.is-sort-menu-open = !BrowserGlobal.is-sort-menu-open;
+                }
+            }
+        }
+
+        if (!loading && !error && BrowserGlobal.is-airlock-selected && BrowserGlobal.is-airlock-mounted): VerticalLayout {
+            alignment: start;
+            spacing: Size.sz10;
+            padding-top: Size.sz16;
+
+            HeadingMd {
+                text: TR2.lookup(TrId.AirlockUSBHeader);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                Image {
+                    width: 424px;
+                    height: 184px;
+                    source: CurrentTheme.is-dark ? @image-url("../images/airlock-mounted-dark.png") : @image-url("../images/airlock-mounted.png");
+                }
+            }
+        }
+
+        if (!loading && !error && num-files != 0 && !(BrowserGlobal.is-airlock-selected && BrowserGlobal.is-airlock-mounted)): FileList {
+            model: BrowserGlobal.file-lists[BrowserGlobal.location-idx].files;
+            is-select-mode: BrowserGlobal.is-select-mode;
+
+            entry-pressed(name, is-folder) => {
+                BrowserGlobal.entry-pressed(name, is-folder);
+            }
+
+            entry-long-pressed(name, is-folder) => {
+                BrowserGlobal.entry-long-pressed(name, is-folder);
+            }
+        }
+
+        if (!error && loading): FileListLoading {
+            are-folders-allowed: BrowserGlobal.is-folders-allowed;
+        }
+
+        if (error && !loading): VerticalLayout {
+            height: parent.height;
+            padding: Size.sz6;
+
+            HorizontalLayout {
+                alignment: center;
+                TextSm {
+                    text: TR2.lookup(TrId.ErrorContent);
+                    color: Palette.content-notice;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        if (!error && !loading && num-files == 0 && !(BrowserGlobal.is-airlock-selected && BrowserGlobal.is-airlock-mounted)): VerticalLayout {
+            height: parent.height;
+            padding: Size.sz6;
+
+            HorizontalLayout {
+                alignment: center;
+                TextSm {
+                    text: TR2.lookup(TrId.EmptyFolderEmpty) + TR2.format(TrId.EmptyFilesFiltered, [num-files-filtered]);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        TouchArea {
+            enabled: locations.menu-open;
+            clicked => {
+                locations.menu-open = false;
+            }
+        }
+
+        locations := LocationSwitcher {
+            x: header.absolute-position.x - root.absolute-position.x + (header.width - self.width) / 2;
+            y: header.absolute-position.y - root.absolute-position.y + (header.height - self.height) / 2;
+
+            locations: BrowserGlobal.allowed-locations;
+            selected_index: BrowserGlobal.location-idx;
+            breadcrumbs: BrowserGlobal.build-breadcrumbs(BrowserGlobal.location-idx, BrowserGlobal.current-path);
+            location-changed(index) => {
+                BrowserGlobal.location-changed(index);
+            }
+            breadcrumb-selected(name, index) => {
+                BrowserGlobal.breadcrumb-selected(name, index);
+            }
+        }
+    }
+}
+
+export component FileBrowser inherits Rectangle {
+    Image {
+        source: Images.common(CurrentTheme.is-dark ? "images/background-dark" : "images/background");
+    }
+
+    BasePage {
+        VerticalLayout {
+            padding: Size.sz4;
+            BrowserBody { }
+        }
+    }
+
+    if BrowserGlobal.is-file-menu-open: Rectangle {
+        background: Palette.overlay;
+        if BrowserGlobal.is-select-mode: SelectModePopupMenu {
+            x: parent.width - self.width - Size.sz4;
+            y: 80px;
+            z: 100;
+        }
+        if !BrowserGlobal.is-select-mode: FilePopupMenu {
+            x: parent.width - self.width - Size.sz4;
+            y: 80px;
+            z: 100;
+        }
+
+        TouchArea {
+            clicked => {
+                BrowserGlobal.is-file-menu-open = false;
+            }
+        }
+    }
+
+    if BrowserGlobal.is-sort-menu-open: Rectangle {
+        background: Palette.overlay;
+        SortPopupMenu {
+            x: parent.width - self.width - Size.sz4;
+            y: 250px;
+            z: 100;
+        }
+
+        TouchArea {
+            clicked => {
+                BrowserGlobal.is-sort-menu-open = false;
+            }
+        }
+    }
+
+    property <ActiveModal> active-modal: ModalGlobal.active-modal;
+
+    if active-modal == ActiveModal.Delete: DeleteModal { }
+    if active-modal == ActiveModal.Rename: RenameModal { }
+    if active-modal == ActiveModal.CreateFolder: CreateFolderModal { }
+    if active-modal == ActiveModal.CopyMove: CopyMoveModal { }
+}

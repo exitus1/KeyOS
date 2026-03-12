@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+defer = { workspace = true }
+log = { workspace = true }
+log-server = { workspace = true }
+rkyv = { workspace = true }
+server-macro = { path = "../server/macro" }
+whence = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-names = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "worker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-channel = { workspace = true }
+async-task = { workspace = true }
+async-watch = { workspace = true }
+futures-lite = { workspace = true }
+log = { workspace = true }
+oneshot = { workspace = true }
+pin-project-lite = { version = "0.2" }
+rkyv = { workspace = true }
+server = { workspace = true }
+whence = { workspace = true }
+xous-ticktimer = { workspace = true }
+
+[features]
+test_executor = []
+integration_test = []

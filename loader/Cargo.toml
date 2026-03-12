@@ -1,0 +1,22 @@
+[package]
+name = "loader"
+version = "0.1.0"
+authors = ["Sean Cross <sean@xobs.io>", "Foundation Devices, Inc. <hello@foundation.xyz>"]
+edition = "2018"
+description = "Initial kernel loader for Xous"
+
+[target.'cfg(keyos)'.dependencies]
+armv7 = { workspace = true }
+atsama5d27 = { workspace = true }
+keyos = { path = "../keyos" }
+utralib = { workspace = true }
+
+[dependencies.com_rs]
+git = "https://github.com/betrusted-io/com_rs"
+branch = "main"
+
+[dev-dependencies]
+lazy_static = "1.4.0"
+
+[features]
+debug-print = []

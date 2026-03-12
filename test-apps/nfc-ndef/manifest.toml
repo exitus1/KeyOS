@@ -1,0 +1,7 @@
+appId = "0x6775692d6170702d6578616aaaacaaab"
+
+[appName]
+en = "NFC Ndef Test"
+
+[permissions]
+"os/nfc" = ["SetEnabled", "WriteNdefRawMsg", "ReadNdefRawMsg"]

@@ -1,0 +1,70 @@
+{
+  "sources": "ui/ui/i18n/sources",
+  "apps": [
+    {
+      "name": "authenticator",
+      "path": "apps/gui-app-authenticator",
+      "include": ["common.time", "common.button"]
+    },
+    {
+      "name": "camera",
+      "path": "apps/gui-app-qr-scanner",
+      "include": []
+    },
+    {
+      "name": "controlcenter",
+      "path": "os/gui-app-control-center",
+      "include": ["common.button.shutDown", "common.backup", "common.time"]
+    },
+    {
+      "name": "files",
+      "path": "apps/gui-app-file-browser",
+      "include": ["common.button", "common.fillerText"]
+    },
+    {
+      "name": "launcher",
+      "path": "os/gui-app-launcher",
+      "include": ["common.button", "common.time"]
+    },
+    {
+      "name": "lock",
+      "path": "os/gui-app-lock-screen",
+      "include": ["common.changePin"]
+    },
+    {
+      "name": "onboarding",
+      "path": "os/gui-app-onboarding",
+      "include": ["common.button", "common.update", "keycardBackup", "common.recoverRestoreCardKeycard"]
+    },
+    {
+      "name": "recovery",
+      "path": "os/gui-app-recovery",
+      "include": ["common.button"]
+    },
+    {
+      "name": "securitykey",
+      "path": "apps/gui-app-security-keys",
+      "include": ["common.button"]
+    },
+    {
+      "name": "settings",
+      "path": "os/gui-app-settings",
+      "include": ["common", "keycardBackup"]
+    },
+    {
+      "name": "switcher",
+      "path": "apps/gui-app-switcher",
+      "include": []
+    },
+    {
+      "name": "vault",
+      "path": "apps/gui-app-seed-vault",
+      "include": ["common.button"]
+    },
+    {
+      "name": "wallet",
+      "path": "apps/gui-app-bitcoin",
+      "include": ["common.button", "common.slideToSign", "common.createAccountsanitized", "common.createAccount"]
+    }
+  ]
+}

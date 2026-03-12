@@ -1,0 +1,7 @@
+appId = "0x6f732f69326300000000000000000000"
+memory = ["TWIHS0"]
+syscall = ["SetThreadPriority"]
+extends = "../../api/i2c"
+
+[appName]
+en = "I2C Server"

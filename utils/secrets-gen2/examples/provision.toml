@@ -1,0 +1,5 @@
+colorway = "dark"
+fido-private-key = "4549dc1824d661dd8760a91c91855392360a06eebd3fa190f07964560d943412"
+provisioning-secret = "4d1efa24c5b6ee46ad9ffe1b14d01175b0d527b42e3267fcc567c7cb4ae1ae32"
+sc-server-pubkey = "044b1ce5ab4acbcd895b5de82d76d22c475b75d05245f2ececa4cd531be8301a6bdf94b143f0bbbe5731e2d45e41e5087fb55d3faf1da54e534fdacd6663442323"
+sc-server-url = "localhost:8000"

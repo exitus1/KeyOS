@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundationdevices.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+authors = ["Foundation Devices <hello@foundationdevices.com>"]
+description = "FFI from at91bootstrap to Foundation's rustlang modules"
+license = "GPL-3.0-or-later"
+edition = "2021"
+name = "charge-boot"
+version = "0.1.1"
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+atsama5d27 = { workspace = true }
+boot-common = { path = "../common" }
+embedded-graphics = "0.8.1"
+ft3269 = { workspace = true }
+fuse = { path = "../../utils/fuse" }
+keyos = { path = "../../keyos" }

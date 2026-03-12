@@ -1,0 +1,55 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { SegmentModel } from "@ui/widgets/segmented-selector.slint";
+import { BreadCrumb } from "../location-switcher.slint";
+import { FileListData } from "../file-list.slint";
+
+export enum ActiveModal {
+    None,
+    Delete,
+    Rename,
+    CreateFolder,
+    CopyMove,
+}
+
+export enum FileAction {
+    Copy,
+    Move,
+}
+
+export global ModalGlobal {
+    in property <ActiveModal> active-modal: ActiveModal.None;
+
+    in property <bool> loading: false;
+
+    callback delete-confirmed();
+
+    in property <string> rename-text;
+    callback rename-confirmed(string);
+    pure callback validate-rename(string) -> bool;
+
+    callback create-folder-confirmed(string);
+    pure callback validate-create-folder(string) -> bool;
+
+    // closes active modal
+    callback cancel();
+
+    in property <FileAction> copy-move-action: FileAction.Copy;
+    in property <percent> copy-move-progress: 0%;
+    in property <string> copy-move-summary: "";
+    in property <int> copy-move-location-idx: 0;
+    in property <[SegmentModel]> copy-move-allowed-locations: [];
+    in property <[FileListData]> copy-move-file-lists: [];
+    in property <string> copy-move-current-path: "";
+    in property <bool> copy-move-action-enabled: false;
+
+    pure callback build-breadcrumbs(int, string) -> [BreadCrumb];
+
+    callback copy-move-close();
+    callback copy-move-confirmed();
+    callback copy-move-location-changed(int);
+    callback copy-move-breadcrumb-selected(string, int);
+    callback copy-move-enter-folder(string);
+    callback copy-move-exit-folder();
+}

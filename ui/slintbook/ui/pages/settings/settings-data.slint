@@ -1,0 +1,151 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { 
+    MenuSection, 
+    MenuSectionContainer, 
+    MenuSectionLayout,
+    MenuBooleanItem,
+    MenuActionItem,
+    HLine,
+    RadioItem,
+    MenuItemLayout
+} from "@ui/widgets/settings-menu.slint";
+import { UISize } from "@ui/theme.slint";
+import { PageBody, Slider, NavHeader } from "@ui/widgets.slint";
+import { ScrollView } from "std-widgets.slint";
+
+component SettingDataMenu {
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+    
+    // Top-level properties
+    property <bool> a-bool: false;
+    property <string> s1: "";
+    property <string> s2: "";
+    property <string> e1-value: "option1";
+    property <int> e2-value: 1;
+    VerticalLayout {
+        NavHeader {
+            title: "Settings";
+        }
+
+        PageBody {
+            VerticalLayout {
+                spacing: 16px;
+                
+                // Top level items
+                MenuSectionContainer {
+                    MenuSectionLayout {
+                        MenuBooleanItem {
+                            label: "a boolean";
+                            icon: "pin";
+                            checked: root.a-bool;
+                            changed(val) => {
+                                root.a-bool = val;
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuActionItem {
+                            label: "Nested Menu";
+                            icon: "passport";
+                            clicked => {
+                                // Navigate to nested menu
+                            }
+                        }
+                    }
+                }
+                
+                // String Settings section
+                MenuSection {
+                    title: "String Settings";
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            label: "String 1";
+                            text: root.s1;
+                        }
+                    }
+                }
+                
+                // Enum Settings section
+                MenuSection {
+                    title: "Enum Settings";
+                    MenuSectionLayout {
+                        MenuActionItem {
+                            label: "Enum 1";
+                            text: root.e1-value == "option1" ? "Option 1" : "Option 2";
+                            clicked => {
+                                // Open enum selection dialog
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuActionItem {
+                            label: "Enum 2";
+                            text: "Option " + root.e2-value;
+                            clicked => {
+                                // Open enum selection dialog
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+component EnumSelectionPage {
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+    in-out property <int> selected-value: 1;
+    VerticalLayout {
+        NavHeader {
+            title: "Enum 2";
+        }
+
+        PageBody {
+            MenuSectionContainer {
+                MenuSectionLayout {
+                    RadioItem {
+                        label: "Option 1";
+                        checked: root.selected-value == 1;
+                        clicked => {
+                            root.selected-value = 1;
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: "Option 2";
+                        checked: root.selected-value == 2;
+                        clicked => {
+                            root.selected-value = 2;
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: "Option 3";
+                        checked: root.selected-value == 3;
+                        clicked => {
+                            root.selected-value = 3;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component SettingsDataPage inherits ScrollView {
+    VerticalLayout {
+        SettingDataMenu { }
+
+        EnumSelectionPage { }
+    }
+}

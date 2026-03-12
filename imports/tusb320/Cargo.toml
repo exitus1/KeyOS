@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundationdevices.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "tusb320"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Driver for the tusb320 USB Type-C™ Configuration Channel Logic and Port Controller"
+
+[dependencies]
+embedded-hal = { version = "1.0" }
+bitfield = "0.15.0"

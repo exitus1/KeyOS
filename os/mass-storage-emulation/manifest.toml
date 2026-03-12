@@ -1,0 +1,26 @@
+appId = "0x6f732f6d732d656d756c6174696f6e00"
+syscall = ["SetThreadPriority"]
+
+[appName]
+en = "Mass storage emulation server"
+
+[permissions]
+"os/fs" = [
+    "ReadBlocks",
+    "WriteBlocks",
+    "BlockCount",
+    "FlushFs",
+    "SubscribeFilesystemEvent",
+    "MountAirlock",
+]
+"os/settings" = ["SubscribeAirlockMode", "GetAirlockMode"]
+"os/usbdev" = [
+    "ReadEndpoint",
+    "WriteEndpoint",
+    "NumInterfaces",
+    "RegisterSetupResponder",
+    "RegisterInterface",
+    "WaitForConnection",
+    "ResetController",
+    "IsDeviceEmulationConnected",
+]

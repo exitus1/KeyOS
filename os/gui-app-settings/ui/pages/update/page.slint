@@ -1,0 +1,153 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Button, TextMd, Icon, TextSm, TextLg, TextXl, JumboIcon, BasePage, PageBody, ContentSection, ButtonSection, WrappedIcon } from "@ui/widgets.slint";
+import { Importance, Palette } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+
+import { UpdateProps } from "props.slint";
+
+import { SettingsNavHeader } from "../../widgets/nav-header.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { SettingGlobal } from "../../globals/setting-global.slint";
+import { QlGlobal } from "../../globals/ql-global.slint";
+import { UpdateGlobal } from "../../globals/update-global.slint";
+
+component ManualUpdateButton inherits Button {
+    importance: Importance.secondary;
+    icon: "file";
+    label: TR2.lookup(TrId.UpdateManualUpdate);
+    enabled: false;
+    clicked => {
+        UpdateGlobal.manual-update();
+        Navigate.update-install({ });
+    }
+}
+
+component NoUpdateAvailable {
+    in property <string> current-version;
+    in property <string> last-checked-on;
+
+    PageBody {
+        ContentSection {
+            HorizontalLayout {
+                alignment: center;
+                WrappedIcon {
+                    outer-icon: "jumbo-circle";
+                    inner-icon: "check";
+                }
+            }
+
+            TextMd {
+                text: TR2.format(TrId.UpdateDeviceCurrentVersion, [current-version]);
+                color: Palette.content-primary;
+                horizontal-alignment: center;
+            }
+
+            TextSm {
+                text: TR2.format(TrId.UpdateUpToDateSubheader, [last-checked-on]);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+                visible: last-checked-on != "";
+            }
+        }
+
+        ButtonSection {
+            ManualUpdateButton { }
+
+            Button {
+                importance: Importance.primary;
+                label: TR2.lookup(TrId.UpdateEnvoyCheck);
+                loading: UpdateGlobal.checking-fw-update;
+                enabled: !self.loading;
+                clicked => {
+                    UpdateGlobal.check-fw-update()
+                }
+            }
+        }
+    }
+}
+
+component UpdateAvailable {
+    in property <string> current-version;
+    in property <string> new-version;
+
+    PageBody {
+        ContentSection {
+            HorizontalLayout {
+                alignment: center;
+                // not using WrappedIcon because underbar is not the right size.
+                JumboIcon {
+                    name: "jumbo-download";
+                }
+            }
+
+            TextXl {
+                text: TR2.lookup(TrId.UpdateAvailableHeader);
+                color: Palette.content-primary;
+                height: Size.sz14;
+                horizontal-alignment: center;
+            }
+
+            VerticalLayout {
+                spacing: Size.sz4;
+                TextMd {
+                    text: TR2.format(TrId.UpdateDeviceCurrentVersion, [current-version]);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.UpdateDeviceUpdatedTo);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: TR2.format(TrId.UpdateDeviceNewVersion, [new-version]);
+                    color: Palette.content-primary;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+
+        ButtonSection {
+            ManualUpdateButton { }
+
+            Button {
+                importance: Importance.primary;
+                label: TR2.lookup(TrId.UpdateEnvoyUpdate);
+                enabled: QlGlobal.ql-live;
+                clicked => {
+                    Navigate.update-progress({ replace: true })
+                }
+            }
+        }
+    }
+}
+
+export component UpdatePage inherits BasePage {
+    in property <UpdateProps> props;
+
+    property <string> last-checked-on: UpdateGlobal.last-update-checked-on;
+    property <string> current-version: SettingGlobal.current-keyos-version;
+    property <string> new-version: UpdateGlobal.new-keyos-version;
+    property <bool> new-version-available: new-version != "" && new-version != current-version;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.UpdateTitle);
+        }
+
+        if new-version-available: UpdateAvailable {
+            current-version: current-version;
+            new-version: new-version;
+        }
+
+        if !new-version-available: NoUpdateAvailable {
+            current-version: current-version;
+            last-checked-on: last-checked-on;
+        }
+    }
+}

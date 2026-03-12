@@ -1,0 +1,162 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../../gen/tr.slint";
+import { BasePage, Divider, HeadingSm, TextSm } from "@ui/widgets.slint";
+import { IconSize, Palette, Importance, Timings, Images } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+
+import { WarrantyProps } from "props.slint";
+
+import { SettingsNavHeader } from "../../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../../gen/navigate.slint";
+
+
+export component WarrantyPage inherits BasePage {
+    in property <WarrantyProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.WarrantyTitle);
+        }
+
+        VerticalLayout {
+            Flickable {
+                width: parent.width;
+                viewport-width: parent.width;
+
+                VerticalLayout {
+                    padding-top: Size.sz4;
+                    padding-bottom: Size.sz4;
+                    padding-left: Size.sz7;
+                    padding-right: Size.sz7;
+                    spacing: Size.sz5;
+
+                    HeadingSm {
+                        text: "LIMITED PRODUCT WARRANTY";
+                    }
+
+                    TextSm {
+                        text: "Last updated: December 22, 2025\n\nThis Limited Product Warranty (“Warranty”) is issued by Foundation Devices, Inc. (“Foundation,” “Company,” “we,” or “us”), located at 6 Liberty Square #6018, Boston, MA 02109.\n\nThis Warranty applies to Passport Core and Passport Prime hardware devices (each, a “Product”).\n\nThis Warranty is incorporated by reference into, and must be read together with, the applicable Terms of Use. In the event of a conflict, the Terms of Use control.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "1. WARRANTY COVERAGE";
+                    }
+
+                    TextSm {
+                        text: "1.1 Limited Hardware Warranty\n\nFoundation warrants that the Product will be free from material defects in workmanship and materials, under normal use, for one (1) year from the date of original purchase (“Warranty Period”).\n\nThis Warranty applies only to the original purchaser and is non-transferable, notwithstanding any permitted device transfers under the Terms of Use.\n\n1.2 Battery Coverage\n\nThe Product battery is covered for the full Warranty Period, including defects resulting in abnormal or significant capacity loss.\n\n - Passport Core: Battery is user-replaceable.\n\n - Passport Prime: Battery is not user-replaceable and must be serviced by Foundation.\n\nNormal battery aging outside the Warranty Period is not covered.\n\n1.3 Remedies\n\nIf a covered defect arises during the Warranty Period, Foundation may, at its sole discretion:\n\n - Repair the Product, or\n\n - Replace it with a new or refurbished unit that is functionally equivalent.\n\nAny repaired or replaced Product is covered only for the remainder of the original Warranty Period.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "2. WARRANTY EXCLUSIONS";
+                    }
+
+                    TextSm {
+                        text: "This Warranty does not cover defects or damage resulting from:\n\n - Misuse, abuse, neglect, accidents, or improper handling\n\n - Unauthorized opening, disassembly, modification, or repair\n\n - Broken or removed tamper seals\n\n - Attempts to bypass or interfere with security components\n\n - Use inconsistent with documentation or instructions\n\n - Liquids, electrical faults, or external damage\n\n - Normal cosmetic wear\n\n - Acts of God (fire, flood, natural disasters)\n\nAny opening or modification of the Product by anyone other than Foundation voids this Warranty.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "3. SOFTWARE, FIRMWARE, AND DIGITAL ASSETS";
+                    }
+
+                    TextSm {
+                        text: "3.1 Software and Firmware\n\nAll firmware, operating system software, and related code are provided “AS IS” and “AS AVAILABLE.”\n\nFoundation makes no guarantees regarding:\n\n - Future updates or features\n\n - Compatibility with any blockchain, protocol, or third-party software\n\n - Error-free operation\n\nSoftware or firmware issues do not constitute a hardware defect.\n\n3.2 Digital Assets and Backups\n\nFoundation is not responsible or liable for:\n\n - Loss of bitcoin or other digital assets\n\n - Loss or compromise of private keys, seed phrases, NFC Keycards, Magic Backups, or credentials\n\n - Failed restores, user error, phishing, malware, or third-party actions\n\nYou bear sole responsibility for custody, backups, and transaction verification.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "4. DISCLAIMER OF WARRANTIES";
+                    }
+
+                    TextSm {
+                        text: "THIS WARRANTY IS A LIMITED WARRANTY.\n\nEXCEPT AS EXPRESSLY PROVIDED HEREIN, THE PRODUCTS ARE PROVIDED “AS IS” AND “AS AVAILABLE.”\n\nFOUNDATION DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT, TO THE MAXIMUM EXTENT PERMITTED BY LAW.\n\nSome jurisdictions do not allow limitations on implied warranties; in such cases, applicable law will govern.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "5. LIMITATION OF LIABILITY";
+                    }
+
+                    TextSm {
+                        text: "TO THE MAXIMUM EXTENT PERMITTED BY LAW:\n\n - FOUNDATION SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF FUNDS, DATA, OR PROFITS.\n\n - FOUNDATION’S TOTAL LIABILITY ARISING FROM OR RELATING TO THIS WARRANTY SHALL NOT EXCEED THE GREATER OF (A) ONE HUNDRED U.S. DOLLARS (US $100) OR (B) THE AMOUNT YOU PAID FOR THE PRODUCT.\n\nThese limitations apply even if a remedy fails of its essential purpose.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "6. WARRANTY SERVICE";
+                    }
+
+                    TextSm {
+                        text: "To submit a warranty claim, contact:\n\nEmail: hello@foundation.xyz\n\nProof of purchase may be required. Repair, replacement, and shipping arrangements are determined by Foundation on a case-by-case basis.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "7. DISPUTE RESOLUTION";
+                    }
+
+                    TextSm {
+                        text: "Any dispute arising out of or relating to this Warranty shall be resolved by binding arbitration in Massachusetts, consistent with the Federal Arbitration Act, under the same arbitration framework referenced in the applicable Terms of Use.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "8. SEVERABILITY";
+                    }
+
+                    TextSm {
+                        text: "If any provision of this Warranty is held unenforceable, the remaining provisions will remain in full force and effect.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    HeadingSm {
+                        text: "9. ENTIRE WARRANTY";
+                    }
+
+                    TextSm {
+                        text: "This Warranty constitutes the complete and exclusive warranty for the Product and supersedes all prior warranty representations, whether oral or written.";
+                    }
+
+                    Divider {
+                        width: 50px;
+                    }
+
+                    TextSm {
+                        text: "Foundation Devices, Inc.\n\n6 Liberty Square #6018\n\nBoston, MA 02109\n\nhello@foundation.xyz";
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gpio"
+version = "0.1.0"
+edition = "2021"
+description = "GPIO API crate"
+publish = false
+
+[dependencies]
+log = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+thiserror = { workspace = true }
+xous = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+eh-0 = { package = "embedded-hal", version = "0.2.7", features = ["unproven"] }
+eh-1 = { package = "embedded-hal", version = "1.0" }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

@@ -1,0 +1,52 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Page } from "./page.slint";
+import { IconButton, HeadingMd, TextMd } from "@ui/widgets.slint";
+import { Size, Importance, Utils, Palette } from "@ui/theme.slint";
+
+export component IconButtonsPage inherits Page {
+    private property <string> output;
+
+    VerticalLayout {
+        spacing: Size.sz2;
+        VerticalLayout {
+            spacing: Size.sz8;
+            HeadingMd {
+                text: "Output: " + output;
+                height: Size.sz10;
+            }
+
+            Rectangle {
+                width: 100%;
+                height: 60px * 3 + Size.sz4 * 4;
+                background: Palette.background-primary;
+                VerticalLayout {
+                    spacing: Size.sz4;
+                    padding: Size.sz4;
+                    alignment: start;
+
+                    for state in ["enabled", "disabled", "pressed"]: HorizontalLayout {
+                        spacing: Size.sz4;
+                        for importance in [
+                            Importance.primary,
+                            Importance.secondary,
+                            Importance.tertiary,
+                            Importance.notice,
+                            Importance.negative
+                        ]: IconButton {
+                            id: Utils.importance-to-str(importance) + "-" + state;
+                            icon: "bitcoin";
+                            importance: importance;
+                            enabled: state != "disabled";
+                            force-pressed: state == "pressed";
+                            clicked(id) => {
+                                output = "Clicked on " + id + "!";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

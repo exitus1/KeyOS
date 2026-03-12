@@ -1,0 +1,74 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+import { WrappedIcon , Button, ButtonSection, TimerCircularProgress, HeadingMd, JumboIconPageBody } from "@ui/widgets.slint";
+
+import {  OnboardingContentSection, OnboardingBasePage } from "base-page.slint";
+import { WrappedIcon } from "../../../../ui/ui/widgets.slint";
+
+export component RestoreSeedLoading inherits JumboIconPageBody {
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+            TimerCircularProgress {
+                indeterminate: true;
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            text: TR2.lookup(TrId.SavingMasterKeyHeader);
+            horizontal-alignment: center;
+        }
+    }
+}
+
+export component RestoreSuccessContent inherits OnboardingContentSection {
+    HorizontalLayout {
+        alignment: center;
+        WrappedIcon {
+            outer-icon: "jumbo-circle";
+            inner-icon: "check";
+        }
+    }
+
+    HeadingMd {
+        vertical-stretch: 0;
+        text: TR2.lookup(TrId.RecoverSuccessHeader);
+        horizontal-alignment: center;
+    }
+
+    @children
+}
+
+export component RestoreFailed inherits JumboIconPageBody {
+    in property <string> title;
+    callback retry;
+
+    OnboardingContentSection {
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "close";
+            }
+        }
+
+        HeadingMd {
+            vertical-stretch: 0;
+            text: title;
+            horizontal-alignment: center;
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            clicked => {
+                root.retry()
+            }
+        }
+    }
+}

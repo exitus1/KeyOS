@@ -1,0 +1,101 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {Chip, HeadingMd, TextMd, Icon, RoundContainer, StepList, SlideToButton} from "@ui/widgets.slint";
+import {Palette, Size} from "@ui/theme.slint";
+
+export component NavSortSearchPage inherits Page {
+
+    VerticalLayout {
+        alignment: start;
+        spacing: Size.sz6;
+        HeadingMd {
+            text: "Chips";
+            height: Size.sz12;
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            TextMd {
+                text: "Selected Chips";
+                vertical-alignment: center;
+                width: 140px;
+            }
+
+            Chip {
+                text: "List";
+                icon: "list";
+                width: 110px;
+            }
+
+            Chip {
+                text: "List";
+                width: 110px;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            TextMd {
+                text: "Unselected Chips";
+                vertical-alignment: center;
+                width: 140px;
+            }
+
+            Chip {
+                text: "List";
+                icon: "list";
+                selected: false;
+                width: 110px;
+            }
+
+            Chip {
+                text: "List";
+                selected: false;
+                width: 110px;
+            }
+        }
+
+        HeadingMd {
+            text: "Step List";
+            height: Size.sz12;
+        }
+
+        StepList {
+            steps: [
+                {
+                    label: "Verifying signature",
+                    icon: "check",
+                    completed: true,
+                    in-progress: false,
+                },
+                {
+                    label: "Prepare filesystem",
+                    icon: "arrow-right",
+                    completed: false,
+                    in-progress: true,
+                },
+                {
+                    label: "Copy firmware",
+                    icon: "arrow-right",
+                    completed: false,
+                    in-progress: false,
+                },
+                {
+                    label: "Reboot",
+                    icon: "arrow-right",
+                    completed: false,
+                    in-progress: false,
+                },
+            ];
+        }
+
+        HorizontalLayout {
+            SlideToButton {
+                label: "Shut Down";
+                icon: "arrow-right";
+            }
+        }
+    }
+}

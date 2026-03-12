@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "fs"
+version = "0.1.0"
+edition = "2021"
+description = "Filesystem Server API crate"
+publish = false
+
+[features]
+test = ["dep:tempfile", "dep:chrono"]
+default = []
+
+[dependencies]
+bitflags = { workspace = true }
+log = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+
+# Test dependencies
+chrono = { version = "0.4", optional = true }
+tempfile = { version = "3", optional = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

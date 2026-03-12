@@ -1,0 +1,13 @@
+appId = "0x2c45ab5762feefeea6fcc2069535c002"
+syscall = ["VirtToPhys"]
+
+[appName]
+en = "App Switcher"
+
+[permissions]
+template = ["gui-app"]
+"os/gui-server" = [
+    "CloseApp",
+    "SwitchToLauncher",
+    "SwitchTo",
+]

@@ -1,0 +1,34 @@
+// SPDX-FileCopyrightText: 2026 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { IconButton, Panel } from "@ui/widgets.slint";
+import { Palette, Size, Importance, UISize } from "@ui/theme.slint";
+import { ModalGlobal } from "../modal/global.slint";
+
+export component TextInputModal inherits Rectangle {
+    in property <length> panel-y-offset: -(Size.sz16 + Size.sz8);
+
+    background: Palette.overlay;
+
+    // Don't allow touching items behind this
+    TouchArea { }
+
+    Panel {
+        width: UISize.modal-width;
+        z: 100;
+        y: (parent.height - self.height) / 2 + root.panel-y-offset;
+
+        IconButton {
+            icon: "close";
+            importance: Importance.tertiary;
+            size: Size.sz10;
+            x: parent.width - self.width - Size.sz4;
+            y: Size.sz4;
+            clicked => {
+                ModalGlobal.cancel();
+            }
+        }
+
+        @children
+    }
+}

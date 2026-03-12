@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "gui-app-security-keys"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fido = { path = "../../os/fido" }
+fs = { workspace = true }
+fuzzy-filter = "0.1.0"
+gui-server-api = { workspace = true }
+haptics = { workspace = true }
+i18n = { path = "../../i18n" }
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+nfc = { path = "../../os/nfc" }
+ordered-table = { path = "../../utils/ordered-table" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+server = { path = "../../server" }
+settings = { workspace = true }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+thiserror = "1.0"
+usb = { workspace = true }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

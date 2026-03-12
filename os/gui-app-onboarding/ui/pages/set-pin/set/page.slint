@@ -1,0 +1,207 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { 
+    BasePage, 
+    Button,
+    HeadingMd,
+    LoginLayout,
+    NavHeader,
+    PasswordEntry,
+    PinEntry,
+    TextSm
+} from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+
+import { Navigate, Animate } from "../../../gen/navigate.slint";
+import { SeedGlobal } from "../../../onboarding-callbacks.slint";
+
+component SetAuthHeader inherits NavHeader {
+    in-out property <bool> is-confirming: false;
+    in-out property <bool> verification-failed: false;
+
+    clicked => {
+        if root.is-confirming {
+            root.is-confirming = false;
+            root.verification-failed = false;
+        } else {
+            Navigate.backward();
+        }
+    }
+}
+
+component SetPin inherits Rectangle {
+    in property <int> minimum-length: 6;
+    callback change-pin(string);
+    callback switch-to-password();
+
+    private property <string> new-pin: "";
+    private property <bool> is-confirming: false;
+    private property <bool> verification-failed: false;
+
+    init => {
+        pin-entry.focus();
+    }
+
+    focus-scope := FocusScope {
+        focus-changed-event() => {
+            pin-entry.focus();
+        }
+    }
+
+    VerticalLayout {
+        alignment: start;
+
+        SetAuthHeader {
+            title: root.is-confirming ? TR2.lookup(TrId.VerifyPinTitle) : TR2.lookup(TrId.EnterPinTitle);
+            is-confirming <=> root.is-confirming;
+            verification-failed <=> root.verification-failed;
+        }
+
+        LoginLayout {
+            pin-entry := PinEntry {
+                accepted => {
+                    if (root.is-confirming) {
+                        if (self.pin == root.new-pin) {
+                            root.change-pin(self.pin);
+                        } else {
+                            root.verification-failed = true;
+                            self.pin = "";
+                        }
+                    } else if (self.pin-length >= root.minimum-length) {
+                        root.is-confirming = true;
+                        root.new-pin = self.pin;
+                        self.pin = "";
+                    }
+                }
+            }
+
+            if root.verification-failed: TextSm {
+                text: TR2.lookup(TrId.VerifyPinMismatchContent);
+                horizontal-alignment: center;
+                color: Palette.content-lightcopper-brand;
+            }
+
+            if !root.verification-failed && !root.is-confirming && pin-entry.pin-length < root.minimum-length: TextSm {
+                text: TR2.lookup(TrId.EnterPinContent);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            if pin-entry.pin-length > 8 && pin-entry.pin-length <= 11: TextSm {
+                text: TR2.lookup(TrId.ChangePinNewUpToTwelveDigits);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            if pin-entry.pin-length > 11: TextSm {
+                text: TR2.lookup(TrId.EnterPinMaxContent);
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+            }
+
+            if !root.is-confirming && pin-entry.pin == "": Button {
+                label: TR2.lookup(TrId.EnterPinSwitchToPassword);
+                importance: Importance.tertiary;
+                clicked => {
+                    root.switch-to-password();
+                }
+            }
+        }
+    }
+}
+
+component SetPassword inherits Rectangle {
+    callback change-pin(string);
+    callback switch-to-pin();
+
+    private property <string> new-pin: "";
+    private property <bool> is-confirming: false;
+    private property <bool> verification-failed: false;
+
+    init => {
+        password-entry.focus();
+    }
+
+    focus-scope := FocusScope {
+        focus-changed-event() => {
+            password-entry.focus();
+        }
+    }
+
+    VerticalLayout {
+        alignment: start;
+
+        SetAuthHeader {
+            title: root.is-confirming ? TR2.lookup(TrId.VerifyPasswordTitle) : TR2.lookup(TrId.PasswordTitle);
+            is-confirming <=> root.is-confirming;
+            verification-failed <=> root.verification-failed;
+        }
+
+        LoginLayout {
+            password-entry := PasswordEntry {
+                accepted => {
+                    if (root.is-confirming) {
+                        if (self.password == root.new-pin) {
+                            root.change-pin(self.password);
+                        } else {
+                            root.verification-failed = true;
+                            self.password = "";
+                        }
+                    } else {
+                        root.is-confirming = true;
+                        root.new-pin = self.password;
+                        self.password = "";
+                    }
+                }
+            }
+
+            if root.verification-failed: TextSm {
+                text: TR2.lookup(TrId.VerifyPasswordMismatchContent);
+                horizontal-alignment: center;
+                color: Palette.content-lightcopper-brand;
+            }
+
+            VerticalLayout {
+                alignment: start;
+                padding-top: Size.sz3;
+                visible: !root.is-confirming && password-entry.password == "";
+                Button {
+                    label: TR2.lookup(TrId.PasswordSwitchToPin);
+                    importance: Importance.tertiary;
+                    clicked => {
+                        root.switch-to-pin();
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component SetPinSetPage inherits BasePage {
+    private property <bool> is-pin: true;
+
+    function change-pin(pin: string, is-pin: bool) {
+        SeedGlobal.set-pin(pin, is-pin);
+        Navigate.set-pin-success({ is-pin: is-pin }, { replace: true, animate: Animate.None });
+    }
+
+    if root.is-pin: SetPin {
+        change-pin(pin) => {
+            root.change-pin(pin, true);
+        }
+        switch-to-password => {
+            root.is-pin = false;
+        }
+    }
+
+    if !root.is-pin: SetPassword {
+        change-pin(pin) => {
+            root.change-pin(pin, false);
+        }
+        switch-to-pin => {
+            root.is-pin = true;
+        }
+    }
+}

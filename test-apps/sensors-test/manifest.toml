@@ -1,0 +1,8 @@
+appId = "0x73656e736f7273fc7465737400000000"
+
+[appName]
+en = "Sensors test"
+
+[permissions]
+"os/accelerometer" = ["AccelerometerSubscribe"]
+"os/ambient-light" = ["AmbientLightSubscribe"]

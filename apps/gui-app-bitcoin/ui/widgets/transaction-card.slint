@@ -1,0 +1,342 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { CardColor, Palette, Size, Importance, UISize, Utils } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+import { LightPalette } from "@ui/palettes/light-palette.slint";
+import { HeadingSm, TextMd, TextSm, TextXs, TextLg, Icon, LineCard, CryptoFiatField, CardField, Link, BtcAddress, Pagination, CircleIcon } from "@ui/widgets.slint";
+
+export enum PsbtOutputKind {
+    Change,
+    Transfer,
+    External,
+    Suspicious,
+    OpReturn,
+}
+
+export struct PsbtOutputView {
+    kind: PsbtOutputKind,
+    amount-btc: string,
+    amount-currency: string,
+    address: string,  // May be empty for OpReturn
+    message: string,  // An OpReturn message
+    account-index: string,  // Represent u32 transfer account index with string
+}
+
+export struct PsbtView {
+    account-name: string,
+    is-multisig: bool,
+    account-index: string,
+    card-color: CardColor,
+    outputs: [PsbtOutputView],
+    fee-btc: string,
+    fee-currency: string,
+    total-btc: string,
+    total-currency: string,
+    crypto-icon: string,
+    fiat-icon: string,
+    fee-percent: int,
+    fee-warning-threshold: int,
+}
+
+// This adds up with a TextMd to make 32px of height
+component CardSectionTitle inherits HorizontalLayout {
+    padding-left: Size.sz2;
+    padding-right: Size.sz2;
+    padding-top: Size.sz0_75;
+    padding-bottom: Size.sz0_75;
+    alignment: space-between;
+}
+
+component OutputSection inherits VerticalLayout {
+    in property <PsbtView> psbt;
+    in property <int> output-index;
+    in property <string> crypto-icon;
+    in property <string> fiat-icon;
+
+    property <bool> multi-output: psbt.outputs.length != 1;
+    property <PsbtOutputView> output: psbt.outputs[output-index];
+    alignment: start;
+    spacing: Size.sz2_5;
+
+    function output-kind-string(output: PsbtOutputView, account-index: string) -> string {
+        if (output.kind == PsbtOutputKind.Change) {
+            return TR2.lookup(TrId.ExploreAddressesMenuChange);
+        } else if (output.kind == PsbtOutputKind.Transfer) {
+            return TR2.lookup(TrId.SigningTransactionSelfSend);
+        } else if (output.kind == PsbtOutputKind.External) {
+            return "";
+        } else if (output.kind == PsbtOutputKind.Suspicious) {
+            return TR2.lookup(TrId.SigningTransactionSuspicious);
+        } else if (output.kind == PsbtOutputKind.OpReturn) {
+            return "OP_RETURN";
+        }
+        return "";
+    }
+
+    // Amount to send
+    CardSectionTitle {
+        TextMd {
+            text: TR2.lookup(TrId.SigningTransactionAmountToSend);
+            color: LightPalette.content-primary-inverse;
+            bold: true;
+        }
+    }
+
+    CryptoFiatField {
+        crypto-icon: crypto-icon;
+        crypto-amount: output.amount-btc;
+        fiat-amount: output.amount-currency;
+        fiat-icon: fiat-icon;
+    }
+
+    // Destination
+    CardSectionTitle {
+        alignment: space-between;
+
+        TextMd {
+            text: multi-output ? TR2.format(TrId.SigningTransactionDestinationNumberX, [output-index + 1]) : TR2.lookup(TrId.SigningTransactionDestination);
+            color: LightPalette.content-primary-inverse;
+            bold: true;
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz1;
+
+            VerticalLayout {
+                alignment: center;
+                Icon {
+                    name: output.kind == PsbtOutputKind.Transfer ? "info" : (output.kind == PsbtOutputKind.Suspicious ? "alert" : "");
+                    color: LightPalette.content-primary-inverse;
+                }
+            }
+
+            TextMd {
+                text: output-kind-string(output, psbt.account-index);
+                color: LightPalette.content-primary-inverse;
+                bold: true;
+            }
+        }
+    }
+
+    CardField {
+        height: Size.sz15;
+        VerticalLayout {
+            alignment: center;
+            padding-left: Size.sz2;
+            padding-right: Size.sz2;
+            if output.kind != PsbtOutputKind.OpReturn: BtcAddress {
+                section-spacing: Size.sz0_5;
+                horizontal-alignment: start;
+                address: output.address;
+                items-per-row: 8;
+            }
+            if output.kind == PsbtOutputKind.OpReturn: TextSm {
+                text: output.message;
+                color: Palette.content-primary;
+            }
+        }
+    }
+}
+
+component TotalSection inherits VerticalLayout {
+    in property <PsbtView> psbt;
+    in property <string> crypto-icon;
+    in property <string> fiat-icon;
+    alignment: start;
+    spacing: Size.sz2_5;
+
+    // Fee
+    CardSectionTitle {
+        TextMd {
+            text: TR2.lookup(TrId.SigningTransactionFee);
+            color: LightPalette.content-primary-inverse;
+            bold: true;
+        }
+
+        if psbt.fee-percent > psbt.fee-warning-threshold: HorizontalLayout {
+            spacing: Size.sz1;
+            VerticalLayout {
+                alignment: center;
+                Icon {
+                    name: "alert";
+                    color: LightPalette.content-primary-inverse;
+                }
+            }
+
+            TextMd {
+                text: TR2.format(TrId.SigningTransactionFeePercentage, [psbt.fee-percent <= 100 ? psbt.fee-percent : ">100"]);
+                color: LightPalette.content-primary-inverse;
+                bold: true;
+            }
+        }
+    }
+
+    CryptoFiatField {
+        crypto-icon: crypto-icon;
+        crypto-amount: psbt.fee-btc;
+        fiat-amount: psbt.fee-currency;
+        fiat-icon: fiat-icon;
+    }
+
+    // Total
+    CardSectionTitle {
+        TextMd {
+            text: TR2.lookup(TrId.SigningTransactionTotal);
+            color: LightPalette.content-primary-inverse;
+            bold: true;
+        }
+    }
+
+    CryptoFiatField {
+        crypto-icon: crypto-icon;
+        crypto-amount: psbt.total-btc;
+        fiat-amount: psbt.total-currency;
+        fiat-icon: fiat-icon;
+    }
+}
+
+export component TransactionCard inherits Rectangle {
+    in property <PsbtView> psbt;
+    in property <CardColor> card-color: psbt.card-color;
+    in property <string> crypto-icon: psbt.crypto-icon;
+    in property <string> fiat-icon: psbt.fiat-icon;
+
+    height: psbt.outputs.length == 1 ? 374px : 420px;  // Total of multi-output heights, larger than single-output height
+    width: 448px;  // TODO: How to get rid of these hard-coded sizes?
+
+    if psbt.outputs.length == 1: LineCard {
+        height: 374px;
+        width: 448px;
+        card-color: card-color;
+
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz2_5;
+            padding: Size.sz2;
+
+            OutputSection {
+                psbt: psbt;
+                output-index: 0;
+                crypto-icon: crypto-icon;
+                fiat-icon: fiat-icon;
+            }
+
+            TotalSection {
+                psbt: psbt;
+                crypto-icon: crypto-icon;
+                fiat-icon: fiat-icon;
+            }
+        }
+    }
+
+    if psbt.outputs.length != 1: VerticalLayout {
+        spacing: Size.sz4;
+        alignment: start;
+
+        Pagination {
+            total-pages: psbt.outputs.length;
+            height: 226px;  // 206px card, 8px spacing, 12px page dots
+            width: 448px;
+            page-spacing: Size.sz2_5;
+            vertical-spacing: Size.sz2;
+
+            for output[index] in psbt.outputs: VerticalLayout {
+                width: root.width;
+
+                LineCard {
+                    card-color: card-color;
+                    height: 206px;  // 4x10px spacing, 2x8px padding, 32px top line, 2x26px TextMds, 32px CardField, 60px bitcoin address, 2x2px card padding
+                    width: 448px;  // TODO: How to get rid of these hard-coded sizes?
+
+                    OutputSection {
+                        psbt: psbt;
+                        output-index: index;
+                        crypto-icon: crypto-icon;
+                        fiat-icon: fiat-icon;
+                        padding: Size.sz2;
+                    }
+                }
+            }
+        }
+
+        LineCard {
+            card-color: card-color;
+            height: 178px;  // 3x10px spacing, 2x8px padding, 2x26px TextMds, 2x32px CardField, 2x2px card padding
+            width: 448px;  // TODO: How to get rid of these hard-coded sizes?
+
+            TotalSection {
+                psbt: psbt;
+                crypto-icon: crypto-icon;
+                fiat-icon: fiat-icon;
+                padding: Size.sz2;
+            }
+        }
+    }
+}
+
+export component Example2Outputs inherits Rectangle {
+    width: UISize.screen-width;
+    height: 420px;
+    background: grey;
+    padding: Size.sz6;
+
+    TransactionCard {
+        crypto-icon: "bitcoin";
+        fiat-icon: "dollar";
+
+        psbt: {
+            account-name: "Hardcoded Account",
+            account-index: "0",
+            outputs: [
+                {
+                    kind: PsbtOutputKind.External,
+                    amount-btc: "0.00005",
+                    amount-currency: "5.69",
+                    address: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+                    account-index: "",
+                },
+                {
+                    kind: PsbtOutputKind.Change,
+                    amount-btc: "0.0001",
+                    amount-currency: "11.38",
+                    address: "12cbQLTFMXRnSzktFkuoG3eHoMeFtpTu3S",
+                    account-index: "",
+                },
+            ],
+            fee-btc: "0.000001",
+            fee-currency: "1.14",
+            total-btc: "0.000151",
+            total-currency: "17.19",
+        };
+    }
+}
+
+export component Example1Output inherits Rectangle {
+    width: UISize.screen-width;
+    height: 420px;
+    background: grey;
+    padding: Size.sz6;
+
+    TransactionCard {
+        crypto-icon: "bitcoin";
+        fiat-icon: "dollar";
+
+        psbt: {
+            account-name: "Hardcoded Account",
+            account-index: "0",
+            outputs: [
+                {
+                    kind: PsbtOutputKind.External,
+                    amount-btc: "0.00005",
+                    amount-currency: "5.69",
+                    address: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+                    account-index: "",
+                },
+            ],
+            fee-btc: "0.000001",
+            fee-currency: "1.14",
+            total-btc: "0.000051",
+            total-currency: "6.83",
+        };
+    }
+}

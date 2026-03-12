@@ -1,0 +1,142 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { NavHeader, BasePage, ContentSection, PageBody, TextMd, ButtonSection, Button, DynamicQrCode, Modal, ErrorModal, QrCodeCard, JumboIconPageBody, WrappedIcon, HeadingMd, TimerCircularProgress, ConfirmationModal } from "@ui/widgets.slint";
+import { Palette, Importance, Size} from "@ui/theme.slint";
+import { TR2, TrId } from "../../../../gen/tr.slint";
+
+import { CreateAccount } from "../../../../create-account.slint";
+import { Callbacks, AccountView } from "../../../../callbacks.slint";
+import { ExportAccount, ExportAccountState, ExportFormats, VisualFormat } from "../../../../export-account.slint";
+import { Navigate, Animate } from "../../../../gen/navigate.slint";
+
+import { AccountProps } from "../../props.slint";
+import { ScanConnectProps } from "./props.slint";
+import { VerifyAddress } from "../../../../verify-address.slint";
+
+export component ScanConnectPage inherits BasePage {
+    in property <AccountProps> acct-props;
+    in property <ScanConnectProps> scan-props;
+
+    property <AccountView> account: Callbacks.account-details(acct-props.account-id);
+    property <ExportFormats> formats: ExportAccount.connector-formats(scan-props.connector-id);
+    property <bool> saving: ExportAccount.state == ExportAccountState.Saving;
+    property <bool> saved: ExportAccount.state == ExportAccountState.Saved;
+    property <bool> has-error: ExportAccount.state == ExportAccountState.Error;
+    property <bool> is-save-modal-open: saved;
+    property <bool> maintain-saved-page: false;
+
+    property <string> connector-name: ExportAccount.connector-display-name(scan-props.connector-id);
+
+    VerticalLayout {
+        NavHeader {
+            title: account.is-multisig ? TR2.lookup(TrId.ExportMultisigTitle) : TR2.lookup(TrId.ConnectScanTitle);
+            clicked => {
+                ExportAccount.state = ExportAccountState.Idle;
+                Navigate.backward();
+            }
+        }
+
+        PageBody {
+            ContentSection {
+                TextMd {
+                    horizontal-alignment: center;
+                    color: Palette.content-tertiary;
+                    text: account.is-multisig ? TR2.lookup(TrId.ExportMultisigSubheader) : TR2.format(TrId.ConnectScanSubheader, [connector-name]);
+                }
+
+                if (account.is-multisig || formats.visual == VisualFormat.UR2 || formats.visual == VisualFormat.None): DynamicQrCode {
+                    get-parts(density) => {
+                        // TODO: unify this function
+                        if (account.is-multisig) {
+                            ExportAccount.export-multisig-config-qr(acct-props.account-id, density);
+                        } else {
+                            ExportAccount.export-account-qr(acct-props.account-id, scan-props.connector-id, scan-props.join-multisig, density);
+                        }
+                    }
+                }
+
+                if (!account.is-multisig && formats.visual == VisualFormat.QR): HorizontalLayout {
+                    alignment: center;
+
+                    QrCodeCard {
+                        // Density is ignored when 0, and returns a single part
+                        data: ExportAccount.export-account-qr(acct-props.account-id, scan-props.connector-id, scan-props.join-multisig, 0)[0];
+                    }
+                }
+            }
+
+            ButtonSection {
+                if formats.file || account.is-multisig: Button {
+                    icon: saved ? "check" : "save";
+                    label: saved ? TR2.lookup(TrId.ExportMultisigSavedSaved) : TR2.lookup(TrId.CommonButtonSaveToFile);
+                    enabled: !saved;
+                    importance: Importance.secondary;
+                    clicked => {
+                        // TODO: unify this function
+                        if (account.is-multisig) {
+                            ExportAccount.export-multisig-config-file(acct-props.account-id);
+                        } else {
+                            ExportAccount.export-account-file(acct-props.account-id, scan-props.connector-id, scan-props.join-multisig);
+                        }
+                    }
+                }
+
+                if scan-props.join-multisig: Button {
+                    label: TR2.lookup(TrId.CommonButtonContinue);
+                    clicked => {
+                        ExportAccount.state = ExportAccountState.Idle;
+                        CreateAccount.import-multisig();
+                    }
+                }
+
+                if !scan-props.join-multisig || account.is-multisig: Button {
+                    label: TR2.lookup(TrId.CommonButtonVerifyAddress);
+                    clicked => {
+                        ExportAccount.state = ExportAccountState.Idle;
+                        VerifyAddress.verify-address({ account-id: acct-props.account-id, show-skip-button: true, show-view-all: false });
+                    }
+                }
+            }
+        }
+    }
+
+    if is-save-modal-open: Modal {
+        icon: "save";
+        icon-color: Palette.content-brand;
+        title: TR2.lookup(TrId.FileSavedHeader);
+        text: TR2.format(TrId.FileSavedContent, [ExportAccount.saved-file-path]);
+
+        Button {
+            icon: "";
+            label: TR2.lookup(TrId.CommonButtonConfirm);
+            importance: Importance.primary;
+            clicked => {
+                is-save-modal-open = false;
+            }
+        }
+    }
+
+    if has-error: ConfirmationModal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.FileUnableSavedHeader);
+        text: TR2.lookup(TrId.FileUnableSavedContent);
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+        cancel-button-label: TR2.lookup(TrId.CommonButtonRetry);
+
+        cancel-clicked => {
+            ExportAccount.state = ExportAccountState.Idle;
+            // TODO: unify this function
+            if (account.is-multisig) {
+                ExportAccount.export-multisig-config-file(acct-props.account-id);
+            } else {
+                ExportAccount.export-account-file(acct-props.account-id, scan-props.connector-id, scan-props.join-multisig);
+            }
+        }
+
+        confirm-clicked => {
+            ExportAccount.state = ExportAccountState.Idle;
+        }
+    }
+}

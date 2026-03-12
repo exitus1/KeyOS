@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "spi"
+version = "0.1.0"
+edition = "2021"
+description = "SPI API crate"
+publish = false
+
+[dependencies]
+log = { workspace = true }
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+xous = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+dma = { workspace = true }
+eh-1 = { package = "embedded-hal", version = "1.0" }
+heapless = { version = "0.9" }
+st25r95 = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

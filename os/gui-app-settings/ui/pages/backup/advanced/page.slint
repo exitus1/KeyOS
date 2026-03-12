@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { Palette, Size } from "@ui/theme.slint";
+import { 
+    MenuSection,
+    MenuSectionLayout,
+    MenuActionItem,
+    HLine,
+    BasePage,
+    PageBody
+} from "@ui/widgets.slint";
+
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { Navigate } from "../../../gen/navigate.slint";
+import { AdvancedBackupProps } from "./props.slint";
+
+export component AdvancedBackupPage inherits BasePage {
+    in property <AdvancedBackupProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.AdvancedBackupsTitle);
+        }
+
+        PageBody {
+            MenuSection {
+                title: "";
+                MenuSectionLayout {
+                    MenuActionItem {
+                        first: true;
+                        label: TR2.lookup(TrId.AdvancedBackupsViewSeedWords);
+                        clicked => {
+                            Navigate.view-seed-words({ });
+                        }
+                    }
+
+                    HLine { }
+
+                    MenuActionItem {
+                        label: TR2.lookup(TrId.AdvancedBackupsSaveSeed);
+                        clicked => {
+                            Navigate.save-seed({ });
+                        }
+                    }
+
+                    HLine { }
+
+                    MenuActionItem {
+                        last: true;
+                        label: TR2.lookup(TrId.AdvancedBackupsSettingsAndDataBackup);
+                        clicked => {
+                            Navigate.save-settings({ });
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

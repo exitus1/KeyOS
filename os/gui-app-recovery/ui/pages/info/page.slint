@@ -1,0 +1,195 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { BasePage } from "@ui/widgets.slint";
+import { Button, Shield, Icon, HeadingMd, TextLg, TextSm, TextMd,
+         TextXs, TimerCircularProgress, Shimmer, IconButton, StepList, PopupMenu } from "@ui/widgets.slint";
+import { Size, Palette, UISize, Importance, Utils, Images } from "@ui/theme.slint";
+import { StepModel } from "@ui/widgets/step-list.slint";
+import { AppHeader } from "@ui/widgets/app-header.slint";
+import { JumboIcon } from "@ui/widgets/jumbo-icon.slint";
+import { SegmentedControl } from "@ui/widgets/segmented-control.slint";
+import { RoundContainer } from "@ui/widgets/round-container.slint";
+import { Divider } from "@ui/widgets/divider.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { IconSize } from "@ui/types.slint";
+import { InfoGlobal } from "../../globals/info-global.slint";
+import { Callbacks } from "../../callbacks.slint";
+
+component LoadingPlaceholder inherits HorizontalLayout {
+    padding: Size.sz2;
+
+    Shimmer {
+        num-steps: 10;
+        duration: 1.5s;
+
+        // Background color is the same as the text to make it look like a placeholder
+        Rectangle {
+            background: Palette.content-tertiary.brighter(50%);
+            TextSm {
+                text: "Loading...";
+                color: Palette.content-tertiary.brighter(50%);
+            }
+        }
+    }
+}
+
+component TableCell inherits Rectangle {
+    in property <string> label;
+    in property <string> value;
+    in property <bool> is-vertical: false;
+
+    height: Size.sz16;
+
+    if is-vertical: VerticalLayout {
+        padding-top: Size.sz2;
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+        TextMd {
+            height: 52px;
+            text: label;
+            color: Palette.content-primary;
+            vertical-alignment: center;
+        }
+
+        if (value != ""): TextSm {
+            height: 100px;
+            text: value;
+            color: Palette.content-tertiary;
+        }
+        if (value == ""): LoadingPlaceholder { }
+    }
+
+    if !is-vertical: HorizontalLayout {
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+        alignment: space-between;
+
+        VerticalLayout {
+            alignment: center;
+            TextMd {
+                text: label;
+                color: Palette.content-primary;
+            }
+        }
+
+        VerticalLayout {
+            alignment: center;
+            if (value != ""): TextSm {
+                text: value;
+                color: Palette.content-tertiary;
+            }
+            if (value == ""): LoadingPlaceholder { }
+        }
+    }
+}
+
+export component InfoPage inherits BasePage {
+    width: 100%;
+    height: 100%;
+
+    private property <int> selected-page: 1;
+
+    function get-version() -> string {
+        if (selected-page == 0) {
+            return InfoGlobal.bootloader-version;
+        } else if (selected-page == 1) {
+            return InfoGlobal.firmware-version;
+        } else {
+            return InfoGlobal.recovery-version;
+        }
+    }
+
+    function get-build-date() -> string {
+        if (selected-page == 0) {
+            return InfoGlobal.bootloader-build-date;
+        } else if (selected-page == 1) {
+            return InfoGlobal.firmware-build-date;
+        } else {
+            return InfoGlobal.recovery-build-date;
+        }
+    }
+
+    function get-hash() -> string {
+        if (selected-page == 0) {
+            return InfoGlobal.bootloader-hash;
+        } else if (selected-page == 1) {
+            return InfoGlobal.firmware-hash;
+        } else {
+            return InfoGlobal.recovery-hash;
+        }
+    }
+
+    Image {
+        source: Images.common("images/background");
+    }
+
+    VerticalLayout {
+        padding-left: 5px;
+        padding-right: 5px;
+        padding: Size.sz4;
+        alignment: stretch;
+
+        AppHeader {
+            title: TR2.lookup(TrId.SysInfoTitle);
+        }
+
+        VerticalLayout {
+            alignment: stretch;
+            padding-left: Size.sz6;
+            padding-right: Size.sz6;
+            padding-bottom: Size.sz11;
+            spacing: Size.sz6;
+
+            SegmentedControl {
+                labels: [
+                    TR2.lookup(TrId.SysInfoBootloader),
+                    TR2.lookup(TrId.SysInfoKeyos),
+                    TR2.lookup(TrId.SysInfoRecovery)
+                ];
+                selected-index: 1;
+                changed(s, index) => {
+                    selected-page = index;
+                }
+            }
+
+            RoundContainer {
+                VerticalLayout {
+                    TableCell {
+                        label: TR2.lookup(TrId.SysInfoVersion);
+                        value: get-version();
+                    }
+
+                    Divider { }
+
+                    TableCell {
+                        label: TR2.lookup(TrId.SysInfoBuildDate);
+                        value: get-build-date();
+                    }
+
+                    Divider { }
+
+                    TableCell {
+                        label: TR2.lookup(TrId.SysInfoSha256Hash);
+                        value: get-hash();
+                        is-vertical: true;
+                        height: 152px;
+                    }
+                }
+            }
+
+            // Fill the space
+            Rectangle {
+                vertical-stretch: 1;
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonStartKeyos);
+                icon: "play";
+                clicked(id) => {
+                    Callbacks.reboot-clicked();
+                }
+            }
+        }
+    }
+}

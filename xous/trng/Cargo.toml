@@ -1,0 +1,28 @@
+[package]
+name = "trng"
+version = "0.1.0"
+authors = ["bunnie <bunnie@kosagi.com>"]
+edition = "2018"
+description = "TRNG server"
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../api/log" }
+num-derive = "0.4.2"
+num-traits = "0.2.18"
+ticktimer-server = { package = "xous-api-ticktimer", path = "../api/ticktimer" }
+xous = { path = "../xous-rs" }
+xous-ipc = { path = "../ipc" }
+xous-names = { package = "xous-api-names", path = "../api/names" }
+
+[target.'cfg(keyos)'.dependencies]
+atsama5d27 = { workspace = true }
+utralib = { workspace = true }
+
+[target.'cfg(not(keyos))'.dependencies]
+rand = "0.8.5"
+rand_chacha = "0.3.1"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

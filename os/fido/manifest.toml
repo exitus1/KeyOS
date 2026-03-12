@@ -1,0 +1,23 @@
+appId = "0x8abc821d427553efab0c6b374d059bda"
+
+[appName]
+en = "FIDO Server"
+
+[servers."os/fido"]
+CreateSecurityKey = { id = 0, type = "scalar" }
+NextSecurityKeyIndex = { id = 1, type = "blockingScalar" }
+SetLive = { id = 2, type = "scalar" }
+IsLive = { id = 3, type = "blockingScalar" }
+GetSelectedSecurityKey = { id = 4, type = "blockingScalar" }
+SelectSecurityKey = { id = 5, type = "scalar" }
+U2fProcessApdu = { id = 32, type = "archive" }
+CtapProcessCbor = { id = 33, type = "archive" }
+ResetState = { id = 64, type = "blockingScalar", cfg = "feature = \"test-app\"" }
+
+[permissions]
+template = ["fs-generic", "crypto-sha"]
+"os/crypto" = ["Hmac"]
+"os/fs" = []
+"os/gui-server" = ["NavigateTo"]
+"os/security" = ["SignWithFidoKey", "GetAppSeed", "GetFidoPubkey"]
+"os/settings" = ["SubscribeOnboardingStatus"]

@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+@rust-attr(derive(serde::Serialize, serde::Deserialize))
+export struct KeyView {
+    label: string,
+    icon: string,
+    live: bool,
+    color: int,
+    index: int,
+}
+
+@rust-attr(derive(serde::Serialize, serde::Deserialize))
+export enum EditCaller {
+    add,
+    main,
+    register,
+}
+
+export enum AuthenticatingState {
+    wait,
+    registration-confirm,
+    authentication-confirm,
+    registration-success,
+    authentication-success,
+}

@@ -1,0 +1,10 @@
+appId = "0x6f732f6770696f000000000000000000"
+memory = ["PIO", "SPIO", "RSTC"]
+syscall = ["ClaimInterrupt", "SetThreadPriority"]
+extends = "../../api/gpio"
+
+[appName]
+en = "GPIO Server"
+
+[servers."os/gpio"]
+SubscriberDisconnected = { id = 64, type = "scalar" }

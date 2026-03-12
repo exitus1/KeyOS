@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { VerifyKeycardBackupGlobal } from "../../../globals/verify-keycard-global.slint";
+
+import { KeyCardAnimation } from "@ui/widgets/key-card-animation.slint";
+
+import { StepList, StepModel } from "@ui/widgets/step-list.slint";
+import { Button, TextMd, Icon, BasePage, PageBody, ButtonSection, WrappedIcon, TimerCircularProgress, HeadingMd } from "@ui/widgets.slint";
+import { Palette, Size } from "@ui/theme.slint";
+
+
+component VerifyProgress inherits PageBody {
+    property <[StepModel]> steps: VerifyKeycardBackupGlobal.steps;
+    property <bool> reading: VerifyKeycardBackupGlobal.reading-from-keycard;
+    property <bool> complete: VerifyKeycardBackupGlobal.complete;
+
+    VerticalLayout {
+        spacing: Size.sz10;
+
+        // Icon changes based on state
+        HorizontalLayout {
+            alignment: center;
+            if complete: WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "check";
+            }
+            if !complete && reading: TimerCircularProgress {
+                indeterminate: true;
+                Icon {
+                    name: "nfc-1-card-vert";
+                    size: 96px;
+                }
+            }
+            if !complete && !reading: KeyCardAnimation { }
+        }
+
+        // Header - only show when we have steps in progress
+        if steps.length > 0 && steps[0].completed: HeadingMd {
+            text: complete ? TR2.lookup(TrId.VerifyKeycardsTwoOfThreeMagicSuccessHeader) : TR2.lookup(TrId.VerifyKeycardsTwoOfThreeMagicHeader);
+            horizontal-alignment: center;
+        }
+
+        // Steps list
+        StepList {
+            steps: steps;
+        }
+    }
+
+    if complete: ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonDone);
+            clicked => {
+                Navigate.backward()
+            }
+        }
+    }
+}
+
+component Failed inherits PageBody {
+    property <string> error: VerifyKeycardBackupGlobal.error;
+
+    VerticalLayout {
+        spacing: Size.sz10;
+
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                outer-icon: "jumbo-circle";
+                inner-icon: "close";
+            }
+        }
+
+        if error != "": HorizontalLayout {
+            alignment: center;
+            spacing: Size.sz4;
+
+            VerticalLayout {
+                alignment: center;
+                Icon {
+                    name: "alert";
+                    color: Palette.content-copper-brand;
+                }
+            }
+
+            TextMd {
+                text: error;
+                vertical-alignment: center;
+                color: Palette.content-copper-brand;
+            }
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            clicked => {
+                VerifyKeycardBackupGlobal.start();
+            }
+        }
+    }
+}
+
+export component VerifyBackupPage inherits BasePage {
+    init => {
+        VerifyKeycardBackupGlobal.start();
+    }
+
+    property <bool> has-error: VerifyKeycardBackupGlobal.error != "";
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.BackupVerifyKeycards);
+        }
+
+        if has-error: Failed { }
+        if !has-error: VerifyProgress { }
+    }
+}

@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "localizer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+chrono = "0.4"
+clap = { version = "4.5", features = ["derive"] }
+regex = "1.10"
+serde = { workspace = true }
+serde_json = { workspace = true }
+walkdir = "2.4"

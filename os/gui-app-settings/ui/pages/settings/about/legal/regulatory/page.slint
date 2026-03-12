@@ -1,0 +1,72 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../../../gen/tr.slint";
+import { TextXs, SliderBrightness, Switch, TextXl, TextMd, BasePage, PageBody, ContentSection, MenuSection,  HLine, MenuSectionLayout, MenuItemLayout, ItemTextPreview } from "@ui/widgets.slint";
+import { IconSize, Palette, Importance, Timings, Images } from "@ui/theme.slint";
+import { Size } from "@ui/types.slint";
+
+import { RegulatoryProps } from "props.slint";
+import { SettingsNavHeader } from "../../../../../widgets/nav-header.slint";
+import { Navigate } from "../../../../../gen/navigate.slint";
+
+
+export component RegulatoryPage inherits BasePage {
+    in property <RegulatoryProps> props;
+
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.RegulatoryTitle);
+        }
+
+        PageBody {
+            ContentSection {
+                MenuSection {
+                    title: "";
+                    MenuSectionLayout {
+                        MenuItemLayout {
+                            first: true;
+                            label: TR2.lookup(TrId.RegulatoryFccID);
+                            ItemTextPreview {
+                                text: "2BNWP-FDPRIME";
+                                text-width: 200px;
+                            }
+                        }
+
+                        HLine { }
+
+                        MenuItemLayout {
+                            last: true;
+                            label: TR2.lookup(TrId.RegulatoryIsedCN);
+                            ItemTextPreview {
+                                text: "34470-FDPRIME";
+                                text-width: 200px;
+                            }
+                        }
+                    }
+                }
+
+                TextXl {
+                    text: TR2.lookup(TrId.RegulatoryPassportPrime);
+                    horizontal-alignment: center;
+                    wrap: TextWrap.word-wrap;
+                    color: Palette.content-primary;
+                }
+
+                TextMd {
+                    text: "Foundation Devices, Inc\n6 Liberty Square #6018\nBoston, MA 02109 USA";
+                    horizontal-alignment: center;
+                    color: Palette.content-primary;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    Image {
+                        source: Images.common("images/regulatory");
+                        height: Size.sz15;
+                    }
+                }
+            }
+        }
+    }
+}

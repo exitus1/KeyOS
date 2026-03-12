@@ -1,0 +1,2364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.9" />
+<title>secure-sam-ba-cipher.py(1)</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>
+secure-sam-ba-cipher.py(1) Manual Page
+</h1>
+<h2>NAME</h2>
+<div class="sectionbody">
+<p>secure-sam-ba-cipher.py -
+   Secure SAM-BA Cipher tool
+</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>secure-sam-ba-cipher.py</strong> <em>COMMAND</em> [<em>OPTIONS</em>]</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This tool can be used to generate the encrypted/authenticated files that are
+needed to enable and use the secure mode of the following devices:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Microchip SAMA5D2x
+</p>
+</li>
+<li>
+<p>
+Microchip SAMA5D29
+</p>
+</li>
+<li>
+<p>
+Microchip SAMA5D3x
+</p>
+</li>
+<li>
+<p>
+Microchip SAMA5D4x
+</p>
+</li>
+<li>
+<p>
+Microchip SAM9X60
+</p>
+</li>
+<li>
+<p>
+Microchip SAMA7G5
+</p>
+</li>
+<li>
+<p>
+<a href="#GS_Mistral"><strong>Getting started on Microchip PIC32CXMT</strong></a>
+</p>
+</li>
+<li>
+<p>
+<a href="#GS_SAM9X7x"><strong>Getting started on Microchip SAM9X7x</strong></a>
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>A Licence key is required for all encryption/authentication features of the
+cipher tool.</p></div>
+<div class="paragraph"><p>The following features are available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+generating a license request
+</p>
+</li>
+<li>
+<p>
+generating a file for setting a customer key
+</p>
+</li>
+<li>
+<p>
+generating a file for setting the root certificate hash
+</p>
+</li>
+<li>
+<p>
+encrypting/authenticating a program for use as bootstrap (decrypted and
+  checked at runtime by the ROM code)
+</p>
+</li>
+<li>
+<p>
+encrypting/authenticating an program for use as application (decrypted and
+  checked at runtime by the bootstrap)
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation">INSTALLATION</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_windows_and_linux_x86_64_debian_or_derivative_such_as_ubuntu">Windows and Linux (x86_64, Debian or derivative such as Ubuntu)</h3>
+<div class="paragraph"><p>The following dependencies are required:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+python3.8
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The following libraries are mandatory, they can be installed using <em>pip3 install</em> command:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+pyopenssl
+</p>
+</li>
+<li>
+<p>
+pycryptodome
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The source files are provided, just extract the dedicated archive,
+where XXXX is the current version number:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+secure-sam-ba-cipher-XXXX-win32.zip
+</p>
+</li>
+<li>
+<p>
+secure-sam-ba-cipher-XXXX-linux_x86_64.tar.gz
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_commands">COMMANDS</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a href="#RL"><strong>request-license</strong></a>
+</dt>
+<dd>
+<p>
+Create a license request file
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#CK"><strong>customer-key</strong></a>
+</dt>
+<dd>
+<p>
+Create an encrypted file for setting customer key
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#RCH"><strong>root-cert-hash</strong></a>
+</dt>
+<dd>
+<p>
+Create an encrypted file for setting the root certificate hash
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#BT"><strong>bootstrap</strong></a>
+</dt>
+<dd>
+<p>
+Encrypt a bootstrap binary
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#AP"><strong>application</strong></a>
+</dt>
+<dd>
+<p>
+Encrypt an application binary
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>All commands need command line parameters for device
+type and for the license file.</p></div>
+<div class="paragraph"><p>This data can also be set in environment variables <em>SECURE_SAM_BA_DEVICE</em> and
+<em>SECURE_SAM_BA_LICENSE</em>.</p></div>
+<div class="paragraph"><p>To differenciate the private key used for license and the one used for bootstrap signature,
+the following naming rules are applied in the given examples:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+For license: the private key name is "license_private.pem" and its passephrase is "license_passphrase"
+</p>
+</li>
+<li>
+<p>
+For bootstrap:  the private key name is "bootstrap_private.pem" and its passephrase is "bootstrap_passphrase"
+</p>
+</li>
+</ul></div>
+<div class="sect2">
+<h3 id="_supported_devices">Supported devices</h3>
+<div class="paragraph"><p>This section provides <em>DEVICE</em> values as expected by the <em>-d, --device</em> command
+line option.</p></div>
+<div class="tableblock">
+<table rules="all"
+width="100%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<caption class="title">Table 1. Supported devices</caption>
+<col width="50%" />
+<col width="50%" />
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">Device family</p></td>
+<td align="left" valign="top"><p class="table">DEVICE value</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">SAMA5D2</p></td>
+<td align="left" valign="top"><p class="table">sama5d2x</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">SAMA5D29</p></td>
+<td align="left" valign="top"><p class="table">sama5d29</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">SAMA5D3</p></td>
+<td align="left" valign="top"><p class="table">sama5d3x</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">SAMA5D4</p></td>
+<td align="left" valign="top"><p class="table">sama5d4x</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">SAM9X60</p></td>
+<td align="left" valign="top"><p class="table">sam9x60</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">SAMA7G5</p></td>
+<td align="left" valign="top"><p class="table">sama7g5</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">PIC32CXMT</p></td>
+<td align="left" valign="top"><p class="table">pic32cxmt</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="RL">PARAMETERS FOR REQUEST-LICENSE COMMAND</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>request-license</em> command will generate a license request and RSA key pair (public and private). The user can use the same key pair for all products. The public key is used by Microchip to ensure confidentiality during license transport. It is recommended to use a passphrase during license request generation to encrypt the generated private key. The user may ensure the security of its private keys.</p></div>
+<div class="sect2">
+<h3 id="_parameters">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the license request (if ommited, license will be written
+    to standard output)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+    Name of the device
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (optional)
+</dt>
+<dd>
+<p>
+    Private key file will be generated if it doesn&#8217;t exist (if ommited, private key will be written
+    to the output file: "private_key.pem").
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to encrypt the private key file (if ommited, output private key will be written in plain format).
+</p>
+</dd>
+<dt class="hdlist1">
+-n, --rsa_size <em>RSA KEY SIZE</em> (optional)
+</dt>
+<dd>
+<p>
+    RSA key size, is the number of bits (if ommited, n = 4096 is used as default value)
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_example">Example</h3>
+<div class="paragraph"><p>The following command line will generate a license request in file
+<em>request.txt</em>.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py request-license -d sama5d3x -o request.txt -pk license_private.pem -pp pass:license_passphrase -n 4096</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="CK">PARAMETERS FOR CUSTOMER-KEY COMMAND</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>customer-key</em> command will generate encrypted files for all devices among the same family. It contains the customer
+key. A suffix with the device name is added befor ".cip" in the output file name. The dedicated file can be sent to the device to set the key in the device fuses.</p></div>
+<div class="sect2">
+<h3 id="_parameters_2">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Customer key file
+</p>
+</dd>
+<dt class="hdlist1">
+-pad, --cust-key-padding <em>KEY_PADDING</em> (optional)
+</dt>
+<dd>
+<p>
+        8 bytes key padding in hexadecimal format used only for SAMA5D3x devices (if ommited, padding will be random)
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the secure monitor command of <strong>sam-ba</strong>
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Private key file used to decrypt some sensitive fields in the license file.
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to decrypt the private key file. This parameter is mandatory if the private key is ciphered.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_customer_key_file_format">Customer Key File Format</h3>
+<div class="paragraph"><p>The format of <em>KEY_FILE</em> (named <em>cust.key</em> in next examples), depends on the device.</p></div>
+<div class="sect3">
+<h4 id="_on_sama5d3_sama5d4_sama5d2_and_sama5d29">On SAMA5D3, SAMA5D4, SAMA5D2 and SAMA5D29</h4>
+<div class="paragraph"><p>The file <em>cust.key</em> must contain a customer key in hexadecimal using the
+following format:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>KEY_CUST=000000000000000000000000000000000000000000000000</code></pre>
+</div></div>
+<div class="paragraph"><p>Customer key length is different depending on the device:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+SAMA5D3: 192 bits (24 bytes, 48 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+SAMA5D4: 256 bits (32 bytes, 64 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+SAMA5D2: 256 or 384 bits (32 or 48 bytes, 64 or 96 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+SAMA5D29: 256 or 384 bits (32 or 48 bytes, 64 or 96 hexadecimal digits)
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>On SAMA5D2 and SAMA5D29, the full customer key (384 bits) cannot be used with RSA signatures but only
+with AES-CMAC for authentication.</p></div>
+<div class="paragraph"><p>Also, the <em>customer-key</em> command automatically guesses whether <em>OUTPUT_FILE</em>
+contains either a customer key (256 bits) or a full customer key (384 bits)
+based on the number of hexadecimal digits after <em>KEY_CUST=</em> inside <em>KEY_FILE</em>.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_on_sam9x60_and_sama7g5">On SAM9X60 and SAMA7G5</h4>
+<div class="paragraph"><p>The file <em>cust.key</em> must contain a customer key in hexadecimal using the
+new format:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>CBC_KEY=0000000000000000000000000000000000000000000000000000000000000000
+CBC_IV=00000000000000000000000000000000
+CMAC_KEY=0000000000000000000000000000000000000000000000000000000000000000</code></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+CBC_KEY:  256 bits (32 bytes, 64 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+CBC_IV:   128 bits (16 bytes, 32 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+CMAC_KEY: 256 bits (32 bytes, 64 hexadecimal digits)
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect3">
+<h4 id="_on_pic32cxmt">On PIC32CXMT</h4>
+<div class="paragraph"><p>The file <em>cust.key</em> must contain a customer key in hexadecimal using the
+new format:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>CBC_KEY=0000000000000000000000000000000000000000000000000000000000000000
+MASTER_KEY=0000000000000000000000000000000000000000000000000000000000000000
+ROOT_CA_HASH=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+AUTH_TYPE=00000000
+IS_PAIRED=00000000
+PADDING=0000000000000000</code></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+CBC_KEY:  256 bits (32 bytes, 64 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+MASTER_KEY:  256 bits (32 bytes, 64 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+ROOT_CA_HASH:   512 bits (64 bytes, 128 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+AUTH_TYPE: 32 bits (4 bytes, 8 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+IS_PAIRED: 32 bits (4 bytes, 8 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+PADDING: 64 bits (8 bytes, 16 hexadecimal digits)
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_2">Example</h3>
+<div class="paragraph"><p>The following command line will read a customer key in file <em>cust.key</em> and
+write the customer key encrypted for SAMA5D3 device in files <em>customer-key_sama5d3x.cip</em> and <em>customer-key_sama5d3x_nk.cip</em></p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py customer-key -d sama5d3x -l license.txt -k cust.key -pad 0123456789abcdef -o customer-key.cip -pk license_private.pem -pp pass:license_passphrase</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="RCH">PARAMETERS FOR ROOT-CERT-HASH COMMAND</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><strong>This command is only available on SAMA5D2, SAMA5D29, SAM9X60 and SAMA7G5.</strong></p></div>
+<div class="paragraph"><p>The <em>root-cert-hash</em> command will generate the encrypted files contaning the
+hash of the root certificate of the chain in RSA signature mode.</p></div>
+<div class="sect2">
+<h3 id="_parameters_3">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device (defaults to environment variable <em>SECURE_SAM_BA_DEVICE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-c, --certs-file <em>CERTS_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Certificate chain file in PEM format
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the <em>set root certificate hash</em> data
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Private key file used to decrypt some sensitive fields in the license file.
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to decrypt the private key file. This parameter is mandatory if the private key is ciphered.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_example_3">Example</h3>
+<div class="paragraph"><p>The following command line will read a certificate chain from file <em>certs.pem</em>
+and write the root certificate hash encrypted for SAMA5D2 device in <em>cert-hash_sama5d2x.cip</em></p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py root-cert-hash -d sama5d2x -l license.txt -c certs.pem -o cert-hash.cip -pk license_private.pem -pp pass:license_passphrase</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="BT">PARAMETERS FOR BOOTSTRAP COMMAND</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>bootstrap</em> command will encrypt and sign (only sign for PIC32CXMT) a program for direct loading by the secure
+ROM code.</p></div>
+<div class="sect2">
+<h3 id="_parameters_4">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device (defaults to environment variable <em>SECURE_SAM_BA_DEVICE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Customer key file
+</p>
+</dd>
+<dt class="hdlist1">
+-c, --certs-file <em>CERTS_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   (SAMA5D2, SAMA5D29, PIC32CXMT and SAM9X60 only) Certificate chain file
+</p>
+</dd>
+<dt class="hdlist1">
+-b, --bypass-root-ca-verif "BOOLEAN" (optional)
+</dt>
+<dd>
+<p>
+   (PIC32CXMT only) In case of "True", the certificates size vector is updated so that the ROM Code will bypass the Root Certifcate verification.
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIV_KEY_FILE</em> (optional)
+</dt>
+<dd>
+<p>
+   (SAMA5D2, SAMA5D29, PIC32CXMT and SAM9X60 only) Private key for the last certificate in the chain
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+   (SAMA5D2, SAMA5D29, PIC32CXMT and SAM9X60 only) Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY)
+</p>
+</dd>
+<dt class="hdlist1">
+-i, --input-file <em>INPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Input file for the bootstrap program
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Encrypted (and or signed) output file for the bootstrap program
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_example_4">Example</h3>
+<div class="sect3">
+<h4 id="_encrypting_using_aes_aes_cmac">Encrypting using AES+AES-CMAC</h4>
+<div class="paragraph"><p>The following command line will encrypt a user bootstrap program
+<em>bootstrap.bin</em> and generates <em>bootstrap_sama5d3x.cip</em> using the customer key in the file
+<em>cust.key</em>.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py bootstrap -d sama5d3x -l license.txt -k cust.key -i bootstrap.bin -o bootstrap.cip</code></pre>
+</div></div>
+</div>
+<div class="sect3">
+<h4 id="_encrypting_using_aes_rsa_signature">Encrypting using AES+RSA signature</h4>
+<div class="paragraph"><p>The following command line will encrypt a user bootstrap program
+<em>bootstrap.bin</em> into the <em>bootstrap.cip</em> file using the customer key in file
+<em>cust.key</em>, the certificate chain contained in <em>certs.pem</em> and the private key
+in <em>private.pem</em> protected by password <em>mypassword</em>.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py bootstrap -d sama5d2x -l license.txt -k cust.key -c certs.pem -pk bootstrap_private.pem -pp pass:bootstrap_passphrase -i bootstrap.bin -o bootstrap.cip</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="AP">PARAMETERS FOR APPLICATION COMMAND</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>application</em> command will encrypt/authenticate a program for loading by a
+bootstrap loader.</p></div>
+<div class="paragraph"><p>The application is encrypted using AES and authenticated used AES-CMAC.</p></div>
+<div class="sect2">
+<h3 id="_parameters_5">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device (defaults to environment variable <em>SECURE_SAM_BA_DEVICE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Application key file
+</p>
+</dd>
+<dt class="hdlist1">
+-i, --input-file <em>INPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Input file for the application binary
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Encrypted output file for the application
+</p>
+</dd>
+<dt class="hdlist1">
+--no-header (optional)
+</dt>
+<dd>
+<p>
+    Write encrypted data without header
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_application_key_file_format">Application Key File Format</h3>
+<div class="paragraph"><p>The file app.key must contain application keys in hexadecimal
+using the following format:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>KEY=0000000000000000000000000000000000000000000000000000000000000000
+IV_KEY=00000000000000000000000000000000
+CMAC_KEY=0000000000000000000000000000000000000000000000000000000000000000</code></pre>
+</div></div>
+<div class="paragraph"><p>Length of AES key and AES CMAC key can be:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+128 bits (16 bytes, 32 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+192 bits (24 bytes, 48 hexadecimal digits)
+</p>
+</li>
+<li>
+<p>
+256 bits (32 bytes  64 hexadecimal digits)
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>AES IV is always 128 bits (16 bytes, 32 hexadecimal digits).</p></div>
+</div>
+<div class="sect2">
+<h3 id="_optional_application_header">Optional Application Header</h3>
+<div class="paragraph"><p>By default, the ciphered application will be prefixed by a 16 bytes header that is used
+by the bootstrap program.  The header is encrypted separately from the
+application, but using the same AES key and IV.  The <em>--no-header</em> option can
+be used to request a ciphered application without header.
+In all cases, the ciphered application is followed by its 16-bytes AES CMAC,
+computed on the ciphered data, excluding header.</p></div>
+<div class="paragraph"><p>The 16-byte application header contains four 32-bit unsigned integers, stored in little endian:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+0: Magic Number: 0x0000AA55
+</p>
+</li>
+<li>
+<p>
+1: Application Size before ciphering
+</p>
+</li>
+<li>
+<p>
+2: Reserved (0)
+</p>
+</li>
+<li>
+<p>
+3: Reserved (0)
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>For example, for an application of size 12345 (0x3039), the header will be:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>55 AA 00 00 39 30 00 00 00 00 00 00 00 00 00 00</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_example_5">Example</h3>
+<div class="paragraph"><p>The following command line will encrypt the user application <em>app.bin</em> using a
+key <em>app.key</em> and write the result in file <em>app.cip</em>.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py application -d sama5d3x -l license.txt -k app.key -i app.bin -o app.cip</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="GS_Mistral">Getting started with Secure SAM-BA cipher on Microchip PIC32CXMT</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This getting started with Secure SAM-BA cipher on Microchip PIC32CXMT devices will guide user through all the steps required to sign an application (bootstrap) to boot on PIC32CXT devices.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_license_request">License request</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Secure SAM-Ba cipher can only be used if a valid license is provided.
+The <em>request-license</em> command will generate a license request and RSA key pair (public and private). This license request is used by Microchip representative to generate a valid license to use with Secure SAM-BA cipher.
+The RSA public key is used by Microchip to ensure confidentiality during license transport.
+It is recommended to use a passphrase during license request generation to encrypt the generated private key. It is user responsibility to ensure security of its private keys.</p></div>
+<div class="sect2">
+<h3 id="_parameters_6">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the license request (if ommited, license will be written
+    to standard output)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+    Name of the device
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (optional)
+</dt>
+<dd>
+<p>
+    Private key file will be generated if it doesn&#8217;t exist (if ommited, private key will be written
+    to the output file: "private_key.pem").
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to encrypt the private key file (if ommited, output private key will be written in plain format).
+</p>
+</dd>
+<dt class="hdlist1">
+-n, --rsa_size <em>RSA KEY SIZE</em> (optional)
+</dt>
+<dd>
+<p>
+    RSA key size, is the number of bits (if ommited, n = 4096 is used as default value)
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_example_6">Example:</h3>
+<div class="paragraph"><p>The following command line will generate a license request in file
+<em>request.txt</em>.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py request-license -d pic32cxmt -o request.txt -pk license_private.pem -pp pass:license_passphrase -n 4096</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="CK_Mistral">Customer key</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The customer-key command will generate encrypted files with secret customer key to be used with all devices among the same family.
+It contains the secret customer key. A suffix with the device name is added before ".cip" in the output file name.
+The dedicated file can be sent to the device to set the secret key in the device fuses.</p></div>
+<div class="sect2">
+<h3 id="_parameters_7">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Customer key file
+</p>
+</dd>
+<dt class="hdlist1">
+-pad, --cust-key-padding <em>KEY_PADDING</em> (optional)
+</dt>
+<dd>
+<p>
+        8 bytes key padding in hexadecimal format used only for SAMA5D3x devices (if ommited, padding will be random)
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the secure monitor command of <strong>sam-ba</strong>
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Private key file used to decrypt some sensitive fields in the license file.
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to decrypt the private key file. This parameter is mandatory if the private key is ciphered.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_customer_key_file_format_2">Customer Key File Format</h3>
+<div class="paragraph"><p>The file <em>cust.key</em> must contain a customer key in hexadecimal using the
+new format:</p></div>
+<div class="sidebarblock">
+<div class="content"><strong>CBC_KEY=0000000000000000000000000000000000000000000000000000000000000000</strong><br />
+<strong>MASTER_KEY=0000000000000000000000000000000000000000000000000000000000000000</strong><br />
+<strong>ROOT_CA_HASH=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</strong><br />
+<strong>AUTH_TYPE=00000000</strong><br />
+<strong>IS_PAIRED=00000000</strong><br />
+<strong>PADDING=0000000000000000</strong></div></div>
+<div class="paragraph"><p>where:<br /></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>CBC_KEY</strong>:  256 bits (32 bytes, 64 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this key is not used, bootstrap application is only signed, should be left to zero<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>MASTER_KEY</strong>:  256 bits (32 bytes, 64 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this key is used only if AUTH_TYPE field is set to "00000000" meaning AES-CMAC authentication is selected, can be left to zero otherwise as it is not used<br />
+</p>
+</li>
+<li>
+<p>
+this key is used as secret key for AES-CMAC signature if the pairing mode is not enabled, otherwise it is diversified with device unique ID to get an unique secret key, for AES-CMAC signature, anchored into device<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>ROOT_CA_HASH</strong>:  512 bits (64 bytes, 128 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+SHA512 digest of root ca, this field is only used in case of public key authentication, AUTH_TYPE field set to “01000000”<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>AUTH_TYPE</strong>: 32 bits (4 bytes, 8 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this field can be “00000000” in case of CMAC authentication or “01000000” for asymetric key pair authentication<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>IS_PAIRED</strong>: 32 bits (4 bytes, 8 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this field can be “00000000” in case of pairing mode is disabled and different from “00000000” if pairing mode is enabled (see <strong>MASTER_KEY</strong> for details about what pairing mode means)<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>PADDING</strong>: 64 bits (8 bytes, 16 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+2 words of padding to be multiple of AES bloc size.
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_example_7">Example:</h3>
+<div class="paragraph"><p>The following command line will read a customer key in file <em>cust.key</em> and
+write the customer key encrypted for Microchip PIC32CXMT device in files <em>customer-key_pic32cxmt.cip</em></p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py customer-key -d pic32cxmt -l license.txt -k cust.key -pad 0123456789abcdef -o customer-key.cip -pk license_private.pem -pp pass:license_passphrase</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bootstrap">Bootstrap</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>bootstrap</em> command will sign an application for direct loading by the secure ROM Code.</p></div>
+<div class="sect2">
+<h3 id="_parameters_8">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device (defaults to environment variable <em>SECURE_SAM_BA_DEVICE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Customer key file, same file used for <a href="#CK_Mistral"><strong>customer-key command</strong></a>
+</p>
+</dd>
+<dt class="hdlist1">
+-c, --certs-file <em>CERTS_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   X509 v3 Certificate chain file in pem format
+</p>
+</dd>
+<dt class="hdlist1">
+-b, --bypass-root-ca-verif "BOOLEAN" (optional)
+</dt>
+<dd>
+<p>
+   In case of "True", the certificates size vector is updated so that the ROM Code will bypass the Root Certifcate verification.
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIV_KEY_FILE</em> (optional)
+</dt>
+<dd>
+<p>
+   Private key for the last certificate in the chain
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+   Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY)
+</p>
+</dd>
+<dt class="hdlist1">
+-i, --input-file <em>INPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Input file for the bootstrap program
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Signed output file for the application program
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_sign_using_aes_cmac">Sign using AES-CMAC</h3>
+<div class="paragraph"><p>The following command line will sign an user bootstrap program
+<em>bootstrap.bin</em> and generates <em>bootstrap.cip</em> using the customer key in the file
+<em>cust.key</em>.<br />
+For this signature to be correctly validated by the ROM Code <strong>AUTH_TYPE</strong> field must be set to zero, please check <a href="#CK_Mistral"><strong>customer-key command</strong></a> for details.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_example_8">Example:</h3>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py bootstrap -d pic32cxmt -l license.txt -k cust.key -i bootstrap.bin -o bootstrap.cip</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_sign_using_public_key_algorithms_rsa_or_ecdsa">Sign using public key algorithms RSA or ECDSA</h3>
+<div class="paragraph"><p>The following command line will sign using public key algorithms RSA or ECDSA an user bootstrap application
+<em>bootstrap.bin</em> into the <em>bootstrap.cip</em> file only if <strong>AUTH_TYPE</strong> field is set to asymetric key pair authentication in file
+<em>cust.key</em>, please check <a href="#CK_Mistral"><strong>customer-key command</strong></a> for details. The certificate chain is contained in <em>certs.pem</em> and the private key
+in <em>private.pem</em> protected by password <em>mypassword</em>.<br />
+According to the certificates provided, RSA or ECDSA signature will be used.</p></div>
+<div class="paragraph"><p>Suported key length are:<br /></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+RSA signature using 2048 bits key length<br />
+</p>
+</li>
+<li>
+<p>
+RSA signature using 4096 bits key length<br />
+</p>
+</li>
+<li>
+<p>
+ECDSA signature using 256 bits key length<br />
+</p>
+</li>
+<li>
+<p>
+ECDSA signature using 384 bits key length<br />
+</p>
+</li>
+<li>
+<p>
+ECDSA signature using 521 bits key length
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_example_9">Example:</h3>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py bootstrap -d pic32cxmt -l license.txt -k cust.key -c certs.pem -pk bootstrap_private.pem -pp pass:bootstrap_passphrase -i bootstrap.bin -o bootstrap.cip</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="GS_SAM9X7x">Getting started with Secure SAM-BA cipher on Microchip SAM9X7x</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This getting started with Secure SAM-BA cipher on Microchip SAM9X7x devices will guide user through all the steps required to generate customer key messages then cipher and sign a botstrap<br />
+to boot on SAM9X7x devices.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_license_request_2">License request</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Some features of Secure SAM-BA cipher can only be used if a valid license is provided.
+The <em>request-license</em> command will generate a license request and RSA key pair (public and private). This license request is used by Microchip representative to generate a valid license to use with Secure SAM-BA cipher.
+The RSA public key is used by Microchip to ensure confidentiality during license transport.
+It is recommended to use a passphrase during license request generation to encrypt the generated private key. It is user responsibility to ensure security of its private keys.</p></div>
+<div class="sect2">
+<h3 id="_parameters_9">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the license request (if ommited, license will be written
+    to standard output)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+    Name of the device
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (optional)
+</dt>
+<dd>
+<p>
+    Private key file will be generated if it doesn&#8217;t exist (if ommited, private key will be written
+    to the output file: "private_key.pem").
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to encrypt the private key file (if ommited, output private key will be written in plain format).
+</p>
+</dd>
+<dt class="hdlist1">
+-n, --rsa_size <em>RSA KEY SIZE</em> (optional)
+</dt>
+<dd>
+<p>
+    RSA key size, is the number of bits (if ommited, n = 4096 is used as default value)
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_example_10">Example:</h3>
+<div class="paragraph"><p>The following command line will generate a license request in file
+<em>request.txt</em>.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py request-license -d sam9x7x -o request.txt -pk license_private.pem -pp pass:license_passphrase -n 4096</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="CK_SAM9X7x">Customer key</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The customer-key command will generate two encrypted files with secret customer key set that can be used with all devices among the same family.
+It contains the secret customer key, sha512 digest of root cerficate in der format, authentication mode selection and pairing mode selection.<br />
+A suffix with the device name is added before "aes" or "rsa" type of customer key message. The output message will have ".cip" extension.<br />
+The customer key messages like "cust_key_msg_sam9x7x_aes.cip" are to be used with write_customer_key command from SAM-BA tool, while<br />
+"cust_key_msg_sam9x7x_rsa.cip" are to be used with write_customer_key_payload command from SAM-BA tool.<br />
+An error will be received if the wrong file is used with wrong command.</p></div>
+<div class="paragraph"><p>The dedicated file can be sent to the device to set the secret key in the device OTP User Area, configure authentication mode, CMAC or RSA&lt;2048, 4096&gt; and activating pairing mode or not.<br />
+The customer keys are not set in plain but rather they are wrapped by PUF (Physically Unclonable Function) and the actual key code resulted is stored into OTP memory matrix.</p></div>
+<div class="sect2">
+<h3 id="_parameters_10">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (required)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Customer key file
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Output file for the secure monitor command of <strong>sam-ba</strong>
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIVATE KEY FILE</em> (required)
+</dt>
+<dd>
+<p>
+    Private key file used to decrypt some sensitive fields in the license file.
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PRIVATE KEY PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+    Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY) is used to decrypt the private key file. This parameter is mandatory if the private key is ciphered.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_customer_key_file_format_3">Customer Key File Format</h3>
+<div class="paragraph"><p>The file <em>cust.key</em> must contain a customer key in hexadecimal using the
+new format:</p></div>
+<div class="sidebarblock">
+<div class="content"><strong>CBC_KEY=0000000000000000000000000000000000000000000000000000000000000000</strong><br />
+<strong>CBC_IV=00000000000000000000000000000000</strong><br />
+<strong>CMAC_KEY=0000000000000000000000000000000000000000000000000000000000000000</strong><br />
+<strong>ROOT_CA_HASH=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</strong><br />
+<strong>SEC_BOOT_CFG=00000000000000000000000000000000</strong><br /></div></div>
+<div class="paragraph"><p>where:<br /></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>CBC_KEY</strong>:  256 bits (32 bytes, 64 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this key is used to cipher bootstrap or application<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>CBC_IV</strong>:  128 bits (16 bytes, 32 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this is the initial vector used by AES-CBC
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>CMAC_KEY</strong>:  256 bits (32 bytes, 64 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this key is used to sign bootstrap or application when authentication mode is set to CMAC signature, must be left to zero if RSA authentication mode is selected<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>ROOT_CA_HASH</strong>:  512 bits (64 bytes, 128 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+SHA512 digest of root ca in der format, this field is only used in case of public key authentication, must be left to zero if not used<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>SEC_BOOT_CFG</strong>: 128 bits 16 bytes, 32 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this field is used to configure authentication mode and pairing mode<br />
+</p>
+</li>
+<li>
+<p>
+first 4 bytes are used to configure authenticatin mode, 00000000 is for CMAC and 01000000 is for RSA signature<br />
+</p>
+</li>
+<li>
+<p>
+next 4 bytes are used to enable pairing mode, 00000000 is for pairing mode disabled and 01000000 is for pairing mode enabled
+</p>
+</li>
+<li>
+<p>
+last 8 bytes are used as padding, can have any random values
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_example_of_sec_boot_cfg_field_with_rsa_signature">Example of SEC_BOOT_CFG field with RSA signature:</h3>
+<div class="sidebarblock">
+<div class="content"><strong>SEC_BOOT_CFG=01000000000000000000000000000000</strong><br /></div></div>
+</div>
+<div class="sect2">
+<h3 id="_example_of_sec_boot_cfg_field_with_pairing">Example of SEC_BOOT_CFG field with pairing:</h3>
+<div class="sidebarblock">
+<div class="content"><strong>SEC_BOOT_CFG=00000000010000000000000000000000</strong><br /></div></div>
+</div>
+<div class="sect2">
+<h3 id="_example_11">Example:</h3>
+<div class="paragraph"><p>The following command line will read a customer key in file <em>cust.key</em> and
+write the customer key encrypted for Microchip SAM9X7x device in files <em>customer-key_sam9x7x_aes.cip</em> and <em>customer-key_sam9x7x_rsa.cip</em></p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py customer-key -d sam9x7x -l license.txt -pk license_private.pem -pp pass:license_passphrase -k cust.key -o customer-key.cip</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bootstrap_2">Bootstrap</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>bootstrap</em> command will sign an application for direct loading by the secure ROM Code.</p></div>
+<div class="sect2">
+<h3 id="_parameters_11">Parameters</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-l, --license <em>LICENSE</em> (optional -  not used if provided)
+</dt>
+<dd>
+<p>
+   License activation file (defaults to environment variable <em>SECURE_SAM_BA_LICENSE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-d, --device <em>DEVICE</em> (required)
+</dt>
+<dd>
+<p>
+   Name of the device (defaults to environment variable <em>SECURE_SAM_BA_DEVICE</em>)
+</p>
+</dd>
+<dt class="hdlist1">
+-k, --key-file <em>KEY_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Customer key file in the format, same file used for <a href="#BK_SAM9X7x"><strong>customer key file format</strong></a>
+</p>
+</dd>
+<dt class="hdlist1">
+-c, --certs-file <em>CERTS_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   X509 v3 Certificate chain file in pem format
+</p>
+</dd>
+<dt class="hdlist1">
+-b, --bypass-root-ca-verif "BOOLEAN" (optional)
+</dt>
+<dd>
+<p>
+   In case of "True", the certificates size vector is updated so that the ROM Code will bypass the Root Certifcate verification.
+</p>
+</dd>
+<dt class="hdlist1">
+-pk, --priv-key-file <em>PRIV_KEY_FILE</em> (optional)
+</dt>
+<dd>
+<p>
+   Private key for the last certificate in the chain
+</p>
+</dd>
+<dt class="hdlist1">
+-pp, --priv-key-pass <em>PASSWORD</em> (optional)
+</dt>
+<dd>
+<p>
+   Password for the private key (syntax is "pass:XXX" for password XXX, or "file:YYY" to read password from file YYY)
+</p>
+</dd>
+<dt class="hdlist1">
+-i, --input-file <em>INPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Input file for the bootstrap program
+</p>
+</dd>
+<dt class="hdlist1">
+-o, --output-file <em>OUTPUT_FILE</em> (required)
+</dt>
+<dd>
+<p>
+   Signed output file for the application program
+</p>
+</dd>
+</dl></div>
+<div class="paragraph" id="BK_SAM9X7x"><p>customer key file format:</p></div>
+<div class="sidebarblock">
+<div class="content"><strong>CBC_KEY=00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff</strong><br />
+<strong>CBC_IV=00112233445566778899aabbccddeeff</strong><br />
+<strong>CMAC_KEY=00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff</strong><br /></div></div>
+<div class="paragraph"><p>where:<br /></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>CBC_KEY</strong>:  256 bits (32 bytes, 64 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this key is used to cipher bootstrap or application<br />
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>CBC_IV</strong>:  128 bits (16 bytes, 32 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this is the initial vector used by AES-CBC
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+<strong>CMAC_KEY</strong>:  256 bits (32 bytes, 64 hexadecimal digits) (<strong>required</strong>)<br />
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+this key is used to sign bootstrap or application when authentication mode is set to CMAC signature, must be left to zero if RSA authentication mode is selected<br />
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_sign_using_aes_cmac_2">Sign using AES-CMAC</h3>
+<div class="paragraph"><p>The following command line will sign an user bootstrap program
+<em>bootstrap.bin</em> and generates <em>bootstrap.cip</em> using the customer key in the file
+<em>cust.key</em>.<br />
+For this signature to be correctly validated by the ROM Code first 4 bytes from SEC_BOOT_CFG field must be set to zero, please check <a href="#CK_SAM9X7x"><strong>customer key command</strong></a> for details.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_example_12">Example:</h3>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py bootstrap -d sam9x7x -l license.txt -k cust.key -i bootstrap.bin -o bootstrap.cip</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_sign_using_public_key_algorithms_rsa">Sign using public key algorithms RSA</h3>
+<div class="paragraph"><p>The following command line will sign using RSA public key algorithm an user bootstrap or an application
+<em>bootstrap.bin</em> into the <em>bootstrap.cip</em> file only if authentication mode is set into SEC_BOOT_CFG field is set to asymetric key pair authentication in file
+<em>cust.key</em>, please check <a href="#CK_SAM9X7x"><strong>customer key command</strong></a> for details. The certificate chain is contained in <em>certs.crt</em> and the private key
+in <em>private.pem</em> protected by password <em>mypassword</em>.<br /></p></div>
+<div class="paragraph"><p>Suported key length are:<br /></p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+RSA signature using 2048 bits key length<br />
+</p>
+</li>
+<li>
+<p>
+RSA signature using 4096 bits key length<br />
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_example_13">Example:</h3>
+<div class="listingblock">
+<div class="content">
+<pre><code>secure-sam-ba-cipher.py bootstrap -d sam9x7x -l license.txt -k cust.key -c certs.pem -pk bootstrap_private.pem -pp pass:bootstrap_passphrase -i bootstrap.bin -o bootstrap.cip</code></pre>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated
+ 2022-04-20 10:17:07 EEST
+</div>
+</div>
+</body>
+</html>

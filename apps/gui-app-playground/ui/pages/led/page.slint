@@ -1,0 +1,285 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { HeadingMd, HeadingLg, HeadingSm, BasePage, IconButton, TextMd } from "@ui/widgets.slint";
+import { Palette, Size, UISize } from "@ui/theme.slint";
+import { Slider } from "@ui/widgets/slider.slint";
+import { Callbacks } from "../../callbacks.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+
+component ValueSlider inherits HorizontalLayout {
+    in property <float> value;
+    in property <string> name: "R";
+    in property <float> maximum: 255;
+
+    callback changed(float);
+    callback released();
+
+    alignment: stretch;
+    VerticalLayout {
+        alignment: center;
+        padding-right: 10px;
+
+        HeadingLg {
+            text: name;
+            width: 40px;
+            color: Palette.content-primary;
+            horizontal-stretch: 0;
+            horizontal-alignment: center;
+        }
+    }
+
+    slider := Slider {
+        value: value;
+        horizontal-stretch: 1;
+        minimum: 0;
+        maximum: maximum;
+        notification-threshold: 1;
+        changed(value) => {
+            root.changed(value);
+        }
+        released => {
+            root.released();
+        }
+    }
+}
+
+component ValueInput inherits Rectangle {
+    in-out property <string> text <=> input.text;
+    callback edited();
+
+    border-width: 1px;
+    border-color: Palette.border-primary;
+    border-radius: 8px;
+    width: 110px;
+
+    VerticalLayout {
+        padding-top: 8px;
+        padding-bottom: 4px;
+
+        input := TextInput {
+            color: Palette.content-primary;
+            font-size: Size.sz6;
+            width: 110px;
+            horizontal-alignment: center;
+            edited => {
+                edited();
+            }
+        }
+    }
+}
+
+component DisabledLED inherits Rectangle {
+    background: Palette.background-primary-alternative;
+    border-radius: 50px;
+    border-width: 0px;
+    width: 80px;
+    height: 80px;
+
+    Rectangle {
+        width: parent.width - 16px;
+        height: parent.height - 16px;
+        border-radius: 50px;
+        background: #404040;
+    }
+}
+
+component LED inherits Rectangle {
+    in property <bool> selected: false;
+    in property <brush> led-color: #ff0000;
+
+    callback changed(bool);
+
+    background: Palette.background-primary-alternative;
+    border-radius: 50px;
+    border-width: selected ? 4px : 0px;
+    border-color: Palette.content-primary;
+    width: 80px;
+    height: 80px;
+
+    Rectangle {
+        width: parent.width - 16px;
+        height: parent.height - 16px;
+        border-radius: 50px;
+        background: led-color;
+    }
+
+    TouchArea {
+        clicked => {
+            changed(!selected);
+        }
+    }
+}
+
+export component LedPagePage inherits BasePage {
+    private property <int> red: 255;
+    private property <int> green: 0;
+    private property <int> blue: 0;
+
+    private property <bool> led0_selected: true;
+    private property <bool> led1_selected: true;
+
+    private property <color> led0_color: #ff0000;
+    private property <color> led1_color: #ff0000;
+
+    init => {
+        update-leds();
+    }
+
+    function update-leds() {
+        if (led0_selected) {
+            led0_color = rgb(red, green, blue);
+            Callbacks.set-led(0, red, green, blue);
+        }
+        if (led1_selected) {
+            led1_color = rgb(red, green, blue);
+            Callbacks.set-led(1, red, green, blue);
+        }
+    }
+
+    VerticalLayout {
+        padding: 10px;
+        spacing: 20px;
+
+        HorizontalLayout {
+            alignment: space-between;
+            HorizontalLayout {
+                spacing: 10px;
+                IconButton {
+                    icon: "chevron-left";
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+
+                HeadingLg {
+                    text: "LED Control";
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        swatch := Rectangle {
+            background: rgb(red, green, blue);
+            border-radius: 10px;
+            border-width: 4px;
+            border-color: Palette.border-primary;
+            height: 100px;
+            width: 100%;
+        }
+
+        HorizontalLayout {
+            height: 30px;
+            alignment: space-around;
+
+            HeadingLg {
+                text: "R";
+                width: 110px;
+                color: Palette.content-primary;
+                horizontal-alignment: center;
+            }
+
+            HeadingLg {
+                text: "G";
+                width: 110px;
+                color: Palette.content-primary;
+                horizontal-alignment: center;
+            }
+
+            HeadingLg {
+                text: "B";
+                width: 110px;
+                color: Palette.content-primary;
+                horizontal-alignment: center;
+            }
+        }
+
+        HorizontalLayout {
+            height: 40px;
+            alignment: space-around;
+
+            ValueInput {
+                text: red;
+                edited => {
+                    red = min(max(round(self.text.to-float()), 0),255);
+                    update-leds();
+                }
+            }
+
+            ValueInput {
+                text: green;
+                edited => {
+                    green = min(max(round(self.text.to-float()), 0),255);
+                    update-leds();
+                }
+            }
+
+            ValueInput {
+                text: blue;
+                edited => {
+                    blue = min(max(round(self.text.to-float()), 0),255);
+                    update-leds();
+                }
+            }
+        }
+
+        ValueSlider {
+            name: "R";
+            value: red;
+            changed(value) => {
+                red = round(value);
+            }
+            released() => {
+                update-leds();
+            }
+        }
+
+        ValueSlider {
+            name: "G";
+            value: green;
+            changed(value) => {
+                green = round(value);
+            }
+            released() => {
+                update-leds();
+            }
+        }
+
+        ValueSlider {
+            name: "B";
+            value: blue;
+            changed(value) => {
+                blue = round(value);
+            }
+            released() => {
+                update-leds();
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 10px;
+            alignment: center;
+
+            DisabledLED { }
+
+            LED {
+                led-color: led0_color;
+                selected: led0_selected;
+                changed(selected) => {
+                    led0_selected = selected;
+                }
+            }
+
+            LED {
+                led-color: led1_color;
+                selected: led1_selected;
+                changed(selected) => {
+                    led1_selected = selected;
+                }
+            }
+
+            DisabledLED { }
+        }
+    }
+}

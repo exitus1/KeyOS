@@ -1,0 +1,189 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { HeadingLg, HeadingMd, TextLg, TextMd, BasePage, TimerLoader, Button, IconButton, SwitchControlled } from "@ui/widgets.slint";
+import { Slider } from "std-widgets.slint";
+import { TimerCircularProgress } from "@ui/widgets/circular-progress.slint";
+import { CurrentTheme, Palette, Palettes, Images, Size, UISize, Utils } from "@ui/theme.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+
+component ChangeButton inherits Button {
+    label: "";
+    width: 100px;
+}
+
+component ControlRow inherits VerticalLayout {
+    alignment: center;
+    width: 100%;
+    HorizontalLayout {
+        alignment: space-between;
+        width: 100%;
+        @children
+    }
+}
+
+component ControlText inherits TextMd {
+    width: 100px;
+    vertical-alignment: center;
+    horizontal-alignment: center;
+}
+
+component ControlLabel inherits TextMd {
+    width: 110px;
+    vertical-alignment: center;
+    horizontal-alignment: left;
+}
+
+export component LoaderPagePage inherits BasePage {
+    private property <int> loader-type: 0; // 0: Timer Circular Progress, 1: Timer Loader
+    private property <duration> tick-interval: 100ms;
+    private property <float> thickness: 0.06;
+    private property <length> loader-size: 300px;
+
+    VerticalLayout {
+        padding-left: 20px;
+        padding-right: 20px;
+        spacing: 10px;
+
+        HorizontalLayout {
+            alignment: space-between;
+            HorizontalLayout {
+                spacing: 10px;
+                IconButton {
+                    icon: "chevron-left";
+                    clicked => {
+                        Navigate.backward();
+                    }
+                }
+
+                HeadingLg {
+                    text: "Loaders";
+                    vertical-alignment: center;
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                Button {
+                    label: CurrentTheme.is-dark ? "Dark" : "Light";
+                    clicked => {
+                        CurrentTheme.palette = CurrentTheme.is-dark ? Palettes.light : Palettes.dark;
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            border-color: Palette.border-tertiary;
+            border-radius: 12px;
+            border-width: 2px;
+            height: 400px;
+            if loader-type == 0: TimerCircularProgress {
+                size: loader-size;
+                stroke-width: loader-size * thickness / 2;
+                interval: tick-interval;
+                indeterminate: true;
+            }
+            if loader-type == 1: TimerLoader {
+                size: loader-size;
+                running: true;
+                interval: tick-interval;
+            }
+        }
+
+        VerticalLayout {
+            spacing: 4px;
+            HorizontalLayout {
+                spacing: 10px;
+                TextMd {
+                    text: "Loader Type:";
+                    vertical-alignment: center;
+                    width: 120px;
+                }
+
+                Button {
+                    label: loader-type == 0 ? "Timer Circular Progress" : "Timer Loader";
+                    clicked => {
+                        loader-type = Math.mod(loader-type + 1, 2);
+                    }
+                }
+            }
+
+            ControlRow {
+                ControlLabel {
+                    text: "Size:";
+                    horizontal-alignment: left;
+                }
+
+                ChangeButton {
+                    icon: "chevron-down";
+                    clicked => {
+                        loader-size = Math.max(100px, loader-size - 25px);
+                    }
+                }
+
+                ControlText {
+                    text: Math.round(loader-size / 1px) + "px";
+                }
+
+                ChangeButton {
+                    icon: "chevron-up";
+                    clicked => {
+                        loader-size = Math.min(400px, loader-size + 25px);
+                    }
+                }
+            }
+
+            // Thickness control (only for Timer Circular Progress)
+            if loader-type == 0: ControlRow {
+                ControlLabel {
+                    text: "Thickness:";
+                }
+
+                ChangeButton {
+                    icon: "chevron-down";
+                    clicked => {
+                        thickness = Math.max(0.02, thickness - 0.02);
+                    }
+                }
+
+                ControlText {
+                    text: Math.round(thickness * 100) + "%";
+                }
+
+                ChangeButton {
+                    icon: "chevron-up";
+                    clicked => {
+                        thickness = Math.min(0.3, thickness + 0.02);
+                    }
+                }
+            }
+
+            // Interval control (for both loaders)
+            ControlRow {
+                ControlLabel {
+                    text: "Interval:";
+                }
+
+                ChangeButton {
+                    icon: "chevron-down";
+                    clicked => {
+                        tick-interval = Math.max(50ms, tick-interval - 25ms);
+                    }
+                }
+
+                ControlText {
+                    text: Math.round(tick-interval / 1ms) + "ms";
+                }
+
+                ChangeButton {
+                    icon: "chevron-up";
+                    clicked => {
+                        tick-interval = Math.min(500ms, tick-interval + 25ms);
+                    }
+                }
+            }
+        }
+    }
+}

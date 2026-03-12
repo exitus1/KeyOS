@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { FwUpdateState, FwUpdatePage } from "@ui/pages/fw-update-page.slint";
+import { NavHeader } from "@ui/widgets.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { OnboardingBasePage } from "../../../widgets/base-page.slint";
+import { OnboardingCallbacks } from "../../../onboarding-callbacks.slint";
+
+export component UpdateProgressPage inherits OnboardingBasePage {
+    if OnboardingCallbacks.fw-update-state == FwUpdateState.Failed: NavHeader {
+        y: 0;
+        left-icon: "";
+        right-icon: "file";
+        right-clicked => {
+            OnboardingCallbacks.update-from-file()
+        }
+    }
+
+    // Auto-start download when view loads
+    init => {
+        if (OnboardingCallbacks.fw-update-state == FwUpdateState.Idle) {
+            OnboardingCallbacks.download-firmware-update();
+        }
+    }
+
+    FwUpdatePage {
+        state: OnboardingCallbacks.fw-update-state;
+        error: OnboardingCallbacks.fw-update-error;
+
+        progress-percent: OnboardingCallbacks.fw-update-progress;
+        eta: OnboardingCallbacks.fw-update-eta;
+        keyos-version: OnboardingCallbacks.current-keyos-version;
+
+        retry-fw-update => {
+            OnboardingCallbacks.fw-update-state = FwUpdateState.Idle;
+            OnboardingCallbacks.download-firmware-update();
+        }
+        complete-fw-update => {
+            OnboardingCallbacks.fw-update-state = FwUpdateState.Idle;
+            Navigate.set-pin-info({ replace: true })
+        }
+    }
+}

@@ -1,0 +1,39 @@
+appId = "0x6775692d736572766572000000000000"
+memory = ["LCDC"]
+syscall = ["VirtToPhys", "VirtToPhysPid", "TerminatePid", "ClaimInterrupt", "GetSystemStats", "SetThreadPriority", "Shutdown"]
+extends = "../../api/gui-server"
+
+[appName]
+en = "GUI Server"
+
+[servers."os/gui-server"]
+DisconnectHandlerMessage = { id = 19, type = "scalar" }
+OnVsyncMessage = { id = 21, type = "scalar" }
+OnFreeMemoryBelowThreshold = { id = 24, type = "scalar" }
+CloseAppTimeout = { id = 25, type = "scalar" }
+BlurDone = { id = 26, type = "scalar" }
+PowerButtonTimerCallback = { id = 42, type = "scalar" }
+AutoLockTimerCallback = { id = 43, type = "scalar" }
+ForceShutdownTimeout = { id = 50, type = "scalar" }
+
+[permissions]
+"template" = ["i2c", "gpio"]
+"os/app-manager" = ["LaunchApp", "LaunchAppBlocking"]
+"os/bt" = ["Disconnect"]
+"os/fs" = ["SubscribeFilesystemEvent"]
+"os/camera" = ["NotifyVisible"]
+"os/haptics" = ["Vibrate"]
+"os/power-manager" = ["SetPeripheralEnabled", "GetStatus", "Reboot", "SetOtgPriority", "SetUsbBoost"]
+"os/rgb-server" = ["AnimateAllTo", "SetAllTo"]
+"os/security" = ["Logout", "GetMasterKeyState"]
+"os/settings" = [
+    "GetAutoLock",
+    "SubscribeAutoLock",
+    "GetScreenBrightness",
+    "SubscribeScreenBrightness",
+    "GetTouchOffset",
+    "SubscribeTouchOffset",
+    "FlushAll",
+    "SubscribeOnboardingStatus",
+]
+"os/spi" = ["ClaimPeripheral", "SpiXfer"]

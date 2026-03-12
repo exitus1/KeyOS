@@ -1,0 +1,122 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AuthenticatorCallbacks as CB } from "../../authenticator-callbacks.slint";
+import { AuthView } from "../../authenticator-types.slint";
+import { Palette, Size, UISize, Importance, ResultLevel } from "@ui/theme.slint";
+import { IconButton, TimerCircularProgress, TextLg, TextMd, TextSm, AppHeader, Link, HeadingXl,
+         BasePage, ContentSection, PageBody } from "@ui/widgets.slint";
+import { OpenedCardProps } from "./props.slint";
+import { EditPageVersion } from "@ui/pages.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { TrId, TR2 } from "../../gen/tr.slint";
+
+component FieldDisplay inherits VerticalLayout {
+    spacing: Size.sz1;
+
+    in property <string> field;
+    in property <string> value;
+
+    TextSm {
+        text: field;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    TextMd {
+        text: value;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+export component OpenedCardPage inherits BasePage {
+    in property <OpenedCardProps> props;
+    property <bool> light-mode: true;
+
+    private property <AuthView> entry: CB.entries[props.view-index];
+
+    VerticalLayout {
+        AppHeader {
+            title: entry.label;
+            side-padding: Size.sz8;
+
+            IconButton {
+                icon: "chevron-left";
+                size: Size.sz8;
+                importance: Importance.normal;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                Link {
+                    label: TR2.lookup(TrId.OpenedCardEdit);
+                    importance: Importance.normal;
+                    clicked => {
+                        Navigate.edit({
+                            auth: entry,
+                            label-validation: "",
+                            result: { level: ResultLevel.info, success: true, text: "", title: "" },
+                            version: EditPageVersion.edit,
+                        }, { })
+                    }
+                }
+            }
+        }
+
+        PageBody {
+            padding-top: Size.sz14;
+            ContentSection {
+                spacing: Size.sz12;
+                HorizontalLayout {
+                    alignment: center;
+                    TimerCircularProgress {
+                        size: UISize.large-circular-progress-size;
+                        stroke-width: Size.sz5;
+                        percent: CB.time-until-refresh / 30;
+
+                        VerticalLayout {
+                            spacing: Size.sz0_5;
+                            HeadingXl {
+                                text: entry.code;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                            }
+
+                            HorizontalLayout {
+                                alignment: center;
+                                spacing: Size.sz1;
+                                TextLg {
+                                    vertical-alignment: center;
+                                    horizontal-alignment: center;
+                                    bold: true;
+                                    text: CB.time-until-refresh;
+                                }
+
+                                TextSm {
+                                    vertical-alignment: center;
+                                    horizontal-alignment: center;
+                                    text: TR2.lookup(TrId.CommonTimeSecondsFull);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ContentSection {
+                    FieldDisplay {
+                        field: TR2.lookup(TrId.OpenedCardAccount);
+                        value: entry.account;
+                    }
+
+                    if (entry.issuer != ""): FieldDisplay {
+                        field: TR2.lookup(TrId.OpenedCardIssuer);
+                        value: entry.issuer;
+                    }
+                }
+            }
+        }
+    }
+}

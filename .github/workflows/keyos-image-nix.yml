@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: 2024 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: keyOS Image (nix)
+on:
+  workflow_call:
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+jobs:
+  build:
+    runs-on: [ self-hosted, Linux ]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check if Nix is installed
+        id: check-nix
+        run: |
+          if [ -d "/nix/var/nix/profiles/default/bin" ]; then
+            echo "installed=true" >> $GITHUB_OUTPUT
+          else
+            echo "installed=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - uses: nixbuild/nix-quick-install-action@v30
+        if: steps.check-nix.outputs.installed == 'false'
+        with:
+          nix_conf: |
+            experimental-features = nix-command flakes
+            keep-outputs = true
+            keep-derivations = true
+            max-jobs = auto
+
+      - name: Setup Nix daemon
+        if: steps.check-nix.outputs.installed == 'true'
+        run: |
+          export PATH=/nix/var/nix/profiles/default/bin:$PATH
+          echo "PATH=/nix/var/nix/profiles/default/bin:$PATH" >> $GITHUB_ENV
+          nix --version
+          echo "Using existing Nix daemon"
+
+      - uses: actions/cache@v4
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ github.workflow }}-cache-${{ hashFiles('rust-toolchain.toml') }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ github.workflow }}-cache-${{ hashFiles('rust-toolchain.toml') }}
+        name: Cache cargo registry and target
+      
+      - run: sed -i 's/rustflags = \[/rustflags = ["-D", "warnings", /g' .cargo/config.toml
+        name: Disallow warnings
+      
+      - run: mkdir -p ~/.cargo/registry ~/.cargo/git
+        name: Make sure cache directories exist
+      
+      - run: nix develop .#build --command scripts/generate-cosign2-dev-key.sh
+        name: Generate random signing key
+      
+      - run: nix develop .#build --command cargo xtask build sys-benchmark --verbose-kernel
+        name: Build just a test app and its deps with verbose kernel
+
+      - run: nix develop .#build --command cargo xtask build-charge-boot
+        name: Build the factory charging bootloader
+
+      - run: nix develop .#build --command cargo xtask build-bootloader --production-bootloader
+        name: Build the production bootloader
+      
+      - run: nix develop .#build --command cargo xtask build-all
+        name: Build all
+      
+      - run: git diff -I 'rustflags = ' --exit-code
+        name: Check if any file (e.g. Cargo.lock) is changed during build
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boot.img
+          path: boot.img

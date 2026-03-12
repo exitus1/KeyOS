@@ -1,0 +1,237 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, SlideToButton, JumboIconPageBody, HeadingMd, TextMd, WrappedIcon, BtcAddress, QrCodeCard, Modal, ConfirmationModal } from "@ui/widgets.slint";
+import { Importance, Palette, Size } from "@ui/theme.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { SignMessage, SignMessageState, FileSaveState } from "../../sign-message.slint";
+import { SignMessageProps } from "./props.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+
+component SignPage inherits VerticalLayout {
+    property <bool> signing: SignMessage.state == SignMessageState.Signing;
+
+    NavHeader {
+        title: TR2.lookup(TrId.SignMessageTitle);
+        left-icon: "chevron-left";
+
+        clicked => {
+            SignMessage.done();
+        }
+    }
+
+    VerticalLayout {
+        alignment: space-between;
+        padding-left: Size.sz4;
+        padding-right: Size.sz4;
+        padding-top: Size.sz4;
+        padding-bottom: Size.sz4;
+
+        ContentSection {
+            spacing: Size.sz10;
+
+            VerticalLayout {
+                spacing: Size.sz3;
+
+                TextMd {
+                    text: TR2.lookup(TrId.SignMessageMessage);
+                    bold: true;
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+
+                TextMd {
+                    text: SignMessage.message;
+                    wrap: word-wrap;
+                    color: Palette.content-secondary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            VerticalLayout {
+                spacing: Size.sz3;
+
+                TextMd {
+                    text: TR2.lookup(TrId.SignMessageUsedAddress);
+                    bold: true;
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    BtcAddress {
+                        address: SignMessage.address;
+                    }
+                }
+            }
+        }
+
+        if !signing: ButtonSection {
+            Button {
+                icon: "";
+                label: TR2.lookup(TrId.CommonButtonCancel);
+                importance: tertiary;
+                clicked => {
+                    SignMessage.done();
+                }
+            }
+
+            SlideToButton {
+                label: TR2.lookup(TrId.CommonSlideToSignSign);
+                info-label: TR2.lookup(TrId.CommonSlideToSignHelper);
+
+                activated(id) => {
+                    SignMessage.sign-message();
+                }
+            }
+        }
+
+        if signing: ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonSlideToSignSigning);
+                importance: tertiary;
+                loading: true;
+                enabled: false;
+            }
+        }
+    }
+}
+
+component SuccessPage inherits VerticalLayout {
+    property <bool> saved: SignMessage.file-save-state == FileSaveState.Saved;
+
+    NavHeader {
+        title: TR2.lookup(TrId.SignMessageSuccessTitle);
+        left-icon: "chevron-left";
+
+        clicked => {
+            SignMessage.done();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            TextMd {
+                horizontal-alignment: center;
+                color: Palette.content-tertiary;
+                text: TR2.lookup(TrId.SignMessageSuccessContent);
+            }
+
+            HorizontalLayout {
+                alignment: center;
+
+                QrCodeCard {
+                    data: SignMessage.signed-message.signature;
+                }
+            }
+        }
+
+        ButtonSection {
+            Button {
+                importance: secondary;
+                icon: saved ? "check" : "save";
+                label: saved ? TR2.lookup(TrId.ExportMultisigSavedSaved) : TR2.lookup(TrId.CommonButtonSaveToFile);
+                enabled: !saved;
+                clicked => {
+                    SignMessage.save-signed-message-to-file();
+                }
+            }
+
+            Button {
+                importance: primary;
+                icon: "";
+                label: TR2.lookup(TrId.CommonButtonDone);
+                clicked => {
+                    SignMessage.done();
+                }
+            }
+        }
+    }
+}
+
+component ErrorPage inherits JumboIconPageBody {
+    ContentSection {
+        spacing: Size.sz10;
+
+        HorizontalLayout {
+            alignment: center;
+            WrappedIcon {
+                inner-icon: "close";
+            }
+        }
+
+        VerticalLayout {
+            spacing: Size.sz5;
+            HeadingMd {
+                horizontal-alignment: center;
+                text: TR2.lookup(TrId.AddressTypeNotSupportedHeader);
+            }
+
+            TextMd {
+                horizontal-alignment: center;
+                text: TR2.lookup(TrId.AddressTypeNotSupportedContent1);
+                color: Palette.content-secondary;
+            }
+        }
+    }
+
+    ButtonSection {
+        Button {
+            label: TR2.lookup(TrId.CommonButtonRetry);
+            importance: primary;
+            clicked => {
+                SignMessage.cancel-signing();
+                Navigate.backward-animate(Animate.None);
+                SignMessage.start-sign-message(SignMessage.account-id);
+            }
+        }
+    }
+}
+
+export component SignMessagePage inherits BasePage {
+    in property <SignMessageProps> props;
+
+    property <SignMessageState> state: SignMessage.state;
+    property <bool> saved: SignMessage.file-save-state == FileSaveState.Saved;
+    property <bool> has-save-error: SignMessage.file-save-state == FileSaveState.Error;
+    property <bool> is-save-modal-open: saved;
+
+    if state == SignMessageState.Sign || state == SignMessageState.Signing: SignPage { }
+    if state == SignMessageState.Success: SuccessPage { }
+    if state == SignMessageState.Error: ErrorPage { }
+
+    if is-save-modal-open: Modal {
+        icon: "save";
+        icon-color: Palette.content-brand;
+        title: TR2.lookup(TrId.FileSavedHeader);
+        text: TR2.format(TrId.FileSavedContent, [SignMessage.saved-file-path]);
+
+        Button {
+            icon: "";
+            label: TR2.lookup(TrId.CommonButtonConfirm);
+            importance: primary;
+            clicked => {
+                is-save-modal-open = false;
+            }
+        }
+    }
+
+    if has-save-error: ConfirmationModal {
+        icon: "alert";
+        icon-color: Palette.content-notice;
+        title: TR2.lookup(TrId.FileUnableSavedHeader);
+        text: TR2.lookup(TrId.FileUnableSavedContent);
+        confirm-button-label: TR2.lookup(TrId.CommonButtonConfirm);
+        cancel-button-label: TR2.lookup(TrId.CommonButtonRetry);
+
+        cancel-clicked => {
+            SignMessage.file-save-state = FileSaveState.Idle;
+            SignMessage.save-signed-message-to-file();
+        }
+
+        confirm-clicked => {
+            SignMessage.file-save-state = FileSaveState.Idle;
+        }
+    }
+}

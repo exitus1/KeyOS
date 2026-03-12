@@ -1,0 +1,112 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+import { TR2, TrId } from "../../../gen/tr.slint";
+import { RadioItem, Input, HLine, MenuSectionContainer, MenuSectionLayout, BasePage, PageBody } from "@ui/widgets.slint";
+
+import { SettingsNavHeader } from "../../../widgets/nav-header.slint";
+import { SettingGlobal } from "../../../globals/setting-global.slint";
+
+export component AutoLockPage inherits BasePage {
+    VerticalLayout {
+        SettingsNavHeader {
+            title: TR2.lookup(TrId.AutoShutdownTitle);
+        }
+
+        PageBody {
+            MenuSectionContainer {
+                MenuSectionLayout {
+                    RadioItem {
+                        first: true;
+                        label: SettingGlobal.format-auto-lock(60);
+                        checked: SettingGlobal.auto-lock == 60;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(60);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(180);
+                        checked: SettingGlobal.auto-lock == 180;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(180);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(300);
+                        checked: SettingGlobal.auto-lock == 300;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(300);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(600);
+                        checked: SettingGlobal.auto-lock == 600;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(600);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(900);
+                        checked: SettingGlobal.auto-lock == 900;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(900);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(1800);
+                        checked: SettingGlobal.auto-lock == 1800;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(1800);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(3600);
+                        checked: SettingGlobal.auto-lock == 3600;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(3600);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(7200);
+                        checked: SettingGlobal.auto-lock == 7200;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(7200);
+                        }
+                    }
+
+                    HLine { }
+
+                    RadioItem {
+                        label: SettingGlobal.format-auto-lock(-1);
+                        checked: SettingGlobal.auto-lock == -1;
+                        last: true;
+                        clicked => {
+                            SettingGlobal.set-auto-lock(-1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

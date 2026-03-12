@@ -1,0 +1,31 @@
+appId = "0x6775692d6170702d7374617475736261"
+
+[appName]
+en = "Control Center"
+
+[permissions]
+template = ["gui-app"]
+"os/backup" = ["StatusSubscribe"]
+"os/bt" = ["SubscribeBleState"]
+"os/camera" = ["IsInUse"]
+"os/gui-server" = ["Shutdown"]
+"os/haptics" = ["Vibrate"]
+"os/nfc" = ["IsActive"]
+"os/power-manager" = ["GetStatus", "StatusSubscribe"]
+"os/settings" = [
+    "SetScreenBrightness",
+    "SubscribeScreenBrightness",
+    "SubscribeUseStandardTimeFormat",
+    "SubscribeTimeZone",
+    "SetNfcEnabled",
+    "SubscribeNfcEnabled",
+    "SetBluetoothEnabled",
+    "SubscribeBluetoothEnabled",
+    "SetCameraEnabled",
+    "SubscribeCameraEnabled",
+    "SetUsbEnabled",
+    "SubscribeUsbEnabled",
+]
+"os/usbdev" = ["IsDeviceEmulationEnabled", "IsDeviceEmulationConnected", "SetDeviceEmulationEnabled"]
+"os/usb" = ["IsEnabled", "IsConnected", "SetEnabled"]
+"os/security" = ["GetAppSeed", "GetMasterKeyState"]

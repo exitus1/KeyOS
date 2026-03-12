@@ -1,0 +1,18 @@
+appId = "0x6775692d6170702d6c61756e63686572"
+
+[appName]
+en = "App Launcher"
+
+[permissions]
+template = ["gui-app"]
+"os/app-manager" = ["SubscribeAppEvents", "GetAppName", "LaunchApp"]
+"os/fs" = [
+    "FormatEncryptedVolume",
+    "SubscribeFilesystemEvent",
+    "FormatAirlock",
+    "MountAirlock",
+]
+"os/gui-server" = ["SwitchTo", "Shutdown", "NavigateTo"]
+"os/haptics" = ["Vibrate"]
+"os/quantum-link" = ["SubscribeExchangeRate", "SubscribeExchangeRateHistory", "SubscribeConnectionStatus"]
+"os/settings" = ["SetOnboardingStatus"]

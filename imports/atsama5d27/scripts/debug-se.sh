@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cargo build --release --bin se
+
+GDB="${KEYOS_GDB:-arm-none-eabi-gdb}"    # allow using custom gdb with an env var
+
+$GDB -q ../../../target/armv7a-none-eabi/release/se -x init.gdb

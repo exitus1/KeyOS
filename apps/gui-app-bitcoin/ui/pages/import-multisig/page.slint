@@ -1,0 +1,204 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { BasePage, NavHeader, PageBody, ContentSection, TextMd, ButtonSection, Button, TitledInput, HeadingMd, WrappedIcon, ScrollBody } from "@ui/widgets.slint";
+import { Importance, Palette, Size, ResultLevel } from "@ui/theme.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Utils } from "@ui/utils.slint";
+
+import { ImportMultiSigProps } from "./props.slint";
+
+import { ViewMultiSig } from "../../widgets/multisig.slint";
+import { NetworkKind, Network, MultiSigView} from "../../callbacks.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+import { VerifyAddress } from "../../verify-address.slint";
+import { CreateAccount, CreateAccountState } from "../../create-account.slint";
+import { SignPsbt } from "../../sign-psbt.slint";
+import { TimerCircularProgress } from "../../../../../ui/ui/widgets.slint";
+
+export component ImportMultiSigPage inherits BasePage {
+    in property <ImportMultiSigProps> props;
+
+    property <MultiSigView> multisig: CreateAccount.pending-multisig-account;
+    property <Network> new-network: multisig.network-kind == NetworkKind.Main ? Network.Bitcoin : Network.Testnet4;
+
+    property <bool> configuring: false;
+    property <string> new-label;
+
+    if !configuring && (CreateAccount.state == CreateAccountState.Idle): VerticalLayout {
+        spacing: Size.sz6;
+
+        NavHeader {
+            title: TR2.lookup(TrId.ConnectMultiSigTitle);
+            clicked => {
+                SignPsbt.cancel-signing();
+                Navigate.backward();
+            }
+        }
+
+        ScrollBody {
+            p-y: 0;
+            // FOR SOME REASON THIS MUST BE HERE.
+            // OTHERWISE THE INNER COMPONENT WILL HAVE HEIGHT 0.
+            VerticalLayout {
+                ViewMultiSig {
+                    multisig: multisig;
+                    initial-open: true;
+                }
+            }
+        }
+
+        VerticalLayout {
+            alignment: end;
+            vertical-stretch: 0;
+
+            padding-bottom: Size.sz6;
+            padding-right: Size.sz6;
+            padding-left: Size.sz6;
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonContinue);
+                clicked => {
+                    configuring = true;
+                }
+            }
+        }
+    }
+
+    if configuring && (CreateAccount.state == CreateAccountState.Idle): VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.ConnectMultiSigImportTitle);
+            clicked => {
+                if (configuring) {
+                    configuring = false;
+                } else {
+                    SignPsbt.cancel-signing();
+                    Navigate.backward();
+                }
+            }
+        }
+
+        PageBody {
+            ContentSection {
+                label-input := TitledInput {
+                    title: TR2.lookup(TrId.ConnectMultiSigImportLabel);
+                    placeholder: TR2.lookup(TrId.ConnectMultiSigImportWalletFillerText);
+                    show-clear-btn: false;
+                    caps-mode: sentences;
+                    edited(text) => {
+                        new-label = text;
+                        self.message = CreateAccount.validate-new-label(text);
+                        self.has-notice = self.message != "";
+                    }
+                }
+
+                // TODO: need advanced section with network selection
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonContinue);
+                    enabled: !label-input.has-notice;
+
+                    clicked => {
+                        CreateAccount.create-multi-sig({ label: new-label, network: new-network });
+                    }
+                }
+            }
+        }
+    }
+
+    if CreateAccount.state == CreateAccountState.Creating: PageBody {
+        padding-top: Size.sz16;
+        ContentSection {
+            HorizontalLayout {
+                alignment: center;
+                TimerCircularProgress {
+                    indeterminate: true;
+                }
+            }
+
+            HeadingMd {
+                text: TR2.lookup(TrId.ConnectMultiSigLoaderHeader);
+                horizontal-alignment: center;
+            }
+        }
+    }
+
+    if CreateAccount.state == CreateAccountState.Success: PageBody {
+        padding-top: Size.sz16;
+        ContentSection {
+            HorizontalLayout {
+                alignment: center;
+                WrappedIcon { }
+            }
+
+            HeadingMd {
+                horizontal-alignment: center;
+                text: TR2.lookup(TrId.ConnectMultiSigSuccessTitle);
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonButtonSkipVerification);
+                importance: Importance.secondary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonButtonVerifyAddress);
+                clicked => {
+                    VerifyAddress.verify-address({ account-id: CreateAccount.new-account-id, show-skip-button: false });
+                }
+            }
+        }
+    }
+
+    if CreateAccount.state == CreateAccountState.Error: VerticalLayout {
+        NavHeader {
+            clicked => {
+                SignPsbt.cancel-signing();
+                Navigate.backward()
+            }
+        }
+
+        PageBody {
+            padding-top: 0;
+            ContentSection {
+                HorizontalLayout {
+                    alignment: center;
+                    WrappedIcon {
+                        inner-icon: "close";
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: Size.sz5;
+                    HeadingMd {
+                        horizontal-alignment: center;
+                        text: TR2.lookup(TrId.ConnectMultiSigFailedTitle);
+                    }
+
+                    TextMd {
+                        horizontal-alignment: center;
+                        text: TR2.lookup(TrId.ConnectMultiSigFailedContent);
+                        color: Palette.content-secondary;
+                    }
+                }
+            }
+
+            ButtonSection {
+                Button {
+                    label: TR2.lookup(TrId.CommonButtonRetry);
+                    importance: Importance.primary;
+                    clicked => {
+                        CreateAccount.import-multisig();
+                    }
+                }
+            }
+        }
+    }
+}

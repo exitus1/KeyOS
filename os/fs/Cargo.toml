@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "fs-server"
+version = "0.1.0"
+edition = "2021"
+description = "Filesystem Server"
+publish = false
+
+[features]
+recovery-os = []
+default = []
+
+[dependencies]
+byteorder = "1.5.0"
+enum_dispatch = "0.3.13"
+fatfs = { workspace = true, features = ["std", "alloc", "chrono"] }
+fs = { workspace = true }
+hex = "0.4"
+log = { workspace = true }
+log-server = { workspace = true }
+lru = "0.13"
+num-derive = { workspace = true }
+num-traits = { workspace = true }
+rkyv = { workspace = true }
+server = { workspace = true }
+xous = { workspace = true }
+xous-ipc = { workspace = true }
+xous-names = { workspace = true }
+
+[target.'cfg(keyos)'.dependencies]
+emmc = { path = "../emmc" }
+mass-storage-server = { path = "../mass-storage-server" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(keyos)'] }

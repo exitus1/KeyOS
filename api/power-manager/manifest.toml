@@ -1,0 +1,10 @@
+[servers."os/power-manager"]
+Reboot = { id = 0, type = "blockingScalar" }
+GetStatus = { id = 1, type = "blockingScalar" }
+SetUsbBoost = { id = 2, type = "blockingScalar" }
+SetPeripheralEnabled = { id = 4, type = "blockingScalar", cfg = "keyos" }
+SetOtgPriority = { id = 5, type = "scalar", cfg = "keyos" }
+GetExtendedStatus = { id = 6, type = "archive" }
+ClearChargeFault = { id = 7, type = "scalar" }
+StatusSubscribe = { id = 8, type = "scalarEvent" }
+SetBatteryPercent = { id = 20, type = "scalar", cfg = "not(keyos)" }

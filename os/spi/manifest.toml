@@ -1,0 +1,16 @@
+appId = "0x6f732f73706900000000000000000000"
+memory = ["SPI0"]
+syscall = ["SetThreadPriority"]
+extends = "../../api/spi"
+
+[appName]
+en = "SPI Server"
+
+[permissions]
+"os/dma" = [
+    "PeripheralTransferMsg",
+    "ExecuteTransferMsg",
+    "WaitTransferMsg",
+    "DropTransferMsg",
+]
+"os/power-manager" = ["SetPeripheralEnabled"]

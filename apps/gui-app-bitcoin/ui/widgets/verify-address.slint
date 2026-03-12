@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { TextSm, PageBody } from "@ui/widgets.slint";
+import { Size, Palette } from "@ui/theme.slint";
+
+export component VerifyAddressBody inherits PageBody {
+    padding-top: Size.sz16;
+}
+
+export component LabeledText inherits HorizontalLayout {
+    in property <string> label;
+    in property <string> text;
+
+    alignment: center;
+    spacing: 10px;
+
+    TextSm {
+        text: label;
+        color: Palette.content-tertiary;
+        vertical-alignment: center;
+    }
+
+    TextSm {
+        text: text;
+        vertical-alignment: center;
+    }
+}

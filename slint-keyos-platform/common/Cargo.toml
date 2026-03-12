@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "slint-keyos-platform-common"
+version = "0.1.0"
+edition = "2021"
+description = "KeyOS platform support for slint - common parts between runtime and build"
+
+[dependencies]
+rkyv = { workspace = true }
+
+[dependencies.i-slint-compiler]
+optional = true
+workspace = true
+
+[dependencies.slint]
+optional = true
+workspace = true

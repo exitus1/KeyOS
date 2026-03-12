@@ -1,0 +1,104 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+import { ListView } from "std-widgets.slint";
+
+import { Size } from "@ui/theme.slint";
+import { BasePage, NavHeader, TextSm, SearchInput, PageBody } from "@ui/widgets.slint";
+import { TR2, TrId } from "../../../gen/tr.slint";
+
+import { Navigate } from "../../../gen/navigate.slint";
+import { Settings } from "../../../settings.slint";
+
+export component SettingsSelectCurrencyPage inherits BasePage {
+
+    property <string> search-text <=> input.text;
+    changed search-text => {
+        f.viewport-y = 0;
+        Settings.search-show-fiat-value(search-text);
+    }
+
+    property <length> item-height: Size.sz16;
+
+    VerticalLayout {
+        NavHeader {
+            title: TR2.lookup(TrId.CurrencyTitle);
+            clicked => {
+                Navigate.backward();
+            }
+        }
+
+        PageBody {
+            VerticalLayout {
+                alignment: start;
+                spacing: Size.sz3;
+
+                input := SearchInput {
+                    placeholder: TR2.lookup(TrId.CurrencySearch);
+                }
+
+                f := ListView {
+                    viewport-height: 1000 * item-height;
+                    viewport-width: parent.width;
+                    height: 650px;
+                    width: parent.width;
+                    vertical-scrollbar-policy: always-off;
+                    mouse-drag-pan-enabled: true;
+
+                    scrolled => {
+                        if input.has-focus {
+                            input.clear-focus();
+                        }
+                    }
+
+                    for currency[index] in Settings.all-currencies: Rectangle {
+                        horizontal-stretch: 0;
+                        height: item-height;
+                        width: input.width;
+                        HorizontalLayout {
+                            alignment: space-between;
+                            padding-left: Size.sz4;
+                            padding-right: Size.sz4;
+                            TextSm {
+                                width: 250px;
+                                text: Settings.fiat-value-name(currency);
+                                vertical-alignment: center;
+                                wrap: no-wrap;
+                                overflow: clip;
+                            }
+
+                            rhs := HorizontalLayout {
+                                alignment: end;
+                                spacing: Size.sz4;
+                                width: 100px;
+                                TextSm {
+                                    text: Settings.fiat-value-symbol(currency);
+                                    vertical-alignment: center;
+                                    wrap: no-wrap;
+                                    overflow: clip;
+                                }
+
+                                TextSm {
+                                    text: Settings.fiat-value-code(currency);
+                                    vertical-alignment: center;
+                                    wrap: no-wrap;
+                                    overflow: clip;
+                                }
+                            }
+                        }
+
+                        TouchArea {
+                            clicked => {
+                                if input.has-focus {
+                                    input.clear-focus();
+                                } else {
+                                    Settings.set-show-fiat-value(currency);
+                                    Navigate.backward();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,530 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { AppHeader, Button, HeadingLg, SegmentedControl, IconButton, Icon, HeadingMd, TextMd, TextLg, Switch, Link } from "@ui/widgets.slint";
+import { Palette, Images, Size, Utils, Importance, CurrentTheme } from "@ui/theme.slint";
+import { DarkPalette } from "@ui/palettes/dark-palette.slint";
+import { UISize } from "@ui/types.slint";
+import { TextMd } from "@ui/widgets/txt.slint";
+
+export global Callbacks {
+    callback start-emissions-test();
+    callback stop-emissions-test();
+    callback start-fcc-test();
+    callback stop-fcc-test();
+}
+
+export global State {
+    in-out property <bool> is-emissions-test-running: false;
+    in-out property <bool> is-fcc-test-running: false;
+
+    in-out property <bool> bluetooth-enabled: false;
+    in-out property <bool> nfc-enabled: false;
+    in-out property <bool> usb-enabled: false;
+    in-out property <bool> camera-enabled: false;
+    in-out property <int> bluetooth-channel: 36;
+    in-out property <int> test-mode: 0;
+    in-out property <int> cycle-interval: 1000;
+
+    // Messages
+    in property <string> bluetooth-message: "Idle";
+    in property <string> nfc-message: "Idle";
+    in property <string> usb-message: "Idle";
+    in property <string> camera-message: "Idle";
+}
+
+component TestTile {
+    width: 100%;
+    height: 100px;
+
+    in property <string> title;
+    in property <string> description;
+    in property <bool> enabled;
+    in property <string> icon;
+    callback enabled-changed(bool);
+
+    Rectangle {
+        border-width: 1px;
+        border-color: DarkPalette.border-primary;
+        border-radius: Size.sz6;
+        background: DarkPalette.background-primary;
+
+        HorizontalLayout {
+            padding: Size.sz4;
+            spacing: Size.sz2;
+
+            Icon {
+                name: icon;
+                size: Size.sz12;
+                color: enabled ? DarkPalette.content-primary : DarkPalette.content-tertiary;
+            }
+
+            VerticalLayout {
+                HorizontalLayout {
+                    alignment: stretch;
+                    HeadingMd {
+                        text: title;
+                        color: enabled ? DarkPalette.content-primary : DarkPalette.content-tertiary;
+                        horizontal-stretch: 1;
+                    }
+
+                    HorizontalLayout {
+                        horizontal-stretch: 0;
+                        spacing: Size.sz2;
+                        TextMd {
+                            vertical-alignment: center;
+                            text: enabled ? "Enabled" : "Disabled";
+                            color: enabled ? DarkPalette.content-secondary : DarkPalette.content-tertiary;
+                        }
+
+                        VerticalLayout {
+                            alignment: center;
+                            Switch {
+                                enabled: !State.is-emissions-test-running && !State.is-fcc-test-running;
+                                checked: enabled;
+                                changed => {
+                                    enabled-changed(!enabled);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                TextMd {
+                    text: description;
+                    color: enabled ? DarkPalette.content-secondary : DarkPalette.content-tertiary;
+                }
+            }
+        }
+    }
+}
+
+component CameraTestTile {
+    width: 100%;
+    height: 324px;
+
+    in property <string> title;
+    in property <bool> enabled;
+    callback enabled-changed(bool);
+
+    Rectangle {
+        border-width: 1px;
+        border-color: DarkPalette.border-primary;
+        border-radius: Size.sz6;
+        background: enabled ? Palette.transparent : DarkPalette.background-primary;
+
+        VerticalLayout {
+            alignment: stretch;
+            HorizontalLayout {
+                vertical-stretch: 0;
+                padding-top: Size.sz4;
+                padding-left: Size.sz4;
+                padding-right: Size.sz4;
+                padding-bottom: 0px;
+                spacing: Size.sz2;
+                Icon {
+                    name: "camera";
+                    size: Size.sz12;
+                    color: enabled ? DarkPalette.content-primary : DarkPalette.content-tertiary;
+                }
+
+                VerticalLayout {
+                    HorizontalLayout {
+                        alignment: stretch;
+                        HeadingLg {
+                            vertical-alignment: center;
+                            text: title;
+                            color: enabled ? DarkPalette.content-primary : DarkPalette.content-tertiary;
+                            horizontal-stretch: 1;
+                        }
+
+                        HorizontalLayout {
+                            horizontal-stretch: 0;
+                            spacing: Size.sz2;
+                            alignment: center;
+                            TextMd {
+                                vertical-alignment: center;
+                                text: enabled ? "Enabled" : "Disabled";
+                                color: enabled ? DarkPalette.content-secondary : DarkPalette.content-tertiary;
+                            }
+
+                            VerticalLayout {
+                                alignment: center;
+                                Switch {
+                                    enabled: !State.is-emissions-test-running;
+                                    checked: enabled;
+                                    changed => {
+                                        enabled-changed(!enabled);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalLayout {
+                padding: Size.sz2;
+                Rectangle {
+                    vertical-stretch: 1;
+                    width: 100%;
+                    background: enabled ? Palette.transparent : DarkPalette.background-inverse;
+                    border-radius: Size.sz4;
+                    clip: true;
+
+                    TextMd {
+                        text: State.camera-message;
+                        color: DarkPalette.content-primary-inverse;
+                    }
+                }
+            }
+        }
+    }
+}
+
+component EmissionsTestPage inherits Rectangle {
+    width: 100%;
+    height: 100%;
+    background: Palette.transparent;
+
+    callback close();
+
+    VerticalLayout {
+        padding-top: UISize.control-center-status-bar-height;
+        padding-bottom: Size.sz5;
+        padding-left: Size.sz2;
+        padding-right: Size.sz2;
+        alignment: start;
+        spacing: Size.sz2;
+        height: parent.height;
+
+        AppHeader {
+            title: "Emissions Test";
+            title-color: DarkPalette.content-primary;
+
+            IconButton {
+                enabled: !State.is-emissions-test-running && !State.is-fcc-test-running;
+                icon: "chevron-left";
+                importance: Importance.tertiary;
+                clicked => {
+                    if (State.is-emissions-test-running) {
+                        Callbacks.stop-emissions-test();
+                    }
+                    close();
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                Link {
+                    label: State.is-emissions-test-running ? "Stop" : "Start";
+                    clicked => {
+                        if (State.is-emissions-test-running) {
+                            Callbacks.stop-emissions-test();
+                            // State.is-emissions-test-running = false;
+                        } else {
+                            Callbacks.start-emissions-test();
+                            // State.is-emissions-test-running = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            spacing: Size.sz4;
+            TestTile {
+                icon: "bluetooth";
+                title: "Bluetooth";
+                description: State.bluetooth-message;
+                enabled: State.bluetooth-enabled;
+                enabled-changed(enabled) => {
+                    State.bluetooth-enabled = enabled;
+                    debug("Bluetooth enabled-changed: {}", enabled);
+                }
+            }
+
+            TestTile {
+                icon: "nfc";
+                title: "NFC";
+                description: State.nfc-message;
+                enabled: State.nfc-enabled;
+                enabled-changed => {
+                    State.nfc-enabled = !State.nfc-enabled;
+                    debug("NFC enabled: {}", State.nfc-enabled);
+                }
+            }
+
+            TestTile {
+                icon: "usb";
+                title: "USB";
+                description: State.usb-message;
+                enabled: State.usb-enabled;
+                enabled-changed => {
+                    State.usb-enabled = !State.usb-enabled;
+                    debug("USB enabled: {}", State.usb-enabled);
+                }
+            }
+
+            CameraTestTile {
+                title: "Camera";
+                enabled: State.camera-enabled;
+                enabled-changed => {
+                    State.camera-enabled = !State.camera-enabled;
+                    debug("Camera enabled: {}", State.camera-enabled);
+                }
+            }
+        }
+    }
+}
+
+component FccTestPage inherits Rectangle {
+    width: 100%;
+    height: 100%;
+
+    callback close();
+
+    VerticalLayout {
+        padding-top: UISize.control-center-status-bar-height;
+        padding-bottom: Size.sz5;
+        padding-left: Size.sz2;
+        padding-right: Size.sz2;
+        alignment: start;
+        spacing: Size.sz2;
+        height: parent.height;
+
+        AppHeader {
+            title: "FCC Test";
+            title-color: DarkPalette.content-primary;
+
+            IconButton {
+                enabled: !State.is-emissions-test-running && !State.is-fcc-test-running;
+                icon: "chevron-left";
+                importance: Importance.tertiary;
+                clicked => {
+                    if (State.is-fcc-test-running) {
+                        Callbacks.stop-fcc-test();
+                    }
+                    close();
+                }
+            }
+
+            VerticalLayout {
+                alignment: center;
+                Link {
+                    label: State.is-fcc-test-running ? "Stop" : "Start";
+                    clicked => {
+                        if (State.is-fcc-test-running) {
+                            Callbacks.stop-fcc-test();
+                            // State.is-fcc-test-running = false;
+                        } else {
+                            Callbacks.start-fcc-test();
+                            // State.is-fcc-test-running = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            spacing: Size.sz12;
+
+            VerticalLayout {
+                spacing: Size.sz4;
+                TestTile {
+                    icon: "bluetooth";
+                    title: "Bluetooth";
+                    description: State.bluetooth-message;
+                    enabled: State.bluetooth-enabled;
+                    enabled-changed => {
+                        State.bluetooth-enabled = !State.bluetooth-enabled;
+                        debug("Bluetooth enabled: {}", State.bluetooth-enabled);
+                    }
+                }
+
+                HorizontalLayout {
+                    padding-left: Size.sz8;
+                    spacing: Size.sz4;
+                    alignment: stretch;
+
+                    VerticalLayout {
+                        alignment: center;
+                        TextMd {
+                            horizontal-stretch: 0;
+                            text: "Channel";
+                            color: DarkPalette.content-primary;
+                        }
+                    }
+
+                    SegmentedControl {
+                        enabled: State.bluetooth-enabled && !State.is-fcc-test-running;
+                        horizontal-stretch: 1;
+                        labels: ["all", "37", "38", "39"];
+                        selected_index: State.bluetooth-channel - 36;
+                        changed => {
+                            State.bluetooth-channel = self.selected_index + 36;
+                        }
+                    }
+                }
+            }
+
+            TestTile {
+                icon: "nfc";
+                title: "NFC";
+                description: State.nfc-message;
+                enabled: State.nfc-enabled;
+                enabled-changed => {
+                    State.nfc-enabled = !State.nfc-enabled;
+                    debug("NFC enabled: {}", State.nfc-enabled);
+                }
+            }
+        }
+    }
+}
+
+component MainPage inherits Rectangle {
+    width: 100%;
+    height: 100%;
+
+    callback start-emissions-test();
+    callback start-fcc-test();
+    VerticalLayout {
+        padding-top: UISize.control-center-status-bar-height;
+        padding-bottom: Size.sz5;
+        padding-left: Size.sz8;
+        padding-right: Size.sz8;
+        alignment: start;
+        spacing: Size.sz8;
+        height: parent.height;
+
+        AppHeader {
+            title: "Regulatory Testing";
+            title-color: DarkPalette.content-primary;
+        }
+
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz2;
+
+            TextLg {
+                text: "Testing Mode";
+                horizontal-alignment: center;
+                height: 32px;
+                color: DarkPalette.content-primary;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                SegmentedControl {
+                    labels: ["Cycle", "Continuous"];
+                    selected_index: State.test-mode;
+                    changed => {
+                        State.test-mode = self.selected_index;
+                    }
+                    width: 100%;
+                }
+            }
+
+            if State.test-mode == 0: HorizontalLayout {
+                alignment: stretch;
+                spacing: Size.sz4;
+                TextMd {
+                    horizontal-stretch: 0;
+                    text: "Cycle Time";
+                    height: Size.sz14;
+                    vertical-alignment: center;
+                    color: DarkPalette.content-primary;
+                }
+
+                Button {
+                    horizontal-stretch: 0;
+                    label: "+";
+                    height: Size.sz14;
+                    width: Size.sz16;
+                    clicked => {
+                        State.cycle-interval += 100;
+                    }
+                }
+
+                TextMd {
+                    horizontal-stretch: 1;
+                    text: "\{State.cycle-interval}ms";
+                    height: Size.sz14;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    color: DarkPalette.content-primary;
+                }
+
+                Button {
+                    horizontal-stretch: 0;
+                    label: "-";
+                    height: Size.sz14;
+                    width: Size.sz16;
+                    clicked => {
+                        if State.cycle-interval > 100 {
+                            State.cycle-interval -= 100;
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            alignment: start;
+            spacing: Size.sz8;
+
+            Button {
+                label: "Emissions Test";
+                height: Size.sz16 * 2;
+                clicked => {
+                    start-emissions-test();
+                }
+            }
+
+            Button {
+                label: "FCC Test";
+                height: Size.sz16 * 2;
+                clicked => {
+                    start-fcc-test();
+                }
+            }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    padding: 0;
+    width: UISize.screen-width;
+    height: UISize.screen-height;
+    background: Palette.transparent;
+
+    private property <bool> is-testing-emissions: false;
+    private property <bool> is-testing-fcc: false;
+
+    Image {
+        source: Images.common("images/background-dark");
+        width: 100%;
+        height: 100%;
+    }
+
+    if is-testing-emissions: EmissionsTestPage {
+        close => {
+            is-testing-emissions = false;
+        }
+    }
+    if is-testing-fcc: FccTestPage {
+        close => {
+            is-testing-fcc = false;
+        }
+    }
+    if !is-testing-emissions && !is-testing-fcc: MainPage {
+        start-emissions-test => {
+            is-testing-emissions = true;
+        }
+        start-fcc-test => {
+            is-testing-fcc = true;
+        }
+    }
+}
+
+export { Utils, Images, CurrentTheme }

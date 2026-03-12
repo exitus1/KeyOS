@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "keycard-auth-tool"
+version = "0.2.0"
+edition = "2024"
+
+[dependencies]
+backup-shard = { workspace = true }
+chrono = "0.4.41"
+clap = { version = "4.5.40", features = ["derive"] }
+colored = "3.0.0"
+hex = "0.4.3"
+hmac = "0.12.1"
+ndef = { workspace = true }
+pcsc = "2.9.0"
+serde = { version = "1.0.219", features = ["derive"] }
+sha2 = "0.10.9"
+toml = "0.8.23"

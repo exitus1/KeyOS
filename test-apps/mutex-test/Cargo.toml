@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "mutex-test"
+version = "0.1.0"
+edition = "2021"
+description = "Mutex test"
+
+# Dependency versions enforced by Cargo.lock.
+[dependencies]
+log = "0.4.14"
+log-server = { package = "xous-api-log", path = "../../xous/api/log" }
+xous = { path = "../../xous/xous-rs" }
+xous-api-ticktimer = { path = "../../xous/api/ticktimer" }

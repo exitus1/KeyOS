@@ -1,0 +1,103 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import { Palette, Size, Images, UISize, Timings } from "@ui/theme.slint";
+
+import { Icon, TextMd } from "@ui/widgets.slint";
+
+export component PowerSlide inherits Rectangle {
+    border-radius: Size.sz6;
+    height: Size.sz16 + (Size.sz1 * 2);
+
+    // Nine-slice background image
+    Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../assets/power-slide-frame-9", nine-slice(27 27 27 27));
+    }
+   
+    // Private properties
+    private property <length> inner-width: self.width - Size.sz1 * 2;
+    private property <length> inner-height: self.height - Size.sz1 * 2;
+    private property <length> inner-element-width: thumb.width;
+    private property <length> max-slide-offset: inner-width - inner-element-width;
+    private property <length> slide-offset: min(max-slide-offset, max(Size.zero, (touchArea.pressed ? touchArea.mouse-x - touchArea.pressed-x : 0)));
+    private property <bool> has-activated: false;
+
+    // Public properties
+    in property <string> id;
+    in property <string> label;
+    in property <string> icon: "arrow-right";
+
+    // Callbacks
+    callback activated(string);
+
+    // Target outline
+    target := Image {
+        x: parent.width - self.width - Size.sz1;
+        width: thumb.width;
+        height: inner-height;
+        source: @image-url("../assets/power-slide-target-9", nine-slice(24 24 24 24));
+    }
+
+    // Movable thumb
+    HorizontalLayout {
+        x: Size.sz1 + slide-offset;
+        y: Size.sz1;
+        height: inner-height;
+        width: inner-width;
+        thumb := Rectangle {
+            width: self.preferred-width;
+            height: inner-height;
+            border-radius: Size.sz6;
+            background: Palette.content-notice;
+            horizontal-stretch: 0;
+
+            HorizontalLayout {
+                alignment: start;
+                horizontal-stretch: 0;
+                spacing: Size.sz2;
+                padding-left: Size.sz4;
+                padding-right: Size.sz4;
+
+                right-icon := VerticalLayout {
+                    alignment: center;
+
+                    Icon {
+                        name: root.icon;
+                        color: Palette.white;
+
+                        animate opacity { duration: Timings.prop-change; }
+                    }
+                }
+
+                label := TextMd {
+                    text: root.label;
+                    color: Palette.white;
+                    horizontal-alignment: right;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle {
+            horizontal-stretch: 1;
+        }
+    }
+
+    touchArea := TouchArea {
+        moved() => {
+            // Make sure to only activate at most once per touch/release cycle
+            if (slide-offset >= max-slide-offset && !root.has-activated) {
+                debug("DONE!");
+                root.has-activated = true;
+                root.activated(id);
+            }
+        }
+        pointer-event(e) => {
+            if (e.kind == PointerEventKind.up) {
+                root.has-activated = false;
+            }
+        }
+    }
+}

@@ -1,0 +1,134 @@
+// SPDX-FileCopyrightText: 2023 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+import {Page} from "./page.slint";
+import {AppHeader, Divider, Slider, Shield, HeadingMd, TextMd, IconButton, Button} from "@ui/widgets.slint";
+import {Size, Palette, Importance} from "@ui/theme.slint";
+
+export component MiscellaneousPage inherits Page {
+    background: Palette.background-primary;
+
+    private property <int> slider2-val: -30;
+
+    VerticalLayout {
+        alignment: start;
+        padding-left: Size.sz6;
+        spacing: Size.sz6;
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            alignment: start;
+            TextMd {
+                text: "Slider: -50 to 150";
+                width: 200px;
+            }
+
+            slider2 := Slider {
+                width: 350px;
+                minimum: -50;
+                maximum: 150;
+                value: -30;
+                icon: "transfer";
+            }
+
+            TextMd {
+                text: "Value: " + slider2.value;
+            }
+        }
+
+        Divider { }
+
+        Shield {
+            width: 472px;
+            height: 720px;
+        }
+
+        Divider { }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            alignment: start;
+            TextMd {
+                text: "Shield Width: 200 to 472";
+                width: 200px;
+            }
+
+            w-slider := Slider {
+                width: 350px;
+                minimum: 200;
+                maximum: 472;
+                value: 472;
+            }
+
+            TextMd {
+                text: "Width: " + w-slider.value;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            alignment: start;
+            TextMd {
+                text: "Shield Height: 200 to 690";
+                width: 200px;
+            }
+
+            h-slider := Slider {
+                width: 350px;
+                minimum: 200;
+                maximum: 690;
+                value: 690;
+            }
+
+            TextMd {
+                text: "Height: " + h-slider.value;
+            }
+        }
+
+        Divider { }
+
+        HorizontalLayout {
+            spacing: Size.sz8;
+            alignment: start;
+            TextMd {
+                text: "AppHeader";
+                width: 200px;
+            }
+
+            VerticalLayout {
+                width: 440px;
+                alignment: start;
+                AppHeader {
+                    title: "APP TITLE";
+                }
+
+                AppHeader {
+                    title: "APP TITLE";
+                    IconButton {
+                        icon: "shield";
+                        importance: Importance.tertiary;
+                    }
+
+                    IconButton {
+                        icon: "passport";
+                        importance: Importance.tertiary;
+                    }
+                }
+
+                AppHeader {
+                    title: "APP TITLE";
+
+                    Button {
+                        label: "Back";
+                        importance: Importance.tertiary;
+                    }
+
+                    Button {
+                        label: "Done";
+                        importance: Importance.tertiary;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+// SPDX-FileCopyrightText: 2025 Foundation Devices, Inc. <hello@foundation.xyz>
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+
+export global BackupGlobal {
+    in property <[string]> seed-words: [];
+
+    in property <string> last-backup-time-ago: "";
+
+    in-out property <bool> magic-backup-enabled: true;
+    callback set-magic-backup-enabled(bool);
+
+    callback create-backup();
+    in property <bool> creating-backup;
+}
