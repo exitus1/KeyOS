@@ -4,7 +4,9 @@
 use {
     ordered_table::{SortableCard, TableEntry},
     serde::{Deserialize, Serialize},
-    totp_rs::TOTP,
+    totp_rs::{TotpUrlError, TOTP},
+    url::{form_urlencoded, Url},
+    urlencoding::decode,
 };
 
 pub const DATABASE_FILE: &str = "authenticator_database_v3.json";
@@ -23,14 +25,10 @@ pub enum AuthValidationError {
     InvalidLabelError,
     #[error("Account field must not be empty")]
     EmptyAccountError,
-    #[error("Account field must not contain \":\"")]
-    InvalidAccountError,
-    #[error("Issuer field must not contain \":\"")]
-    InvalidIssuerError,
     #[error("Time period must be 30 seconds: {0:?}")]
     InvalidTimestepError(u64),
     #[error("Invalid TOTP URL: {0:?}")]
-    InvalidTotpError(totp_rs::TotpUrlError),
+    InvalidTotpError(TotpUrlError),
 }
 
 #[repr(u32)]
@@ -100,11 +98,70 @@ impl SortableCard for Auth {
     fn get_date(&self) -> u64 { self.date }
 }
 
+fn escape_first_n_colons(input: &str, n: usize) -> String {
+    if n == 0 {
+        return input.to_string();
+    }
+
+    let mut escaped_colons = 0;
+    let mut escaped = String::with_capacity(input.len() + (n * 4));
+    for c in input.chars() {
+        if c == ':' && escaped_colons < n {
+            escaped.push_str("%253A");
+            escaped_colons += 1;
+        } else {
+            escaped.push(c);
+        }
+    }
+
+    escaped
+}
+
 impl Auth {
     pub fn new(totp_url: String, date: u64) -> Result<Self, AuthValidationError> {
         // Use unchecked, because github, and possibly others, may use short secrets
-        let totp =
-            TOTP::from_url_unchecked(&totp_url).map_err(|e| AuthValidationError::InvalidTotpError(e))?;
+        let totp = match TOTP::from_url_unchecked(&totp_url) {
+            Ok(t) => t,
+            Err(TotpUrlError::IssuerMistmatch(url_issuer, param_issuer)) => {
+                let url_issuer = decode(&url_issuer).map(|v| v.to_string()).unwrap_or(url_issuer);
+                let param_issuer = decode(&param_issuer).map(|v| v.to_string()).unwrap_or(param_issuer);
+                let mut sanitized_url = totp_url.clone();
+                if let Ok(mut parsed_url) = Url::parse(&totp_url) {
+                    let issuer_colons = param_issuer.matches(':').count();
+                    if issuer_colons > 0 {
+                        if let Ok(decoded_path) = decode(parsed_url.path().trim_start_matches('/')) {
+                            let decoded_path = decoded_path.to_string();
+                            let expected_prefix = format!("{param_issuer}:");
+                            if decoded_path.starts_with(&expected_prefix)
+                                && param_issuer.starts_with(&url_issuer)
+                            {
+                                let escaped_path = escape_first_n_colons(&decoded_path, issuer_colons);
+                                parsed_url.set_path(&format!("/{escaped_path}"));
+
+                                let escaped_issuer = param_issuer.replace(':', "%3A");
+                                let mut query_serializer = form_urlencoded::Serializer::new(String::new());
+                                for (key, value) in parsed_url.query_pairs() {
+                                    if key == "issuer" {
+                                        query_serializer.append_pair("issuer", &escaped_issuer);
+                                    } else {
+                                        query_serializer.append_pair(&key, &value);
+                                    }
+                                }
+                                let sanitized_query = query_serializer.finish();
+                                parsed_url.set_query(Some(&sanitized_query));
+                                sanitized_url = parsed_url.to_string();
+                            }
+                        }
+                    }
+                }
+
+                let mut sanitized_totp = TOTP::from_url_unchecked(&sanitized_url)
+                    .map_err(AuthValidationError::InvalidTotpError)?;
+                sanitized_totp.issuer = Some(param_issuer);
+                sanitized_totp
+            }
+            Err(e) => return Err(AuthValidationError::InvalidTotpError(e)),
+        };
         totp.validate()?;
 
         // Don't validate default label, which can be empty initially before
@@ -158,16 +215,8 @@ impl AuthEditField {
                 if val.len() == 0 {
                     return Err(AuthValidationError::EmptyAccountError);
                 }
-
-                if val.contains(":") {
-                    return Err(AuthValidationError::InvalidAccountError);
-                }
             }
-            AuthEditField::Issuer(val) => {
-                if val.contains(":") {
-                    return Err(AuthValidationError::InvalidIssuerError);
-                }
-            }
+            AuthEditField::Issuer(_val) => (),
         }
 
         Ok(())
@@ -207,6 +256,24 @@ mod tests {
         Ok(Auth::new(url, 0)?)
     }
 
+    fn auth_colon_issuer_unescaped() -> Result<Auth, AuthValidationError> {
+        let url =
+            String::from("otpauth://totp/Te:st:testuser?secret=GZ4FORKTNBVFGQTFJJGEIRDOKY&issuer=Te:st");
+        Ok(Auth::new(url, 0)?)
+    }
+
+    fn auth_colon_issuer_escaped() -> Result<Auth, AuthValidationError> {
+        let url =
+            String::from("otpauth://totp/Te%3Ast:testuser?secret=GZ4FORKTNBVFGQTFJJGEIRDOKY&issuer=Te:st");
+        Ok(Auth::new(url, 0)?)
+    }
+
+    fn auth_colon_issuer_query_escaped() -> Result<Auth, AuthValidationError> {
+        let url =
+            String::from("otpauth://totp/Te:st:testuser?secret=GZ4FORKTNBVFGQTFJJGEIRDOKY&issuer=Te%3Ast");
+        Ok(Auth::new(url, 0)?)
+    }
+
     #[test]
     fn create_auth() {
         let auth = auth1().unwrap();
@@ -216,6 +283,27 @@ mod tests {
 
     #[test]
     fn create_short_auth() { auth_short().unwrap(); }
+
+    #[test]
+    fn create_auth_colon_issuer_unescaped() {
+        let auth = auth_colon_issuer_unescaped().unwrap();
+        assert_eq!(auth.get_issuer(), "Te:st");
+        assert_eq!(auth.get_account(), "testuser");
+    }
+
+    #[test]
+    fn create_auth_colon_issuer_escaped() {
+        let auth = auth_colon_issuer_escaped().unwrap();
+        assert_eq!(auth.get_issuer(), "Te:st");
+        assert_eq!(auth.get_account(), "testuser");
+    }
+
+    #[test]
+    fn create_auth_colon_issuer_query_escaped() {
+        let auth = auth_colon_issuer_query_escaped().unwrap();
+        assert_eq!(auth.get_issuer(), "Te:st");
+        assert_eq!(auth.get_account(), "testuser");
+    }
 
     #[test]
     fn create_auth_no_issuer() { auth_no_issuer().unwrap(); }
@@ -282,31 +370,11 @@ mod tests {
     }
 
     #[test]
-    fn validate_invalid_account() {
-        let field = AuthEditField::Account(String::from("Custo:mer"));
-        match field.validate() {
-            Ok(_) => panic!("Invalid account should fail."),
-            Err(AuthValidationError::InvalidAccountError) => (),
-            Err(other) => panic!("Failed with the wrong error: {}", other),
-        }
-    }
-
-    #[test]
     fn validate_empty_account() {
         let field = AuthEditField::Account(String::new());
         match field.validate() {
             Ok(_) => panic!("Empty account should fail."),
             Err(AuthValidationError::EmptyAccountError) => (),
-            Err(other) => panic!("Failed with the wrong error: {}", other),
-        }
-    }
-
-    #[test]
-    fn validate_invalid_issuer() {
-        let field = AuthEditField::Issuer(String::from("Custo:mer"));
-        match field.validate() {
-            Ok(_) => panic!("Invalid issuer should fail."),
-            Err(AuthValidationError::InvalidIssuerError) => (),
             Err(other) => panic!("Failed with the wrong error: {}", other),
         }
     }
@@ -350,17 +418,6 @@ mod tests {
     }
 
     #[test]
-    fn edit_invalid_account() {
-        let mut auth1 = auth1().unwrap();
-        let field = AuthEditField::Account(String::from("Custo:mer"));
-        match auth1.edit(field) {
-            Ok(_) => panic!("Invalid account should fail."),
-            Err(AuthValidationError::InvalidAccountError) => (),
-            Err(other) => panic!("Failed with the wrong error: {}", other),
-        }
-    }
-
-    #[test]
     fn edit_empty_account() {
         let mut auth1 = auth1().unwrap();
         let field = AuthEditField::Account(String::new());
@@ -372,34 +429,12 @@ mod tests {
     }
 
     #[test]
-    fn edit_invalid_issuer() {
-        let mut auth1 = auth1().unwrap();
-        let field = AuthEditField::Issuer(String::from("Custo:mer"));
-        match auth1.edit(field) {
-            Ok(_) => panic!("Invalid issuer should fail."),
-            Err(AuthValidationError::InvalidIssuerError) => (),
-            Err(other) => panic!("Failed with the wrong error: {}", other),
-        }
-    }
-
-    #[test]
     fn table_validate_account() {
         let mut auth1 = auth1().unwrap();
         auth1.totp.account_name = String::from("");
         match auth1.validate() {
             Ok(_) => panic!("This TOTP should not be valid."),
             Err(AuthValidationError::EmptyAccountError) => (),
-            Err(other) => panic!("Failed with the wrong error: {}", other),
-        }
-    }
-
-    #[test]
-    fn table_validate_issuer() {
-        let mut auth1 = auth1().unwrap();
-        auth1.totp.issuer = Some(String::from(":"));
-        match auth1.validate() {
-            Ok(_) => panic!("This TOTP should not be valid."),
-            Err(AuthValidationError::InvalidIssuerError) => (),
             Err(other) => panic!("Failed with the wrong error: {}", other),
         }
     }

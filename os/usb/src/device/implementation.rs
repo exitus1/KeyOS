@@ -564,6 +564,8 @@ impl BlockingScalarHandler<ResetController> for UsbDeviceServer {
         if self.enabled {
             self.hw.set_enabled(false);
             self.send_disconnected();
+            // XXX: Without this sleep, Windows doesn't handle the reset well.
+            std::thread::sleep(std::time::Duration::from_millis(100));
             self.hw.set_enabled(true);
         }
         Ok(())

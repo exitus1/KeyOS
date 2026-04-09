@@ -681,7 +681,12 @@ fn fs_event_handler(state: StoredValue<AppState>, event: fs::FileSystemEvent) {
     if state.borrow().picker.is_some() {
         AppState::list_directory_picker(state)
     } else if state.borrow().copy_move.is_some() {
-        AppState::list_directory_copy_move(state)
+        if !state.with(|state| state.is_mounted(state.browser.current)) {
+            state.borrow_mut().close_modal();
+            state.borrow_mut().apply_ui();
+        } else {
+            AppState::list_directory_copy_move(state)
+        }
     } else {
         AppState::list_directory_browser(state)
     }

@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::str;
 
+use crate::header::BLOCK_SIZE;
 use crate::header::GNU_SPARSE_HEADERS_COUNT;
 use crate::header::{path2bytes, HeaderMode};
 use crate::GnuExtSparseHeader;
@@ -180,7 +181,7 @@ impl<W: Write> Builder<W> {
     ) -> io::Result<()> {
         prepare_header_path(self.get_mut(), header, path.as_ref())?;
         header.set_cksum();
-        self.append(&header, data)
+        self.append(header, data)
     }
 
     /// Adds a new entry to this archive and returns an [`EntryWriter`] for
@@ -269,7 +270,7 @@ impl<W: Write> Builder<W> {
         prepare_header_path(self.get_mut(), header, path)?;
         prepare_header_link(self.get_mut(), header, target)?;
         header.set_cksum();
-        self.append(&header, std::io::empty())
+        self.append(header, std::io::empty())
     }
 
     /// Adds a file on the local filesystem to this archive.
@@ -380,7 +381,7 @@ impl<W: Write> Builder<W> {
     /// operation then this may corrupt the archive.
     ///
     /// Note this will not add the contents of the directory to the archive.
-    /// See `append_dir_all` for recusively adding the contents of the directory.
+    /// See `append_dir_all` for recursively adding the contents of the directory.
     ///
     /// Also note that after all files have been written to an archive the
     /// `finish` function needs to be called to finish writing the archive.
@@ -502,6 +503,8 @@ impl<T: Write + Seek> SeekWrite for T {
 /// After writing all data to the entry, it must be finalized either by
 /// explicitly calling [`EntryWriter::finish`] or by letting it drop.
 pub struct EntryWriter<'a> {
+    // NOTE: Do not add any fields here which require Drop!
+    // See the comment below in finish().
     obj: &'a mut dyn SeekWrite,
     header: &'a mut Header,
     written: u64,
@@ -516,7 +519,7 @@ impl EntryWriter<'_> {
         prepare_header_path(obj.as_write(), header, path)?;
 
         // Reserve space for header, will be overwritten once data is written.
-        obj.write_all([0u8; 512].as_ref())?;
+        obj.write_all([0u8; BLOCK_SIZE as usize].as_ref())?;
 
         Ok(EntryWriter {
             obj,
@@ -527,19 +530,29 @@ impl EntryWriter<'_> {
 
     /// Finish writing the current entry in the archive.
     pub fn finish(self) -> io::Result<()> {
+        // NOTE: This is an optimization for "fallible destructuring".
+        // We want finish() to return an error, but we also need to invoke
+        // cleanup in our Drop handler, which will run unconditionally
+        // and try to do the same work.
+        // By using ManuallyDrop, we suppress that drop. However, this would
+        // be a memory leak if we ever had any struct members which required
+        // Drop - which we don't right now.
+        // But if we ever gain one, we will need to change to use e.g. Option<>
+        // around some of the fields or have a `bool finished` etc.
         let mut this = std::mem::ManuallyDrop::new(self);
         this.do_finish()
     }
 
     fn do_finish(&mut self) -> io::Result<()> {
         // Pad with zeros if necessary.
-        let buf = [0u8; 512];
-        let remaining = u64::wrapping_sub(512, self.written) % 512;
+        let buf = [0u8; BLOCK_SIZE as usize];
+        let remaining = BLOCK_SIZE.wrapping_sub(self.written) % BLOCK_SIZE;
         self.obj.write_all(&buf[..remaining as usize])?;
         let written = (self.written + remaining) as i64;
 
         // Seek back to the header position.
-        self.obj.seek(io::SeekFrom::Current(-written - 512))?;
+        self.obj
+            .seek(io::SeekFrom::Current(-written - BLOCK_SIZE as i64))?;
 
         self.header.set_size(self.written);
         self.header.set_cksum();
@@ -578,9 +591,9 @@ fn append(mut dst: &mut dyn Write, header: &Header, mut data: &mut dyn Read) -> 
 }
 
 fn pad_zeroes(dst: &mut dyn Write, len: u64) -> io::Result<()> {
-    let buf = [0; 512];
-    let remaining = 512 - (len % 512);
-    if remaining < 512 {
+    let buf = [0; BLOCK_SIZE as usize];
+    let remaining = BLOCK_SIZE - (len % BLOCK_SIZE);
+    if remaining < BLOCK_SIZE {
         dst.write_all(&buf[..remaining as usize])?;
     }
     Ok(())
@@ -736,28 +749,32 @@ fn prepare_header_path(dst: &mut dyn Write, header: &mut Header, path: &Path) ->
     // long name extension by emitting an entry which indicates that it's the
     // filename.
     if let Err(e) = header.set_path(path) {
-        let data = path2bytes(&path)?;
+        let data = path2bytes(path)?;
         let max = header.as_old().name.len();
         // Since `e` isn't specific enough to let us know the path is indeed too
         // long, verify it first before using the extension.
         if data.len() < max {
             return Err(e);
         }
-        let header2 = prepare_header(data.len() as u64, b'L');
-        // null-terminated string
-        let mut data2 = data.chain(io::repeat(0).take(1));
-        append(dst, &header2, &mut data2)?;
-
         // Truncate the path to store in the header we're about to emit to
         // ensure we've got something at least mentioned. Note that we use
         // `str`-encoding to be compatible with Windows, but in general the
         // entry in the header itself shouldn't matter too much since extraction
         // doesn't look at it.
+        //
+        // Validate the truncated path BEFORE writing the long-name extension
+        // to the stream. If validation fails after writing, the orphaned
+        // extension entry corrupts subsequent archive entries.
         let truncated = match str::from_utf8(&data[..max]) {
             Ok(s) => s,
             Err(e) => str::from_utf8(&data[..e.valid_up_to()]).unwrap(),
         };
-        header.set_path(truncated)?;
+        header.set_truncated_path_for_gnu_header(truncated)?;
+
+        let header2 = prepare_header(data.len() as u64, b'L');
+        // null-terminated string
+        let mut data2 = data.chain(io::repeat(0).take(1));
+        append(dst, &header2, &mut data2)?;
     }
     Ok(())
 }
@@ -768,8 +785,8 @@ fn prepare_header_link(
     link_name: &Path,
 ) -> io::Result<()> {
     // Same as previous function but for linkname
-    if let Err(e) = header.set_link_name(&link_name) {
-        let data = path2bytes(&link_name)?;
+    if let Err(e) = header.set_link_name(link_name) {
+        let data = path2bytes(link_name)?;
         if data.len() < header.as_old().linkname.len() {
             return Err(e);
         }
@@ -863,7 +880,7 @@ fn append_dir_all(
 ) -> io::Result<()> {
     let mut stack = vec![(src_path.to_path_buf(), true, false)];
     while let Some((src, is_dir, is_symlink)) = stack.pop() {
-        let dest = path.join(src.strip_prefix(&src_path).unwrap());
+        let dest = path.join(src.strip_prefix(src_path).unwrap());
         // In case of a symlink pointing to a directory, is_dir is false, but src.is_dir() will return true
         if is_dir || (is_symlink && options.follow && src.is_dir()) {
             for entry in fs::read_dir(&src)? {
@@ -913,11 +930,10 @@ struct SparseEntry {
 
 /// Find sparse entries in a file. Returns:
 /// * `Ok(Some(_))` if the file is sparse.
-/// * `Ok(None)` if the file is not sparse, or if the file system does not
-///    support sparse files.
+/// * `Ok(None)` if the file is not sparse, or if the file system does not support sparse files.
 /// * `Err(_)` if an error occurred. The lack of support for sparse files is not
-///    considered an error. It might return an error if the file is modified
-///    while reading.
+///   considered an error. It might return an error if the file is modified
+///   while reading.
 fn find_sparse_entries(
     file: &mut fs::File,
     stat: &fs::Metadata,
@@ -970,7 +986,7 @@ fn find_sparse_entries_seek(
         });
     }
 
-    // On most Unices, we need to read `_PC_MIN_HOLE_SIZE` to see if the file
+    // On most Unixes, we need to read `_PC_MIN_HOLE_SIZE` to see if the file
     // system supports `SEEK_HOLE`.
     // FreeBSD: https://man.freebsd.org/cgi/man.cgi?query=lseek&sektion=2&manpath=FreeBSD+14.1-STABLE
     #[cfg(not(any(target_os = "linux", target_os = "android")))]
@@ -1103,8 +1119,9 @@ impl<W: Write> Drop for Builder<W> {
 mod tests {
     use super::*;
 
-    /// Should be multiple of 4KiB on ext4, multiple of 32KiB on FreeBSD/UFS.
-    const SPARSE_BLOCK_SIZE: u64 = 32768;
+    /// Should be multiple of 4KiB on ext4, multiple of 32KiB on FreeBSD/UFS, multiple of 64KiB on
+    /// ppc64el
+    const SPARSE_BLOCK_SIZE: u64 = 64 * 1024;
 
     #[test]
     fn test_find_sparse_entries() {
@@ -1194,7 +1211,7 @@ mod tests {
                 "|    |####|####|    |",
                 &[
                     SparseEntry {
-                        offset: 1 * SPARSE_BLOCK_SIZE,
+                        offset: SPARSE_BLOCK_SIZE,
                         num_bytes: 2 * SPARSE_BLOCK_SIZE,
                     },
                     SparseEntry {

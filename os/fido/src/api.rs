@@ -8,8 +8,8 @@ use crate::messages::ResetState;
 use crate::{
     error::FidoError,
     messages::{
-        CreateSecurityKey, CtapProcessCbor, GetSelectedSecurityKey, IsLive, NextSecurityKeyIndex,
-        SelectSecurityKey, SetLive, Transport, U2fProcessApdu,
+        CreateSecurityKey, CtapProcessCbor, EnsureSecurityKeys, GetSelectedSecurityKey, IsLive,
+        NextSecurityKeyIndex, SelectSecurityKey, SetLive, Transport, U2fProcessApdu,
     },
 };
 
@@ -78,6 +78,14 @@ impl<P: CheckedPermissions> FidoApi<P> {
         P: MessageAllowed<SetLive>,
     {
         self.0.try_send_scalar(SetLive { index, live }).ok();
+    }
+
+    /// Ensure the FIDO server has at least `count` security keys (fire-and-forget).
+    pub fn ensure_security_keys(&self, count: usize)
+    where
+        P: MessageAllowed<EnsureSecurityKeys>,
+    {
+        self.0.try_send_scalar(EnsureSecurityKeys(count)).ok();
     }
 
     /* API for ctap-hid/nfc server */

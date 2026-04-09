@@ -10,6 +10,7 @@ SetLive = { id = 2, type = "scalar" }
 IsLive = { id = 3, type = "blockingScalar" }
 GetSelectedSecurityKey = { id = 4, type = "blockingScalar" }
 SelectSecurityKey = { id = 5, type = "scalar" }
+EnsureSecurityKeys = { id = 6, type = "scalar" }
 U2fProcessApdu = { id = 32, type = "archive" }
 CtapProcessCbor = { id = 33, type = "archive" }
 ResetState = { id = 64, type = "blockingScalar", cfg = "feature = \"test-app\"" }

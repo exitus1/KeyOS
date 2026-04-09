@@ -151,8 +151,10 @@ fn on_startup(state: StoredValue<AppState>) {
         match master_key_state {
             MasterKeyState::Onboarding => {}
             _ => {
-                // todo: determine if seed was restore/new
-                navigate_backup(state);
+                // if we have reached this branch, then we have rebooted mid-way through onboarding
+                // which is un-recoverable. we must factory reset restart onboarding
+                crate::erase_system_state();
+                state.borrow().security.lockout(security::LockoutOptions::erase_all()).ok();
             }
         }
     }
@@ -161,13 +163,9 @@ fn on_startup(state: StoredValue<AppState>) {
 fn navigate_backup(state: StoredValue<AppState>) {
     let state = state.borrow();
     let ui = state.ui();
-    let enabled = state.settings.get_magic_backup_enabled().0;
     let nav = ui.global::<Navigate>();
-    if enabled {
-        nav.invoke_magic_backup(Default::default());
-    } else {
-        nav.invoke_manual_backup(Default::default());
-    }
+    // from magic, you can choose manual backup
+    nav.invoke_magic_backup(Default::default());
 }
 
 fn init_device_name(state: StoredValue<AppState>) {
@@ -301,6 +299,10 @@ fn init_callbacks(state: StoredValue<AppState>) {
 
     cb.on_navigate_backup(move || {
         navigate_backup(state);
+    });
+
+    cb.on_set_magic_backup_enabled(move |enabled| {
+        state.borrow().settings.set_magic_backup_enabled(enabled);
     });
 
     cb.on_download_firmware_update(move || {
@@ -556,21 +558,6 @@ fn init_quantum_link(state: StoredValue<AppState>) {
     })
     .detach();
 
-    spawn_local({
-        let enabled = state.borrow().ql_status.send_ql_archive_retry(
-            quantum_link::messages::EnvoyMagicBackupEnabled,
-            |e| {
-                log::info!("failed to retrieve magic backup enabled, retrying... {e}");
-            },
-        );
-        async move {
-            let enabled = enabled.await;
-            log::info!("retrieved magic backup enabled {enabled}");
-            state.borrow().settings.set_magic_backup_enabled(enabled);
-        }
-    })
-    .detach();
-
     {
         let state = state.borrow();
         ql_utils::sync_system_timezone(state.settings.clone(), state.ql_status.clone(), |e| {
@@ -706,7 +693,13 @@ fn init_seed_global(state: StoredValue<AppState>) {
     });
 
     seed_global.on_restore_from_seed_qr(move || {
-        spawn_local(state::setup_seed::restore_from_seed_qr(state)).detach()
+        spawn_local(async move {
+            state::setup_seed::restore_from_seed_qr(state)
+                .await
+                .inspect_err(|e| log::error!("failed to restore from seedqr {e:?}"))
+                .ok();
+        })
+        .detach()
     });
 
     seed_global.on_validate_seed_word(move |word: SharedString| {

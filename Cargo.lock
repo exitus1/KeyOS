@@ -285,7 +285,7 @@ dependencies = [
  "rkyv",
  "serde_json",
  "server",
- "tar 0.4.42",
+ "tar",
  "thiserror 1.0.64",
  "xous",
  "xous-api-log",
@@ -690,7 +690,7 @@ dependencies = [
  "sha2",
  "shared-fut",
  "simple_logger",
- "tar 0.4.42",
+ "tar",
  "thiserror 2.0.11",
  "whence",
  "worker",
@@ -4414,6 +4414,8 @@ dependencies = [
  "slint-keyos-platform-build",
  "thiserror 1.0.64",
  "totp-rs",
+ "url",
+ "urlencoding",
  "xous-api-log",
 ]
 
@@ -4678,7 +4680,7 @@ dependencies = [
  "server",
  "slint-keyos-platform",
  "slint-keyos-platform-build",
- "tar 0.4.42",
+ "tar",
  "thiserror 1.0.64",
  "usb",
  "xous",
@@ -9343,7 +9345,7 @@ dependencies = [
  "serde",
  "serde_json",
  "server",
- "tar 0.4.42",
+ "tar",
  "thiserror 1.0.64",
  "xous",
  "xous-api-log",
@@ -9766,9 +9768,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.12"
+version = "0.23.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c58f8c84392efc0a126acce10fa59ff7b3d2ac06ab451a33f2741989b806b044"
+checksum = "758025cb5fccfd3bc2fd74708fd4682be41d99e5dff73c377c0646c6012c73a4"
 dependencies = [
  "log 0.4.27",
  "once_cell",
@@ -9781,15 +9783,18 @@ dependencies = [
 
 [[package]]
 name = "rustls-pki-types"
-version = "1.8.0"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc0a2ce646f8655401bb81e7927b812614bd5d91dbc968696be50603510fcaf0"
+checksum = "be040f8b0a225e40375822a563fa9524378b9d63112f53e19ffff34df5d33fdd"
+dependencies = [
+ "zeroize",
+]
 
 [[package]]
 name = "rustls-webpki"
-version = "0.102.7"
+version = "0.103.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84678086bd54edf2b415183ed7a94d0efb049f1b646a33e22a36f3794be6ae56"
+checksum = "df33b2b81ac578cabaf06b89b0631153a3f416b0a886e8a7a1707fb51abbd1ef"
 dependencies = [
  "ring",
  "rustls-pki-types",
@@ -10583,7 +10588,7 @@ dependencies = [
  "lazy_static",
  "regex",
  "serde_json",
- "tar 0.4.44",
+ "tar",
  "toml 0.8.23",
 ]
 
@@ -11266,21 +11271,11 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "tar"
-version = "0.4.42"
-dependencies = [
- "libc",
- "tempfile",
- "xattr",
-]
-
-[[package]]
-name = "tar"
-version = "0.4.44"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d863878d212c87a19c1a610eb53bb01fe12951c0501cf5a0d65f724914a667a"
+version = "0.4.45"
 dependencies = [
  "filetime",
  "libc",
+ "tempfile",
  "xattr",
 ]
 
@@ -11996,7 +11991,7 @@ dependencies = [
  "serde_json",
  "server",
  "sha2",
- "tar 0.4.42",
+ "tar",
  "thiserror 1.0.64",
  "update",
  "utralib",
@@ -12032,9 +12027,9 @@ dependencies = [
 
 [[package]]
 name = "ureq"
-version = "2.10.1"
+version = "2.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b74fc6b57825be3373f7054754755f03ac3a8f5d70015ccad699ba2029956f4a"
+checksum = "02d1a66277ed75f640d608235660df48c8e3c19f3b4edb6a263315626cc3c01d"
 dependencies = [
  "base64 0.22.1",
  "flate2",
@@ -13654,7 +13649,7 @@ dependencies = [
  "sha2",
  "slint-keyos-platform-build",
  "svd2utra 0.1.15 (registry+https://github.com/rust-lang/crates.io-index)",
- "tar 0.4.42",
+ "tar",
  "tempfile",
  "ureq",
  "utralib",

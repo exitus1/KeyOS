@@ -13,8 +13,8 @@ use crate::{
     error::FidoError,
     implementation::fs_permissions::FileSystemPermissions,
     messages::{
-        CreateSecurityKey, CtapProcessCbor, GetSelectedSecurityKey, IsLive, NextSecurityKeyIndex,
-        SelectSecurityKey, SetLive, U2fProcessApdu,
+        CreateSecurityKey, CtapProcessCbor, EnsureSecurityKeys, GetSelectedSecurityKey, IsLive,
+        NextSecurityKeyIndex, SelectSecurityKey, SetLive, U2fProcessApdu,
     },
     CryptoApi, RegisteredKey, RegisteredKeyCtap, RegisteredKeyU2f, SecurityKey,
 };
@@ -227,6 +227,28 @@ impl FidoServer {
         self.fido_keys = Vec::new();
         self.compute_next_signing_keys()?;
         self.state.guard().0 = FidoKeysState::default();
+        Ok(())
+    }
+
+    fn ensure_security_keys(&mut self, expected_count: usize) -> Result<(), FidoError> {
+        let current_count = self.state.security_keys.len();
+        if expected_count > current_count {
+            log::warn!(
+                "security key count mismatch: server has {current_count}, app expects {expected_count} — restoring missing keys"
+            );
+            for _ in current_count..expected_count {
+                self.fido_keys.push(FidoKey::default());
+            }
+            self.compute_next_signing_keys()?;
+            let mut state = self.state.guard();
+            for _ in current_count..expected_count {
+                let mut key = SecurityKey::default();
+                key.live = true;
+                state.security_keys.push(key);
+            }
+            drop(state);
+            self.state.save();
+        }
         Ok(())
     }
 
@@ -453,10 +475,24 @@ impl ScalarHandler<SelectSecurityKey> for FidoServer {
     }
 }
 
+impl ScalarHandler<EnsureSecurityKeys> for FidoServer {
+    fn handle(&mut self, msg: EnsureSecurityKeys, _sender: xous::PID, _context: &mut ServerContext<Self>) {
+        if let Err(e) = self.ensure_security_keys(msg.0) {
+            log::error!("ensure_security_keys failed: {:?}", e);
+        }
+    }
+}
+
 impl ScalarHandler<CreateSecurityKey> for FidoServer {
     fn handle(&mut self, _msg: CreateSecurityKey, _sender: xous::PID, _context: &mut ServerContext<Self>) {
-        if let Err(e) = self.create_security_key() {
-            log::warn!("create_security_key failed: {:?}", e);
+        match self.create_security_key() {
+            Ok(index) => {
+                log::info!("security key created at index {index}");
+                if let Err(e) = self.save_states() {
+                    log::error!("failed to save state after key creation: {:?}", e);
+                }
+            }
+            Err(e) => log::warn!("create_security_key failed: {:?}", e),
         }
     }
 }
@@ -467,6 +503,8 @@ impl ScalarHandler<SetLive> for FidoServer {
         if let Err(e) = state.security_key_mut(msg.index).map(|k| k.live = msg.live) {
             log::warn!("set_live failed: {:?}", e);
         }
+        drop(state);
+        self.state.save();
     }
 }
 

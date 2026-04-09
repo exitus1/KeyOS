@@ -2,19 +2,44 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { MagicBackupProps } from "props.slint";
-import { OnboardingBasePage } from "../../../widgets/base-page.slint";
 import { Navigate } from "../../../gen/navigate.slint";
 import { OnboardingCallbacks } from "../../../onboarding-callbacks.slint";
 import { OnboardingShieldPage, ShieldContent, ShieldSection, OverlayImage } from "../../../widgets/shield-page.slint";
 import { Size } from "@ui/theme.slint";
 import { TR2, TrId } from "../../../gen/tr.slint";
-import { HeadingMd, TextMd, ButtonSection, Button } from "@ui/widgets.slint";
-import { Size } from "@ui/theme.slint";
+import { NavHeader, AppHeader, HeadingMd, TextMd, ButtonSection, Button } from "@ui/widgets.slint";
 
 export component MagicBackupPage inherits OnboardingShieldPage {
     in property <MagicBackupProps> props;
 
     property <bool> first-page: true;
+
+    init => {
+        OnboardingCallbacks.set-magic-backup-enabled(true);
+    }
+
+    NavHeader {
+        y: 0;
+        visible: !first-page;
+        clicked => {
+            first-page = true;
+        }
+    }
+
+    AppHeader {
+        y: 0;
+        title: "";
+        alignment: end;
+        visible: first-page;
+
+        Button {
+            label: TR2.lookup(TrId.BackupMagicMain1Advanced);
+            importance: normal;
+            clicked => {
+                Navigate.manual-backup({ });
+            }
+        }
+    }
 
     ShieldSection {
         ShieldContent {

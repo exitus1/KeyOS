@@ -12,6 +12,7 @@ template = ["gui-app", "navigable", "fs-generic"]
     "GetSelectedSecurityKey",
     "CreateSecurityKey",
     "NextSecurityKeyIndex",
+    "EnsureSecurityKeys",
 ]
 "os/haptics" = ["Vibrate"]
 "os/nfc" = ["IsEnabled"]

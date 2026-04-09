@@ -299,6 +299,7 @@ codegen-units = 1
 
 [patch.crates-io]
 getrandom = { path = "imports/getrandom" }
+tar = { path = "imports/tar-rs" }
 pqcrypto-traits = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }
 pqcrypto-mldsa = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }
 pqcrypto-mlkem = { git = "https://github.com/Foundation-Devices/pqcrypto", rev = "ebadf71214f67cb970242fa1053b4acb65767737" }

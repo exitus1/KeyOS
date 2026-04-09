@@ -1,6 +1,6 @@
 {
   "MasterKeyCreated.dataEncrypted": "Data encrypted",
-  "backupMagicMain1.advanced": "Advanced",
+  "backupMagicMain1.advanced": "Avanzado",
   "backupMagicMain1.subheader": "Create a secure and resilient backup of your Passport Master Key.\n\nYour Master Key will be split into three parts. Two will be stored on Keycards.\n\nThe third will be stored on Envoy, encrypted, and backed up to your Apple or Google account.",
   "backupManual2Of3Keycard.header": "Creating Keycard Backup",
   "backupManualMain.header": "Create Backup",

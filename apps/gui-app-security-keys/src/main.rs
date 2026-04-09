@@ -352,6 +352,8 @@ fn app_main(cx: AppContext, ui: AppWindow) {
         dropdown_model: Rc::new(VecModel::default()),
     };
 
+    app_state.fido_api.ensure_security_keys(app_state.key_table.len());
+
     if app_state.key_table.len() == 0 {
         ui.global::<Navigate>().invoke_add(NavigateOptions { replace: true, animate: Animate::None });
     }

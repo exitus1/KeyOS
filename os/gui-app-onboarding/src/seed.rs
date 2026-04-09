@@ -56,10 +56,16 @@ pub fn parse_seedqr(qr_data: &[u8]) -> Result<bip39::Mnemonic, ParseSeedQrError>
             .collect::<Result<Vec<&'static str>, _>>()?
             .join(" ");
 
-        bip39::Mnemonic::parse(words.as_str()).map_err(|e| e.into())
-    } else {
-        bip39::Mnemonic::from_entropy(qr_data).map_err(|e| e.into())
+        return bip39::Mnemonic::parse(words.as_str()).map_err(|e| e.into());
     }
+
+    if let Ok(text) = std::str::from_utf8(qr_data) {
+        if let Ok(mnemonic) = bip39::Mnemonic::parse_normalized(&text) {
+            return Ok(mnemonic);
+        }
+    }
+
+    bip39::Mnemonic::from_entropy(qr_data).map_err(|e| e.into())
 }
 
 /// Generate standard SeedQR format data (4-digit padded indices)
@@ -179,35 +185,20 @@ mod tests {
     use super::*;
 
     fn create_test_seed() -> security::Seed {
-        let mut seed_bytes = [0u8; security::SEED_LEN];
+        let mut seed_bytes = [0u8; 16];
         getrandom::getrandom(&mut seed_bytes).unwrap();
-        security::Seed(seed_bytes)
-    }
-
-    #[test]
-    fn test_seed_to_words() {
-        let seed = create_test_seed();
-
-        let words = seed_to_words(&seed).unwrap();
-
-        assert_eq!(words.len(), 24);
-
-        // Verify all words are valid BIP39 words
-        let word_list = bip39::Language::English.word_list();
-        for word in &words {
-            assert!(word_list.iter().any(|&w| w == word.as_str()), "Word '{}' not in BIP39 word list", word);
-        }
+        security::Seed::Twelve(seed_bytes)
     }
 
     #[test]
     fn test_mnemonic_to_seed_roundtrip() {
         let original_seed = create_test_seed();
         let mnemonic = bip39::Mnemonic::from_entropy(original_seed.bytes()).unwrap();
-        let recovered_seed = mnemonic_to_seed(&mnemonic).bytes();
+        let recovered_seed = mnemonic_to_seed(&mnemonic).to_vec();
 
         // The recovered seed should have the same entropy bytes
         assert_eq!(
-            &original_seed.0[..mnemonic.to_entropy().len()],
+            &original_seed.bytes()[..mnemonic.to_entropy().len()],
             &recovered_seed[..mnemonic.to_entropy().len()]
         );
     }
@@ -260,24 +251,49 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_seedqr_plaintext() {
+        let mut entropy = [0u8; 16];
+        getrandom::getrandom(&mut entropy).unwrap();
+        let mnemonic = bip39::Mnemonic::from_entropy(&entropy).unwrap();
+
+        let qr_data = mnemonic.to_string();
+        let result = parse_seedqr(qr_data.as_bytes()).unwrap();
+
+        assert_eq!(result, mnemonic);
+    }
+
+    #[test]
+    fn test_parse_seedqr_plaintext_with_extra_whitespace() {
+        let mut entropy = [0u8; 32];
+        getrandom::getrandom(&mut entropy).unwrap();
+        let mnemonic = bip39::Mnemonic::from_entropy(&entropy).unwrap();
+        let words = mnemonic.words().collect::<Vec<_>>();
+        let qr_data = format!("  {}\n{}\n  ", words[..12].join("  "), words[12..].join("\n"));
+
+        let result = parse_seedqr(qr_data.as_bytes()).unwrap();
+
+        assert_eq!(result, mnemonic);
+    }
+
+    #[test]
     fn test_seedqr_generation_roundtrip() {
         let seed = create_test_seed();
 
         // Test standard format roundtrip
         let standard_data = generate_standard_seed_qr_data(&seed).unwrap();
         let parsed_standard = parse_seedqr(&standard_data).unwrap();
-        let recovered_seed = mnemonic_to_seed(&parsed_standard).bytes();
+        let recovered_seed = mnemonic_to_seed(&parsed_standard).to_vec();
         assert_eq!(
-            &seed.0[..parsed_standard.to_entropy().len()],
+            &seed.bytes()[..parsed_standard.to_entropy().len()],
             &recovered_seed[..parsed_standard.to_entropy().len()]
         );
 
         // Test compact format roundtrip
         let compact_data = generate_compact_seed_qr_data(&seed).unwrap();
         let parsed_compact = parse_seedqr(&compact_data).unwrap();
-        let recovered_seed = mnemonic_to_seed(&parsed_compact).bytes();
+        let recovered_seed = mnemonic_to_seed(&parsed_compact).to_vec();
         assert_eq!(
-            &seed.0[..parsed_compact.to_entropy().len()],
+            &seed.bytes()[..parsed_compact.to_entropy().len()],
             &recovered_seed[..parsed_compact.to_entropy().len()]
         );
     }

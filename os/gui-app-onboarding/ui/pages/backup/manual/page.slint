@@ -3,15 +3,27 @@
 
 import { ManualBackupProps } from "props.slint";
 import { Navigate } from "../../../gen/navigate.slint";
-import { Dialog, ButtonSection, Button, HeadingMd, TextMd } from "@ui/widgets.slint";
+import { Dialog, ButtonSection, Button, HeadingMd, NavHeader, TextMd } from "@ui/widgets.slint";
 import { Palette } from "@ui/theme.slint";
 import { OnboardingShieldPage, ShieldSection, ShieldContent, OverlayImage } from "../../../widgets/shield-page.slint";
+import { OnboardingCallbacks } from "../../../onboarding-callbacks.slint";
 import { TR2, TrId } from "../../../gen/tr.slint";
 
 export component ManualBackupPage inherits OnboardingShieldPage {
     in property <ManualBackupProps> props;
 
     property <bool> show-dialog:false;
+
+    init => {
+        OnboardingCallbacks.set-magic-backup-enabled(false);
+    }
+
+    NavHeader {
+        y: 0;
+        clicked => {
+            Navigate.backward();
+        }
+    }
 
     ShieldSection {
         ShieldContent {

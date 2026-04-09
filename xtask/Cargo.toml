@@ -38,7 +38,7 @@ slint-keyos-platform-build = { path = "../slint-keyos-platform/build" }
 svd2utra = "0.1.11"
 tar = { workspace = true }
 tempfile = "3.3.0"
-ureq = { version = "2.9.6", features = ["json"] }
+ureq = { version = "2.12.1", features = ["json"] }
 utralib = { workspace = true }
 xmas-elf = "0.10.0"
 xous = { package = "xous", path = "../xous/xous-rs" }

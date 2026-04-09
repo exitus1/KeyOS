@@ -20,7 +20,6 @@
 #![doc(html_root_url = "https://docs.rs/tar/0.4")]
 #![deny(missing_docs)]
 #![cfg_attr(test, deny(warnings))]
-#![allow(mismatched_lifetime_syntaxes)]
 
 use std::io::{Error, ErrorKind};
 
@@ -29,6 +28,8 @@ pub use crate::builder::{Builder, EntryWriter};
 pub use crate::entry::{Entry, Unpacked};
 pub use crate::entry_type::EntryType;
 pub use crate::header::GnuExtSparseHeader;
+#[cfg(all(any(unix, windows), not(target_arch = "wasm32")))]
+pub use crate::header::DETERMINISTIC_TIMESTAMP;
 pub use crate::header::{GnuHeader, GnuSparseHeader, Header, HeaderMode, OldHeader, UstarHeader};
 pub use crate::pax::{PaxExtension, PaxExtensions};
 

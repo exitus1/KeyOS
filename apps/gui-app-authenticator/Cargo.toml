@@ -18,6 +18,8 @@ serde_json = "1.0"
 slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
 thiserror = "1.0"
 totp-rs = { version = "5.6.0", features = ["otpauth", "serde_support"] }
+url = "2"
+urlencoding = "2.1"
 
 [build-dependencies]
 slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }

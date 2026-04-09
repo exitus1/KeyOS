@@ -7,6 +7,9 @@ use std::io::{self, Error, ErrorKind, SeekFrom};
 use std::marker;
 use std::path::{Component, Path, PathBuf};
 
+#[cfg(feature = "filetime")]
+use filetime::{self, FileTime};
+
 use crate::archive::ArchiveInner;
 use crate::error::TarError;
 use crate::header::bytes2path;
@@ -72,7 +75,7 @@ impl<'a, R: Read> Entry<'a, R> {
     ///
     /// It is recommended to use this method instead of inspecting the `header`
     /// directly to ensure that various archive formats are handled correctly.
-    pub fn path(&self) -> io::Result<Cow<Path>> {
+    pub fn path(&self) -> io::Result<Cow<'_, Path>> {
         self.fields.path()
     }
 
@@ -82,7 +85,7 @@ impl<'a, R: Read> Entry<'a, R> {
     /// separators, and it will not always return the same value as
     /// `self.header().path_bytes()` as some archive formats have support for
     /// longer path names described in separate entries.
-    pub fn path_bytes(&self) -> Cow<[u8]> {
+    pub fn path_bytes(&self) -> Cow<'_, [u8]> {
         self.fields.path_bytes()
     }
 
@@ -99,7 +102,7 @@ impl<'a, R: Read> Entry<'a, R> {
     ///
     /// It is recommended to use this method instead of inspecting the `header`
     /// directly to ensure that various archive formats are handled correctly.
-    pub fn link_name(&self) -> io::Result<Option<Cow<Path>>> {
+    pub fn link_name(&self) -> io::Result<Option<Cow<'_, Path>>> {
         self.fields.link_name()
     }
 
@@ -108,7 +111,7 @@ impl<'a, R: Read> Entry<'a, R> {
     /// Note that this will not always return the same value as
     /// `self.header().link_name_bytes()` as some archive formats have support for
     /// longer path names described in separate entries.
-    pub fn link_name_bytes(&self) -> Option<Cow<[u8]>> {
+    pub fn link_name_bytes(&self) -> Option<Cow<'_, [u8]>> {
         self.fields.link_name_bytes()
     }
 
@@ -130,7 +133,7 @@ impl<'a, R: Read> Entry<'a, R> {
     ///
     /// Also note that this function will read the entire entry if the entry
     /// itself is a list of extensions.
-    pub fn pax_extensions(&mut self) -> io::Result<Option<PaxExtensions>> {
+    pub fn pax_extensions(&mut self) -> io::Result<Option<PaxExtensions<'_>>> {
         self.fields.pax_extensions()
     }
 
@@ -210,8 +213,9 @@ impl<'a, R: Read> Entry<'a, R> {
     /// also be propagated to the path `dst`. Any existing file at the location
     /// `dst` will be overwritten.
     ///
-    /// This function carefully avoids writing outside of `dst`. If the file has
-    /// a '..' in its path, this function will skip it and return false.
+    /// # Security
+    ///
+    /// See [`Archive::unpack`].
     ///
     /// # Examples
     ///
@@ -298,11 +302,11 @@ impl<'a> EntryFields<'a> {
         self.read_to_end(&mut v).map(|_| v)
     }
 
-    fn path(&self) -> io::Result<Cow<Path>> {
+    fn path(&self) -> io::Result<Cow<'_, Path>> {
         bytes2path(self.path_bytes())
     }
 
-    fn path_bytes(&self) -> Cow<[u8]> {
+    fn path_bytes(&self) -> Cow<'_, [u8]> {
         match self.long_pathname {
             Some(ref bytes) => {
                 if let Some(&0) = bytes.last() {
@@ -331,14 +335,14 @@ impl<'a> EntryFields<'a> {
         String::from_utf8_lossy(&self.path_bytes()).to_string()
     }
 
-    fn link_name(&self) -> io::Result<Option<Cow<Path>>> {
+    fn link_name(&self) -> io::Result<Option<Cow<'_, Path>>> {
         match self.link_name_bytes() {
             Some(bytes) => bytes2path(bytes).map(Some),
             None => Ok(None),
         }
     }
 
-    fn link_name_bytes(&self) -> Option<Cow<[u8]>> {
+    fn link_name_bytes(&self) -> Option<Cow<'_, [u8]>> {
         match self.long_linkname {
             Some(ref bytes) => {
                 if let Some(&0) = bytes.last() {
@@ -362,7 +366,7 @@ impl<'a> EntryFields<'a> {
         }
     }
 
-    fn pax_extensions(&mut self) -> io::Result<Option<PaxExtensions>> {
+    fn pax_extensions(&mut self) -> io::Result<Option<PaxExtensions<'_>>> {
         if self.pax_extensions.is_none() {
             if !self.header.entry_type().is_pax_global_extensions()
                 && !self.header.entry_type().is_pax_local_extensions()
@@ -428,10 +432,10 @@ impl<'a> EntryFields<'a> {
             None => return Ok(false),
         };
 
-        self.ensure_dir_created(&dst, parent)
+        self.ensure_dir_created(dst, parent)
             .map_err(|e| TarError::new(format!("failed to create `{}`", parent.display()), e))?;
 
-        let canon_target = self.validate_inside_dst(&dst, parent)?;
+        let canon_target = self.validate_inside_dst(dst, parent)?;
 
         self.unpack(Some(&canon_target), &file_dst)
             .map_err(|e| TarError::new(format!("failed to unpack `{}`", file_dst.display()), e))?;
@@ -444,7 +448,7 @@ impl<'a> EntryFields<'a> {
         // If the directory already exists just let it slide
         fs::create_dir(dst).or_else(|err| {
             if err.kind() == ErrorKind::AlreadyExists {
-                let prev = fs::metadata(dst);
+                let prev = fs::symlink_metadata(dst);
                 if prev.map(|m| m.is_dir()).unwrap_or(false) {
                     return Ok(());
                 }
@@ -476,6 +480,20 @@ impl<'a> EntryFields<'a> {
             }
 
             Ok(())
+        }
+
+        #[cfg(feature = "filetime")]
+        fn get_mtime(header: &Header) -> Option<FileTime> {
+            header.mtime().ok().map(|mtime| {
+                // For some more information on this see the comments in
+                // `Header::fill_platform_from`, but the general idea is that
+                // we're trying to avoid 0-mtime files coming out of archives
+                // since some tools don't ingest them well. Perhaps one day
+                // when Cargo stops working with 0-mtime archives we can remove
+                // this.
+                let mtime = if mtime == 0 { 1 } else { mtime };
+                FileTime::from_unix_time(mtime as i64, 0)
+            })
         }
 
         let kind = self.header.entry_type();
@@ -522,7 +540,7 @@ impl<'a> EntryFields<'a> {
                     // use canonicalization to ensure this guarantee. For hard
                     // links though they're canonicalized to their existing path
                     // so we need to validate at this time.
-                    Some(ref p) => {
+                    Some(p) => {
                         let link_src = p.join(src);
                         self.validate_inside_dst(p, &link_src)?;
                         link_src
@@ -567,6 +585,14 @@ impl<'a> EntryFields<'a> {
                 if self.preserve_ownerships {
                     set_ownerships(dst, &None, self.header.uid()?, self.header.gid()?)?;
                 }
+                #[cfg(feature = "filetime")]
+                if self.preserve_mtime {
+                    if let Some(mtime) = get_mtime(&self.header) {
+                        filetime::set_symlink_file_times(dst, mtime, mtime).map_err(|e| {
+                            TarError::new(format!("failed to set mtime for `{}`", dst.display()), e)
+                        })?;
+                    }
+                }
             }
             return Ok(Unpacked::__Nonexhaustive);
 
@@ -581,7 +607,7 @@ impl<'a> EntryFields<'a> {
                 ::std::os::windows::fs::symlink_file(src, dst)
             }
 
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_arch = "wasm32")))]
             fn symlink(src: &Path, dst: &Path) -> io::Result<()> {
                 ::std::os::unix::fs::symlink(src, dst)
             }
@@ -667,6 +693,14 @@ impl<'a> EntryFields<'a> {
             )
         })?;
 
+        #[cfg(feature = "filetime")]
+        if self.preserve_mtime {
+            if let Some(mtime) = get_mtime(&self.header) {
+                filetime::set_file_handle_times(&f, Some(mtime), Some(mtime)).map_err(|e| {
+                    TarError::new(format!("failed to set mtime for `{}`", dst.display()), e)
+                })?;
+            }
+        }
         set_perms_ownerships(
             dst,
             Some(&mut f),
@@ -700,7 +734,7 @@ impl<'a> EntryFields<'a> {
             })
         }
 
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_arch = "wasm32")))]
         fn _set_ownerships(
             dst: &Path,
             f: &Option<&mut std::fs::File>,
@@ -771,7 +805,7 @@ impl<'a> EntryFields<'a> {
             })
         }
 
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_arch = "wasm32")))]
         fn _set_perms(
             dst: &Path,
             f: Option<&mut std::fs::File>,
@@ -827,7 +861,7 @@ impl<'a> EntryFields<'a> {
             Err(io::Error::new(io::ErrorKind::Other, "Not implemented"))
         }
 
-        #[cfg(all(unix, feature = "xattr"))]
+        #[cfg(all(unix, not(target_arch = "wasm32"), feature = "xattr"))]
         fn set_xattrs(me: &mut EntryFields, dst: &Path) -> io::Result<()> {
             use std::ffi::OsStr;
             use std::os::unix::prelude::*;
@@ -840,7 +874,7 @@ impl<'a> EntryFields<'a> {
                 .filter_map(|e| e.ok())
                 .filter_map(|e| {
                     let key = e.key_bytes();
-                    let prefix = b"SCHILY.xattr.";
+                    let prefix = crate::pax::PAX_SCHILYXATTR.as_bytes();
                     key.strip_prefix(prefix).map(|rest| (rest, e))
                 })
                 .map(|(key, e)| (OsStr::from_bytes(key), e.value_bytes()));

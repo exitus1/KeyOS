@@ -120,9 +120,7 @@ impl AppState {
             #[cfg(not(feature = "recovery-os"))]
             {
                 global.set_is_airlock_selected(current_location == LocationKey::Airlock);
-                global.set_is_airlock_mounted(
-                    *self.availability.get(LocationKey::Airlock) == Some(fs::FileSystemEventType::Unmounted),
-                );
+                global.set_is_airlock_mounted(!self.is_mounted(LocationKey::Airlock));
             }
             #[cfg(feature = "recovery-os")]
             {
@@ -146,6 +144,10 @@ impl AppState {
         }
     }
 
+    pub fn is_mounted(&self, location: LocationKey) -> bool {
+        *self.availability.get(location) == Some(fs::FileSystemEventType::Mounted)
+    }
+
     pub fn apply_copy_move_ui(&self) {
         let Some(ctx) = &self.copy_move else {
             return;
@@ -160,7 +162,16 @@ impl AppState {
         let dest_location = ctx.current;
         let source_dir = self.browser.locations.get(source_location).as_str();
         let dest_dir = ctx.locations.get(dest_location).as_str();
-        let action_enabled = !(source_location == dest_location && source_dir == dest_dir);
+        #[cfg(not(feature = "recovery-os"))]
+        let airlock_used = source_location == LocationKey::Airlock || dest_location == LocationKey::Airlock;
+        #[cfg(not(feature = "recovery-os"))]
+        let airlock_mounted = self.is_mounted(LocationKey::Airlock);
+        #[cfg(feature = "recovery-os")]
+        let airlock_used = false;
+        #[cfg(feature = "recovery-os")]
+        let airlock_mounted = false;
+        let action_enabled = !(source_location == dest_location && source_dir == dest_dir)
+            && (!airlock_used || airlock_mounted);
 
         let global = self.modal_global();
         global.set_copy_move_location_idx(copy_move_idx);

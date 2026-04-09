@@ -106,13 +106,14 @@ pub async fn restore_from_seed_qr(state: StoredValue<AppState>) -> anyhow::Resul
         }
     };
 
+    // has to be before navigation in case it fails
+    let words = seed::parse_seedqr(&qr_data).context("Failed to parse SeedQR")?;
+    let seed = seed::mnemonic_to_seed(&words);
+
     let ui = state.borrow().ui();
     let nav = ui.global::<Navigate>();
     let seed_global = ui.global::<SeedGlobal>();
     nav.invoke_restore_seed_qr(NavigateOptions { animate: Animate::None, replace: false });
-
-    let words = seed::parse_seedqr(&qr_data).context("Failed to parse SeedQR")?;
-    let seed = seed::mnemonic_to_seed(&words);
 
     // In case we're recovering a previously erased master key,
     // compare the fingerprints to ensure they're matching

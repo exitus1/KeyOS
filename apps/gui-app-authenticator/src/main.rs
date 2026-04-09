@@ -234,12 +234,6 @@ impl ToValidationString for AuthValidationError {
             AuthValidationError::EmptyAccountError => {
                 SharedString::from(tr::lookup_id(TrId::MainAddCodeAccountMissing))
             }
-            AuthValidationError::InvalidAccountError => {
-                SharedString::from(tr::lookup_id(TrId::MainAddCodeSpecialCharacter))
-            }
-            AuthValidationError::InvalidIssuerError => {
-                SharedString::from(tr::lookup_id(TrId::MainAddCodeSpecialCharacter))
-            }
             AuthValidationError::InvalidTotpError(_e) => {
                 SharedString::from(tr::lookup_id(TrId::MainAdd2FAModalInvalidSecretContent))
             }
@@ -796,8 +790,7 @@ mod tests {
     const URL3: &str = "otpauth://totp/D:alice@google.com?secret=BBSWY3DPEHPK3PXP&issuer=D";
     const URL4: &str = "otpauth://totp/C:alice@google.com?secret=CBSWY3DPEHPK3PXP&issuer=C";
     const URL5: &str = "otpauth://totp/B:alice@google.com?secret=DBSWY3DPEHPK3PXP&issuer=B";
-    const URL_INVALID: &str =
-        "otpauth://totp/Exam:ple:alice@google.com?secret=ABSWY3DPEHPK3PXP&issuer=Exam:ple";
+    const URL_INVALID: &str = "otpauth://totp/A:alice@google.com?secret=ABSWY3DPEHPK3PXP&issuer=B";
 
     fn app_state0() -> AppState {
         AppState {

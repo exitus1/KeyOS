@@ -55,6 +55,11 @@ impl FromScalar<2> for SetLive {
     fn from_scalar([a, b]: [u32; 2]) -> Self { Self { index: a as usize, live: b != 0 } }
 }
 
+/// Fire-and-forget message to ensure the FIDO server has at least `count` security keys.
+/// Used to recover from state loss where the app's key list survived but the server's didn't.
+#[derive(Debug, server::Message)]
+pub struct EnsureSecurityKeys(pub usize);
+
 #[derive(Debug, Clone, server::Message, rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)]
 #[response(Vec<u8>)]
 pub struct U2fProcessApdu {

@@ -3,7 +3,7 @@
 
 use std::{
     io::Write,
-    sync::atomic::{AtomicU8, Ordering},
+    sync::atomic::{AtomicBool, AtomicU8, Ordering},
 };
 
 use fs::Location;
@@ -54,6 +54,8 @@ const ENDPOINTS: [EndpointProperties; 2] = [
         interval: 0,
     },
 ];
+
+static AIRLOCK_MOUNTED: AtomicBool = AtomicBool::new(true);
 
 #[derive(Default)]
 pub(crate) struct SetupResponder {
@@ -146,16 +148,7 @@ struct BlockDeviceEmulator {
 }
 
 impl BlockDeviceEmulator {
-    pub fn new(read_only: bool) -> Result<Self, fs::Error> {
-        let mut fs = FileSystem::default();
-        fs.unmount_airlock()?;
-
-        Ok(Self { fs, read_only })
-    }
-}
-
-impl Drop for BlockDeviceEmulator {
-    fn drop(&mut self) { self.fs.mount_airlock().ok(); }
+    pub fn new(read_only: bool) -> Self { Self { fs: FileSystem::default(), read_only } }
 }
 
 impl BlockDeviceCommands<BufferWrapper> for BlockDeviceEmulator {
@@ -311,6 +304,8 @@ pub fn start() -> Result<(), crate::error::MassStorageEmulationError> {
         0,
     )?;
 
+    let mut fs = FileSystem::default();
+
     let worker = worker::WorkerHandle::default();
 
     worker
@@ -332,6 +327,8 @@ pub fn start() -> Result<(), crate::error::MassStorageEmulationError> {
         })
         .detach();
 
+    let mut _umount_task;
+
     let settings = SettingsApi::default();
 
     let dummy_disk_image = prepare_dummy_disk_image();
@@ -346,15 +343,33 @@ pub fn start() -> Result<(), crate::error::MassStorageEmulationError> {
                 run_emulation(&mut ep_in, &mut ep_out, DummyDisk { image: dummy_disk_image })
             }
             AirlockMode::ReadOnly | AirlockMode::ReadWrite => {
-                if let Ok(emulator) = BlockDeviceEmulator::new(mode == AirlockMode::ReadOnly) {
-                    run_emulation(&mut ep_in, &mut ep_out, emulator);
-                } else {
-                    // There was a problem setting up airlock.
-                    // Let's wait for a disconnection before retrying.
-                    while usb_api.is_connected()? {
-                        std::thread::sleep(std::time::Duration::from_millis(1000));
+                _umount_task = None;
+                if AIRLOCK_MOUNTED.load(Ordering::Relaxed) {
+                    if let Err(e) = fs.unmount_airlock() {
+                        log::error!("Couldn't unmount airlock: {e:?}");
+                        // There was a problem setting up airlock.
+                        // Let's wait for a disconnection before retrying.
+                        while usb_api.is_connected()? {
+                            std::thread::sleep(std::time::Duration::from_millis(100));
+                        }
+                        continue;
                     }
+                    AIRLOCK_MOUNTED.store(false, Ordering::Relaxed)
                 }
+                run_emulation(
+                    &mut ep_in,
+                    &mut ep_out,
+                    BlockDeviceEmulator::new(mode == AirlockMode::ReadOnly),
+                );
+                _umount_task = Some(worker.spawn({
+                    let mut fs = fs.clone();
+                    let sleep = worker.sleep(std::time::Duration::from_millis(2000));
+                    async move {
+                        sleep.await;
+                        fs.mount_airlock().ok();
+                        AIRLOCK_MOUNTED.store(true, Ordering::Relaxed);
+                    }
+                }))
             }
         };
     }
