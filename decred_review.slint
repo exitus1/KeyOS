@@ -1,0 +1,212 @@
+// Send review screen — render with:
+//   WAYLAND_DISPLAY= slint-viewer ~/KeyOS/decred_review.slint
+
+component DetailRow inherits Rectangle {
+    in property <string> label;
+    in property <string> value;
+    in property <color> value-color: #e8e8e8;
+    in property <bool> mono: false;
+    height: txt.preferred-height + 24px;
+
+    HorizontalLayout {
+        padding: 0px;
+        spacing: 12px;
+        Text {
+            text: root.label;
+            color: #6b6b6b;
+            font-family: "Inter";
+            font-size: 14px;
+            vertical-alignment: center;
+            horizontal-stretch: 0;
+            min-width: 96px;
+        }
+        txt := Text {
+            text: root.value;
+            color: root.value-color;
+            font-family: root.mono ? "Geist Mono" : "Inter";
+            font-size: 15px;
+            font-weight: 500;
+            horizontal-alignment: right;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            wrap: word-wrap;
+        }
+    }
+}
+
+export component ReviewScreen inherits Window {
+    width: 430px;
+    height: 740px;
+    background: #000000;
+    title: "Review";
+
+    property <float> hold-progress: 0.0;
+
+    VerticalLayout {
+        padding: 28px;
+        padding-top: 40px;
+        spacing: 0px;
+
+        // Header
+        Text {
+            text: "Review transaction";
+            color: #ffffff;
+            font-family: "Geist";
+            font-size: 26px;
+            font-weight: 700;
+            horizontal-alignment: center;
+        }
+        Text {
+            text: "Verify every detail on this screen.";
+            color: #6b6b6b;
+            font-family: "Inter";
+            font-size: 13px;
+            horizontal-alignment: center;
+        }
+
+        Rectangle { height: 28px; }
+
+        // Amount hero
+        Rectangle {
+            height: 150px;
+            background: #08080a;
+            border-radius: 20px;
+            border-width: 1px;
+            border-color: #1c1c1c;
+            VerticalLayout {
+                alignment: center;
+                spacing: 4px;
+                Text {
+                    text: "SENDING";
+                    color: #2970ff;
+                    font-family: "Inter";
+                    font-size: 12px;
+                    font-weight: 600;
+                    letter-spacing: 2px;
+                    horizontal-alignment: center;
+                }
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 8px;
+                    Text {
+                        text: "12.5000";
+                        color: #ffffff;
+                        font-family: "Geist";
+                        font-size: 44px;
+                        font-weight: 700;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "DCR";
+                        color: #6b6b6b;
+                        font-family: "Inter";
+                        font-size: 18px;
+                        font-weight: 600;
+                        vertical-alignment: center;
+                    }
+                }
+                Text {
+                    text: "≈ $234.38 USD";
+                    color: #5a5a5a;
+                    font-family: "Inter";
+                    font-size: 15px;
+                    font-weight: 500;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+
+        Rectangle { height: 16px; }
+
+        // Detail card
+        Rectangle {
+            background: #08080a;
+            border-radius: 20px;
+            border-width: 1px;
+            border-color: #1c1c1c;
+            vertical-stretch: 0;
+            VerticalLayout {
+                padding: 8px;
+                padding-left: 18px;
+                padding-right: 18px;
+                DetailRow {
+                    label: "To";
+                    value: "DsTx7n5pQr3kVbW9mYjK2hLpF8cN4dE6aZ1";
+                    mono: true;
+                }
+                Rectangle { height: 1px; background: #161616; }
+                DetailRow {
+                    label: "Network fee";
+                    value: "0.0001 DCR";
+                }
+                Rectangle { height: 1px; background: #161616; }
+                DetailRow {
+                    label: "Total";
+                    value: "12.5001 DCR";
+                    value-color: #ffffff;
+                }
+                Rectangle { height: 1px; background: #161616; }
+                DetailRow {
+                    label: "Inputs";
+                    value: "2 unspent outputs";
+                }
+            }
+        }
+
+        Rectangle { vertical-stretch: 1; }
+
+        // Hold-to-sign button
+        Rectangle {
+            height: 66px;
+            border-radius: 16px;
+            background: #0e0e0e;
+            border-width: 1px;
+            border-color: #1f5fe0;
+            clip: true;
+
+            // fill ring driven by hold-progress (static here for preview)
+            Rectangle {
+                x: 0;
+                width: parent.width * root.hold-progress;
+                background: #2970ff;
+            }
+
+            Text {
+                text: root.hold-progress >= 1.0 ? "Signing…" : "Hold to sign";
+                color: #ffffff;
+                font-family: "Inter";
+                font-size: 18px;
+                font-weight: 700;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            ta := TouchArea {
+                // In the real app this drives hold-progress via a timer.
+                // For preview, tap toggles a partial fill so you can see the style.
+                clicked => {
+                    root.hold-progress = root.hold-progress >= 0.6 ? 0.0 : 0.6;
+                }
+            }
+        }
+
+        Rectangle { height: 12px; }
+
+        // Reject
+        Rectangle {
+            height: 54px;
+            border-radius: 14px;
+            background: transparent;
+            Text {
+                text: "Reject";
+                color: #ff6b6b;
+                font-family: "Inter";
+                font-size: 16px;
+                font-weight: 600;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            TouchArea { }
+        }
+    }
+}

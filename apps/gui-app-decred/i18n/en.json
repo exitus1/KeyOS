@@ -1,14 +1,12 @@
 {
   "appName": "Decred",
-
   "home.subtitle": "Sign transactions and share keys. Nothing leaves this device unless you approve it.",
   "home.receive": "Receive",
   "home.sign": "Sign transaction",
   "home.export": "Export wallet key",
-
+  "home.seed": "Back up seed",
   "receive.title": "Receive Decred",
   "receive.next": "Next address",
-
   "sign.chooseSource": "Load a transaction",
   "sign.chooseSourceHint": "Scan the QR from your wallet, or load it from an SD card.",
   "sign.scanning": "Reading transaction…",
@@ -24,10 +22,14 @@
   "sign.signedTitle": "Signed",
   "sign.signedQrHint": "Scan this with your wallet to broadcast.",
   "sign.savedTitle": "Saved to SD card",
-
   "export.title": "Watch-only key",
   "export.hint": "Import this into your wallet to track balances and build transactions. It cannot move funds.",
-
+  "seed.title": "Your recovery seed",
+  "seed.hint": "Write these words down and keep them safe. Anyone with them controls your funds. Tap the icon to show a SeedQR instead.",
+  "seed.tabWords": "Words",
+  "seed.tabQr": "SeedQR",
+  "seed.qrStandard": "Standard SeedQR",
+  "seed.qrCompact": "Compact SeedQR",
   "common.done": "Done",
   "common.cancel": "Cancel"
 }

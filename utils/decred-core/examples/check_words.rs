@@ -1,0 +1,19 @@
+fn main() {
+    let words = "kiwi proud grass check junk among list purchase chronic hero spirit caught";
+    let m = match bip39::Mnemonic::parse(words) {
+        Ok(m) => m,
+        Err(e) => { println!("INVALID mnemonic: {e:?}"); return; }
+    };
+    println!("valid BIP39, {} words", m.words().count());
+    let entropy = m.to_entropy();
+    println!("entropy: {}", entropy.iter().map(|b| format!("{:02x}",b)).collect::<String>());
+    use decred_core::hd::{ExtPrivKey, p2pkh_address};
+    use secp256k1::Secp256k1;
+    let secp = Secp256k1::new();
+    let master = ExtPrivKey::from_entropy(&entropy, "").unwrap();
+    let acct = master.account_key(&secp, 0).unwrap();
+    for i in 0..5 {
+        let k = acct.address_key(&secp, 0, i).unwrap();
+        println!("index {}: {}", i, p2pkh_address(&secp, &k));
+    }
+}

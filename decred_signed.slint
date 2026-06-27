@@ -1,0 +1,130 @@
+// Signed transaction screen — render with:
+//   WAYLAND_DISPLAY= slint-viewer ~/KeyOS/decred_signed.slint
+
+export component SignedScreen inherits Window {
+    width: 430px;
+    height: 740px;
+    background: #000000;
+    title: "Signed";
+
+    VerticalLayout {
+        padding: 28px;
+        padding-top: 44px;
+        spacing: 0px;
+
+        // Success mark
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: 72px;
+                height: 72px;
+                border-radius: 36px;
+                background: #0a1a12;
+                border-width: 1.5px;
+                border-color: #2dd8a3;
+                Text {
+                    text: "✓";
+                    color: #2dd8a3;
+                    font-size: 38px;
+                    font-weight: 700;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle { height: 18px; }
+
+        Text {
+            text: "Transaction signed";
+            color: #ffffff;
+            font-family: "Geist";
+            font-size: 26px;
+            font-weight: 700;
+            horizontal-alignment: center;
+        }
+        Text {
+            text: "Scan with your wallet to broadcast.\nThis device does not send it.";
+            color: #6b6b6b;
+            font-family: "Inter";
+            font-size: 14px;
+            horizontal-alignment: center;
+        }
+
+        Rectangle { height: 26px; }
+
+        // QR card (animated in the real app — single frame shown here)
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: 300px;
+                height: 300px;
+                background: #ffffff;
+                border-radius: 24px;
+
+                // mock QR matrix
+                Image {
+                    width: 248px;
+                    height: 248px;
+                    source: @image-url("mock-qr.svg");
+                }
+            }
+        }
+
+        Rectangle { height: 14px; }
+
+        // animated-frame indicator
+        HorizontalLayout {
+            alignment: center;
+            spacing: 8px;
+            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: #2970ff; }
+            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: #2970ff; }
+            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: #333333; }
+            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: #333333; }
+        }
+        Text {
+            text: "Frame 2 of 4";
+            color: #5a5a5a;
+            font-family: "Inter";
+            font-size: 12px;
+            horizontal-alignment: center;
+        }
+
+        Rectangle { vertical-stretch: 1; }
+
+        // Save to SD alternative
+        Rectangle {
+            height: 60px;
+            border-radius: 16px;
+            background: #0e0e0e;
+            border-width: 1px;
+            border-color: #242424;
+            Text {
+                text: "Save to SD card instead";
+                color: #e8e8e8;
+                font-family: "Inter";
+                font-size: 16px;
+                font-weight: 500;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            TouchArea { }
+        }
+
+        Rectangle { height: 12px; }
+
+        Rectangle {
+            height: 54px;
+            Text {
+                text: "Done";
+                color: #6b6b6b;
+                font-family: "Inter";
+                font-size: 16px;
+                font-weight: 600;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            TouchArea { }
+        }
+    }
+}

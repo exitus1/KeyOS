@@ -33,6 +33,14 @@ export global SignTx {
     in property <string> fee;
     in property <string> change;
     in property <int> recipient-count;
+    // Destination address(es) — THE critical thing to verify on-device.
+    in property <string> recipient;
+    // Count of outputs the companion mislabelled as change but that
+    // are NOT ours — a detected lie. >0 means show a hard warning and
+    // gate the approve button.
+    in property <int> flagged-count: 0;
+    // Whether the user has acknowledged the mismatch warning.
+    in-out property <bool> mismatch-acknowledged: false;
 
     // Result / failure surfaces.
     in property <string> saved-path;

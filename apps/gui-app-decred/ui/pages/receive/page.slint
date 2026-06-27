@@ -40,12 +40,24 @@ export component ReceivePage inherits BasePage {
                     }
                 }
 
-                // Full address, monospace, wraps. The one place we want density.
-                TextSm {
-                    text: Receive.address;
-                    color: Palette.content-secondary;
-                    horizontal-alignment: center;
-                    wrap: word-wrap;
+                // Full address in a width-constrained box so char-wrap has room
+                // to lay out all 35 chars cleanly (QR above is untouched).
+                Rectangle {
+                    border-radius: 12px;
+                    background: #0d0d10;
+                    border-width: 1px;
+                    border-color: #1f2233;
+                    horizontal-stretch: 1;
+                    HorizontalLayout {
+                        padding: 14px;
+                        TextSm {
+                            text: Receive.address;
+                            color: #e8e8e8;
+                            font-size: 16px;
+                            horizontal-alignment: center;
+                            wrap: char-wrap;
+                        }
+                    }
                 }
             }
 

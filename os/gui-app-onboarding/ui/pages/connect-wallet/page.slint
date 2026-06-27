@@ -53,7 +53,7 @@ export component ConnectWalletPage inherits OnboardingBasePage {
         ButtonSection {
             Button {
                 label: TR2.lookup(TrId.CommonButtonFinish);
-                visible: wallet-connected;
+                visible: true;  /* SIM: always allow finishing without phone */
 
                 clicked => {
                     OnboardingCallbacks.finish-onboarding();

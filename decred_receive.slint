@@ -1,0 +1,174 @@
+// Receive screen — render with:
+//   WAYLAND_DISPLAY= slint-viewer ~/KeyOS/decred_receive.slint
+
+export component ReceiveScreen inherits Window {
+    width: 430px;
+    height: 740px;
+    background: #000000;
+    title: "Receive";
+
+    VerticalLayout {
+        padding: 28px;
+        padding-top: 40px;
+        spacing: 0px;
+
+        // Header
+        Text {
+            text: "Receive Decred";
+            color: #ffffff;
+            font-family: "Geist";
+            font-size: 26px;
+            font-weight: 700;
+            horizontal-alignment: center;
+        }
+        Text {
+            text: "Share this address to receive DCR.";
+            color: #6b6b6b;
+            font-family: "Inter";
+            font-size: 14px;
+            horizontal-alignment: center;
+        }
+
+        Rectangle { height: 28px; }
+
+        // QR placeholder (real app renders the address QR here)
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: 280px;
+                height: 280px;
+                background: #ffffff;
+                border-radius: 24px;
+                Text {
+                    text: "QR";
+                    color: #cfcfcf;
+                    font-family: "Inter";
+                    font-size: 20px;
+                    font-weight: 600;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle { height: 22px; }
+
+        // Address index chip
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: ch.preferred-width + 28px;
+                height: 30px;
+                border-radius: 15px;
+                background: #0e1626;
+                border-width: 1px;
+                border-color: #1f3a66;
+                ch := Text {
+                    text: "Address #0";
+                    color: #2970ff;
+                    font-family: "Inter";
+                    font-size: 13px;
+                    font-weight: 600;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle { height: 14px; }
+
+        // Address text card (monospace, full, verifiable)
+        Rectangle {
+            background: #08080a;
+            border-radius: 16px;
+            border-width: 1px;
+            border-color: #1c1c1c;
+            height: addr.preferred-height + 32px;
+            HorizontalLayout {
+                padding: 16px;
+                addr := Text {
+                    text: "DsZHUWCZdBvZhJHcsMUwgsEYAsuwH7q8ora";
+                    color: #e8e8e8;
+                    font-family: "Geist Mono";
+                    font-size: 16px;
+                    font-weight: 500;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    wrap: word-wrap;
+                }
+            }
+        }
+
+        Rectangle { vertical-stretch: 1; }
+
+        // Next address (fresh address for privacy)
+        Rectangle {
+            height: 60px;
+            border-radius: 16px;
+            background: #0e0e0e;
+            border-width: 1px;
+            border-color: #242424;
+            HorizontalLayout {
+                alignment: center;
+                spacing: 8px;
+                Text {
+                    text: "↻";
+                    color: #2970ff;
+                    font-size: 18px;
+                    vertical-alignment: center;
+                }
+                Text {
+                    text: "Next address";
+                    color: #e8e8e8;
+                    font-family: "Inter";
+                    font-size: 16px;
+                    font-weight: 500;
+                    vertical-alignment: center;
+                }
+            }
+            TouchArea { }
+        }
+
+        Rectangle { height: 12px; }
+
+        // Done (primary blue)
+        Rectangle {
+            height: 60px;
+            border-radius: 16px;
+            background: #2970ff;
+            Text {
+                text: "Done";
+                color: #ffffff;
+                font-family: "Inter";
+                font-size: 17px;
+                font-weight: 700;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            TouchArea { }
+        }
+
+        Rectangle { height: 16px; }
+
+        // small Decred signature mark
+        HorizontalLayout {
+            alignment: center;
+            spacing: 7px;
+            Image {
+                width: 16px;
+                height: 16px;
+                source: @image-url("ui/ui/icons/decred-logo.svg");
+                colorize: #3a3a3a;
+                vertical-alignment: center;
+            }
+            Text {
+                text: "Secured by Decred";
+                color: #3a3a3a;
+                font-family: "Inter";
+                font-size: 12px;
+                font-weight: 500;
+                vertical-alignment: center;
+            }
+        }
+    }
+}

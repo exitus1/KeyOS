@@ -150,6 +150,17 @@ fn on_startup(state: StoredValue<AppState>) {
         log::info!("no update state detected");
         match master_key_state {
             MasterKeyState::Onboarding => {}
+            // SIM FIX: a fully-provisioned device (seed + PIN) must NOT be wiped on
+            // boot. Real hardware persists onboarding-complete and skips this app
+            // entirely; the hosted sim doesn't persist that flag, so on_startup
+            // re-runs and the old catch-all factory-reset a Normal wallet. Treat
+            // Normal as "already set up": finish and go to the launcher.
+            MasterKeyState::Normal => {
+                log::info!("device already provisioned (Normal) — skipping onboarding, launching");
+                state.borrow_mut().finished = true;
+                state.borrow().gui.switch_to_launcher().ok();
+                return;
+            }
             _ => {
                 // if we have reached this branch, then we have rebooted mid-way through onboarding
                 // which is un-recoverable. we must factory reset restart onboarding

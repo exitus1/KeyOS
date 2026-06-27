@@ -60,7 +60,7 @@ export component WelcomePage inherits OnboardingShieldPage {
                 label: TR2.lookup(TrId.CommonButtonGetStarted);
                 importance: primary;
                 clicked => {
-                    Navigate.scan-qr({ });
+                    Navigate.set-pin-info({ });  /* SIM: skip phone scan, go to PIN+create */
                 }
             }
         }

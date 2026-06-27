@@ -1,27 +1,45 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Home. Deliberately spare: a wordmark and three actions, one line of intent
-// each. No dashboards, balances, or chrome — this device signs and shows keys,
-// nothing else.
+// Home: a balance card (MOCK data until QuantumLink companion integration),
+// the wordmark, and the core actions.
 
 import { BasePage, AppHeader, PageBody, ContentSection, ButtonSection, Button, HeadingSm, TextSm } from "@ui/widgets.slint";
+import { CardColor } from "@ui/theme.slint";
+import { Balance } from "../balance.slint";
+import { DcrAccountCard } from "../dcr-account-card.slint";
 import { Palette, Size, Importance } from "@ui/theme.slint";
 import { TR2, TrId } from "../gen/tr.slint";
 import { Navigate } from "../gen/navigate.slint";
 
 export component HomePage inherits BasePage {
-    AppHeader {
-        title: TR2.lookup(TrId.AppName);
-    }
 
     PageBody {
         ContentSection {
             spacing: Size.sz3;
 
-            // One quiet line of orientation, then get out of the way.
-            TextSm {
-                text: TR2.lookup(TrId.HomeSubtitle);
-                color: Palette.content-tertiary;
+            // MOCK balance card — placeholder values (see balance.slint).
+            DcrAccountCard {
+                name: "Decred";
+                crypto-balance: Balance.dcr-amount;
+                fiat-balance: Balance.fiat-amount;
+            }
+
+            // Prominent, centered mission line.
+            Rectangle { height: 10px; }
+            Text {
+                text: "Air-gapped Signer";
+                color: #ffffff;
+                font-size: 28px;
+                font-weight: 800;
+                letter-spacing: 0.5px;
+                horizontal-alignment: center;
+            }
+            Text {
+                text: "COLD · OFFLINE · SECURE";
+                color: #2970ff;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 3px;
                 horizontal-alignment: center;
             }
         }
@@ -30,6 +48,8 @@ export component HomePage inherits BasePage {
             Button {
                 label: TR2.lookup(TrId.HomeReceive);
                 importance: Importance.primary;
+                // App-scoped Decred blue (does not touch shared @ui theme).
+                background: #2970ff;
                 clicked => {
                     Navigate.receive({ });
                 }
@@ -38,6 +58,9 @@ export component HomePage inherits BasePage {
             Button {
                 label: TR2.lookup(TrId.HomeSign);
                 importance: Importance.secondary;
+                // Faint green outline to signal the signing action.
+                border-width: 1px;
+                border-color: #2dd8a3;
                 clicked => {
                     Navigate.sign({ });
                 }
@@ -48,6 +71,13 @@ export component HomePage inherits BasePage {
                 importance: Importance.secondary;
                 clicked => {
                     Navigate.export({ });
+                }
+            }
+            Button {
+                label: TR2.lookup(TrId.HomeSeed);
+                importance: Importance.secondary;
+                clicked => {
+                    Navigate.seed({ });
                 }
             }
         }

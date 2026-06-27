@@ -16,6 +16,7 @@ use slint_keyos_platform::{app, gui_server_api::InputMessage, StoredValue};
 mod create_account;
 mod keys;
 mod receive;
+mod seed_display;
 mod sign_tx;
 mod state;
 
@@ -38,6 +39,7 @@ fn app_main(cx: AppContext, ui: AppWindow) {
     receive::init(state);
     sign_tx::init(state);
     create_account::init(state);
+    seed_display::init(state);
 
     // Handle deep-link navigation (e.g. "open Decred and start a QR scan").
     cx.set_input_handler({

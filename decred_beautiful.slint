@@ -1,0 +1,137 @@
+// Standalone Decred home screen — render with:
+//   WAYLAND_DISPLAY= slint-viewer ~/KeyOS/decred_beautiful.slint
+
+component DcrButton inherits Rectangle {
+    in property <string> label;
+    in property <bool> primary: false;
+    in property <bool> danger: false;
+    in property <bool> hovered: ta.has-hover;
+    callback clicked;
+
+    height: 66px;
+    border-radius: 16px;
+
+    background: primary
+        ? (hovered ? #3a7dff : #2970ff)
+        : danger
+            ? (hovered ? #2a1313 : #1c0e0e)
+            : (hovered ? #161616 : #0e0e0e);
+    border-width: (primary) ? 0px : 1px;
+    border-color: danger ? #5c2222 : #242424;
+    animate background { duration: 140ms; }
+
+    Text {
+        text: root.label;
+        color: root.primary ? #ffffff : (root.danger ? #ff6b6b : #e8e8e8);
+        font-family: "Inter";
+        font-size: 18px;
+        font-weight: root.primary ? 700 : 500;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    ta := TouchArea { clicked => { root.clicked(); } }
+    states [
+        pressed when ta.pressed: {
+            background: root.primary ? #1f5fe0 : (root.danger ? #160a0a : #080808);
+        }
+    ]
+}
+
+export component DecredHome inherits Window {
+    width: 430px;
+    height: 740px;
+    background: #000000;
+    title: "Decred";
+
+    // ---- Circuit board background ----
+    Image {
+        width: 100%;
+        height: 100%;
+        image-fit: cover;
+        opacity: 0.5;
+        source: @image-url("circuit.svg");
+    }
+
+    // subtle vignette so edges fall into black
+    Rectangle {
+        background: @radial-gradient(circle, transparent 55%, #000000 100%);
+    }
+
+    VerticalLayout {
+        padding: 32px;
+        padding-top: 64px;
+
+        VerticalLayout {
+            alignment: start;
+            spacing: 30px;
+
+            // Decred mark — bigger now
+            HorizontalLayout {
+                alignment: center;
+                Rectangle {
+                    width: 196px;
+                    height: 196px;
+                    background: #08080a;
+                    border-radius: 38px;
+                    border-width: 1px;
+                    border-color: #1e1e1e;
+
+                    Rectangle {
+                        width: 152px;
+                        height: 152px;
+                        border-radius: 30px;
+                        border-width: 1px;
+                        border-color: #2970ff;
+                        opacity: 0.20;
+                    }
+
+                    Image {
+                        width: 124px;
+                        height: 124px;
+                        source: @image-url("ui/ui/icons/decred-logo.svg");
+                        colorize: #ffffff;
+                    }
+                }
+            }
+
+            VerticalLayout {
+                alignment: start;
+                spacing: 12px;
+                Text {
+                    text: "Decred";
+                    color: #ffffff;
+                    font-family: "Geist";
+                    font-size: 44px;
+                    font-weight: 700;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: "AIRGAPPED SIGNER";
+                    color: #2970ff;
+                    font-family: "Inter";
+                    font-size: 13px;
+                    font-weight: 600;
+                    letter-spacing: 3px;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: "This device signs transactions and shares keys.\nNothing leaves unless you approve it.";
+                    color: #6b6b6b;
+                    font-family: "Inter";
+                    font-size: 14px;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+
+        Rectangle { vertical-stretch: 1; }
+
+        VerticalLayout {
+            spacing: 14px;
+            DcrButton { label: "Receive"; primary: true; }
+            DcrButton { label: "Send"; danger: true; }
+            DcrButton { label: "Export wallet key"; }
+        }
+    }
+}

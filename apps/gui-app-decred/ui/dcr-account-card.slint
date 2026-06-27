@@ -1,0 +1,97 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Stylized Decred account card (app-scoped). Layered logo, big bold text,
+// blue accent label, circuit-texture grain. Geist isn't bundled in-app, so
+// we use bold weight of the default font (font-family:"Geist" would fall back).
+
+export component DcrAccountCard inherits Rectangle {
+    in property <string> name: "Decred";
+    in property <string> crypto-balance;
+    in property <string> fiat-balance;
+
+    height: 150px;
+    border-radius: 24px;
+    clip: true;
+
+    background: @linear-gradient(160deg, #0d0d10 0%, #08080a 100%);
+    border-width: 1px;
+    border-color: #1f2233;
+
+    Image {
+        width: 100%;
+        height: 100%;
+        image-fit: cover;
+        opacity: 0.10;
+        source: @image-url("circuit.svg");
+    }
+
+    Rectangle {
+        x: parent.width - 160px;
+        y: -50px;
+        width: 230px;
+        height: 230px;
+        border-radius: 115px;
+        background: @radial-gradient(circle, #2970ff 0%, transparent 70%);
+        opacity: 0.20;
+    }
+
+    HorizontalLayout {
+        padding-left: 30px;
+        padding-right: 24px;
+        spacing: 16px;
+
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            spacing: 8px;
+            Text {
+                text: "DECRED";
+                color: #2970ff;
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: 3px;
+            }
+            Text {
+                text: crypto-balance;
+                color: #ffffff;
+                font-size: 40px;
+                font-weight: 800;
+            }
+            Text {
+                text: fiat-balance;
+                color: #8a8a8a;
+                font-size: 20px;
+                font-weight: 600;
+            }
+        }
+
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 0;
+            Rectangle {
+                width: 128px;
+                height: 128px;
+                border-radius: 30px;
+                background: #0a0a0e;
+                border-width: 1px;
+                border-color: #242a3d;
+
+                Rectangle {
+                    width: 104px;
+                    height: 104px;
+                    border-radius: 26px;
+                    border-width: 1.5px;
+                    border-color: #2970ff;
+                    opacity: 0.35;
+                }
+
+                Image {
+                    width: 80px;
+                    height: 80px;
+                    source: @image-url("@ui/icons/decred-logo.svg");
+                    colorize: #ffffff;
+                }
+            }
+        }
+    }
+}

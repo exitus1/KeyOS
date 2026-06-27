@@ -1,0 +1,79 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Seed display screen: device seed as 24 words, with a labeled top toggle to
+// switch to SeedQR (standard or compact). Display only; the OS Seed Vault owns
+// create/restore. Reading the seed passes the OS confirmation gate.
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, SeedWords, QrPages, SegmentedSelector, HeadingSm, TextSm } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { SeedDisplay } from "../../seed-display.slint";
+
+export component SeedPage inherits BasePage {
+    // 0 = words, 1 = seedqr
+    property <int> view-index: 0;
+
+    NavHeader {
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz4;
+
+            HeadingSm {
+                text: TR2.lookup(TrId.SeedTitle);
+                horizontal-alignment: center;
+            }
+
+            // Labeled toggle on top: Words | SeedQR
+            SegmentedSelector {
+                segments: [
+                    { label: TR2.lookup(TrId.SeedTabWords), icon: "list" },
+                    { label: TR2.lookup(TrId.SeedTabQr), icon: "scan-qr" },
+                ];
+                selected-index: root.view-index;
+                clicked(id, index) => {
+                    root.view-index = index;
+                }
+            }
+
+            TextSm {
+                text: TR2.lookup(TrId.SeedHint);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+
+            if view-index == 0: SeedWords {
+                words: SeedDisplay.get-seed-words();
+            }
+
+            if view-index == 1: QrPages {
+                model: [
+                    {
+                        code: SeedDisplay.get-standard-seed-qr(),
+                        header: TR2.lookup(TrId.SeedQrStandard),
+                    },
+                    {
+                        code: SeedDisplay.get-compact-seed-qr(),
+                        header: TR2.lookup(TrId.SeedQrCompact),
+                    },
+                ];
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonDone);
+                importance: Importance.primary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+        }
+    }
+}

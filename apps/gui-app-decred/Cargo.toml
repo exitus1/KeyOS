@@ -36,6 +36,7 @@ thiserror = { workspace = true }
 # In-workspace you would vendor decred-core under utils/ or a path dep.
 decred-core = { path = "../../utils/decred-core" }
 secp256k1 = "0.29"
+bip39 = "2.2"
 serde = { workspace = true, features = ["derive"] }
 
 [build-dependencies]

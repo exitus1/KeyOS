@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Balance global — currently MOCK DATA.
+//
+// The device is airgapped and cannot fetch balances itself. On real hardware,
+// these values would be pushed from an online companion over QuantumLink
+// (exactly as the Bitcoin app receives its balance + fx ExchangeRate). Until
+// that companion integration exists, these are hardcoded placeholders so the
+// balance UI can be built and reviewed.
+//
+// MOCK: 50.32 DCR @ $12.00/DCR = $603.84
+export global Balance {
+    in property <string> dcr-amount: "50.32 DCR";
+    in property <string> fiat-amount: "$603.84";
+    in property <bool> is-mock: true;
+}

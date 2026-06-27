@@ -125,35 +125,35 @@ component BitcoinTile inherits Rectangle {
 
                                     HeadingXl {
                                         horizontal-stretch: 0;
-                                        text: State.is-price-expired ? "" : "$";
+                                        text: false ? "" : "$";
                                         color: Palette.content-tertiary;
                                     }
 
                                     HeadingXl {
                                         horizontal-stretch: 1;
-                                        text: State.is-price-expired ? "" : price;
+                                        text: false ? "" : price;
                                         color: Palette.content-secondary;
                                     }
 
-                                    if State.is-price-stale: VerticalLayout {
+                                    if false: VerticalLayout {
                                         horizontal-stretch: 0;
                                         alignment: start;
                                         padding-top: Size.sz1;
 
                                         TextSm {
-                                            text: State.is-price-expired ? (State.is-envoy-connected ? TR2.lookup(TrId.MainLoadingData) : TR2.lookup(TrId.MainDisconnected)) : TR2.lookup(TrId.MainLastUpdate);
+                                            text: false ? (State.is-envoy-connected ? TR2.lookup(TrId.MainLoadingData) : TR2.lookup(TrId.MainDisconnected)) : TR2.lookup(TrId.MainLastUpdate);
                                             horizontal-alignment: right;
                                             color: LightPalette.content-tertiary;
                                         }
 
                                         TextSm {
-                                            text: State.is-price-expired ? "" : TR2.format(TrId.MainXAgo, [last-price-update-time]);
+                                            text: false ? "" : TR2.format(TrId.MainXAgo, [last-price-update-time]);
                                             horizontal-alignment: right;
                                             color: LightPalette.content-tertiary;
                                         }
                                     }
 
-                                    if !State.is-price-stale: VerticalLayout {
+                                    if !false: VerticalLayout {
                                         horizontal-stretch: 0;
                                         alignment: start;
                                         padding-top: Size.sz1;
@@ -184,7 +184,7 @@ component BitcoinTile inherits Rectangle {
                                     }
                                 }
 
-                                if (State.is-price-expired && !State.is-envoy-connected): Circle {
+                                if (false && !State.is-envoy-connected): Circle {
                                     size: Size.sz8;
                                     y: 2px;
                                     border-color: Palette.content-tertiary;
@@ -220,6 +220,7 @@ component BitcoinTile inherits Rectangle {
                                 source: @image-url("@ui/icons/decred.svg");
                                 width: Size.sz12 * 2;
                                 height: Size.sz12 * 2;
+                                colorize: #ffffff;
                             }
                         }
                     }
@@ -404,10 +405,12 @@ export component MainPage inherits BasePage {
                 spacing: Size.sz4;
 
                 BitcoinTile {
-                    price: State.bitcoin-price;
-                    currency: "Bitcoin USD";
-                    last-change-percent: State.bitcoin-price-change-percent;
-                    last-price-update-time: State.last-update-time;
+                    // MOCK Decred data — hardcoded until QuantumLink companion
+                    // pushes real balance/price. 50.32 DCR @ $12 = $603.84.
+                    price: "603.84";
+                    currency: "50.32 DCR";
+                    last-change-percent: "DCR @ $12.00";
+                    last-price-update-time: "mock";
                     name: "Decred";
                     clicked => {
                         CB.app-clicked(240px, 400px, "0x4465637265642057616c6c6574000000");

@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// SeedDisplay global: backs the "view / back up seed" screen. Display-only
+// (no create/restore — that's the OS Seed Vault's job).
+
+export global SeedDisplay {
+    pure callback get-seed-words() -> [string];
+    pure callback get-standard-seed-qr() -> image;
+    pure callback get-compact-seed-qr() -> image;
+}

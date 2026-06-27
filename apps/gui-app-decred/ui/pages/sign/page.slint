@@ -36,6 +36,10 @@ component SummaryRow inherits HorizontalLayout {
 }
 
 export component SignPage inherits BasePage {
+    init => {
+        // Always start the signing flow clean (don't reopen on a stale QR/Done).
+        SignTx.reject();
+    }
     NavHeader {
         clicked => {
             Navigate.backward();
@@ -77,39 +81,155 @@ export component SignPage inherits BasePage {
                 }
             }
 
-            // --- Review ------------------------------------------------------
+            // --- Review (ported from decred_review.slint mockup) -------------
             if SignTx.state == SignState.Review: VerticalLayout {
-                spacing: Size.sz3;
-                HeadingMd {
-                    text: TR2.lookup(TrId.SignReviewTitle);
+                spacing: 0px;
+
+                Text {
+                    text: "Review transaction";
+                    color: #ffffff;
+                    font-size: 24px;
+                    font-weight: 700;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: "Verify every detail on this screen.";
+                    color: #6b6b6b;
+                    font-size: 13px;
                     horizontal-alignment: center;
                 }
 
-                HLine { }
+                Rectangle { height: 20px; }
+                // HARD WARNING: companion mislabelled non-owned outputs as change.
+                if SignTx.flagged-count > 0: Rectangle {
+                    height: 92px;
+                    border-radius: 16px;
+                    background: #2a0e0e;
+                    border-width: 1.5px;
+                    border-color: #ff4d4d;
+                    VerticalLayout {
+                        padding: 12px;
+                        spacing: 4px;
+                        Text {
+                            text: "⚠ SECURITY WARNING";
+                            color: #ff6b6b;
+                            font-size: 14px;
+                            font-weight: 800;
+                            letter-spacing: 1px;
+                            horizontal-alignment: center;
+                        }
+                        Text {
+                            text: "Your companion labelled an output as change that is NOT one of your addresses. A correct wallet never does this — it may be faulty or hostile. Verify the recipients below.";
+                            color: #ffb3b3;
+                            font-size: 12px;
+                            horizontal-alignment: center;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+                if SignTx.flagged-count > 0: Rectangle { height: 12px; }
 
-                SummaryRow {
-                    label: TR2.lookup(TrId.SignSending);
-                    value: SignTx.send-total;
-                    emphasis: true;
+                // Amount hero
+                Rectangle {
+                    height: 130px;
+                    background: #08080a;
+                    border-radius: 20px;
+                    border-width: 1px;
+                    border-color: #1c1c1c;
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Text {
+                            text: "SENDING";
+                            color: #2970ff;
+                            font-size: 12px;
+                            font-weight: 600;
+                            letter-spacing: 2px;
+                            horizontal-alignment: center;
+                        }
+                        Text {
+                            text: SignTx.send-total;
+                            color: #ffffff;
+                            font-size: 38px;
+                            font-weight: 700;
+                            horizontal-alignment: center;
+                        }
+                    }
                 }
 
-                SummaryRow {
-                    label: TR2.lookup(TrId.SignFee);
-                    value: SignTx.fee;
-                }
+                Rectangle { height: 14px; }
 
-                SummaryRow {
-                    label: TR2.lookup(TrId.SignChange);
-                    value: SignTx.change;
-                }
+                // Detail card
+                Rectangle {
+                    background: #08080a;
+                    border-radius: 20px;
+                    border-width: 1px;
+                    border-color: #1c1c1c;
+                    VerticalLayout {
+                        padding: 8px;
+                        padding-left: 18px;
+                        padding-right: 18px;
+                        spacing: 0px;
 
-                HLine { }
-
-                TextSm {
-                    text: TR2.lookup(TrId.SignReviewHint);
-                    color: Palette.content-tertiary;
-                    horizontal-alignment: center;
-                    wrap: word-wrap;
+                        // RECIPIENT — device-decoded destination; verify every character.
+                        VerticalLayout {
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 4px;
+                            Text {
+                                text: "SENDING TO";
+                                color: #2970ff;
+                                font-size: 12px;
+                                font-weight: 600;
+                                letter-spacing: 1.5px;
+                            }
+                            Text {
+                                text: SignTx.recipient;
+                                color: #ffffff;
+                                font-size: 20px;
+                                font-weight: 500;
+                                wrap: char-wrap;
+                            }
+                        }
+                        Rectangle { height: 1px; background: #161616; }
+                        HorizontalLayout {
+                            height: 44px;
+                            Text {
+                                text: "Network fee";
+                                color: #6b6b6b;
+                                font-size: 14px;
+                                vertical-alignment: center;
+                                horizontal-stretch: 1;
+                            }
+                            Text {
+                                text: SignTx.fee;
+                                color: #e8e8e8;
+                                font-size: 15px;
+                                font-weight: 500;
+                                vertical-alignment: center;
+                                horizontal-alignment: right;
+                            }
+                        }
+                        Rectangle { height: 1px; background: #161616; }
+                        HorizontalLayout {
+                            height: 44px;
+                            Text {
+                                text: "Change";
+                                color: #6b6b6b;
+                                font-size: 14px;
+                                vertical-alignment: center;
+                                horizontal-stretch: 1;
+                            }
+                            Text {
+                                text: SignTx.change;
+                                color: #e8e8e8;
+                                font-size: 15px;
+                                font-weight: 500;
+                                vertical-alignment: center;
+                                horizontal-alignment: right;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -168,6 +288,7 @@ export component SignPage inherits BasePage {
             if SignTx.state == SignState.Idle: Button {
                 label: TR2.lookup(TrId.SignScanQr);
                 importance: Importance.primary;
+                background: #2970ff;
                 clicked => {
                     SignTx.start-qr-scan();
                 }
@@ -180,10 +301,25 @@ export component SignPage inherits BasePage {
                 }
             }
 
-            // Review: the consequential choice.
+            // Acknowledgment gate: when the companion lied about change, the
+            // user MUST consciously acknowledge before Approve unlocks.
+            if SignTx.state == SignState.Review && SignTx.flagged-count > 0 && !SignTx.mismatch-acknowledged: Button {
+                label: "I understand — these are NOT change";
+                importance: Importance.secondary;
+                background: #5a1a1a;
+                label-color: #ffd0d0;
+                clicked => {
+                    SignTx.mismatch-acknowledged = true;
+                }
+            }
+            // Review: the consequential choice. Disabled while an unacknowledged
+            // companion-mismatch is present, so it can't be signed reflexively.
             if SignTx.state == SignState.Review: Button {
                 label: TR2.lookup(TrId.SignApprove);
                 importance: Importance.primary;
+                background: (SignTx.flagged-count > 0 && !SignTx.mismatch-acknowledged) ? #1a2a44 : #2970ff;
+                label-color: #ffffff;
+                enabled: !(SignTx.flagged-count > 0 && !SignTx.mismatch-acknowledged);
                 clicked => {
                     SignTx.approve();
                 }
@@ -201,6 +337,7 @@ export component SignPage inherits BasePage {
                 label: TR2.lookup(TrId.CommonDone);
                 importance: Importance.primary;
                 clicked => {
+                    SignTx.reject();
                     Navigate.backward();
                 }
             }

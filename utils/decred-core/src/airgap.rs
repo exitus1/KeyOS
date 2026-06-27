@@ -105,6 +105,11 @@ pub struct ReviewSummary {
     pub change_total: i64,
     pub input_total: i64,
     pub fee: i64,
+    /// Outputs the companion claimed were change (`is_change = true`) but that
+    /// the device CANNOT derive as its own. A correct watch-only wallet never
+    /// does this, so each entry is evidence the companion is faulty or hostile
+    /// — these MUST be surfaced loudly and block reflexive approval.
+    pub flagged_mismatches: Vec<(String, i64)>,
 }
 
 impl SignRequest {
@@ -134,7 +139,80 @@ impl SignRequest {
             change_total,
             input_total,
             fee: input_total - self.output_total(),
+            flagged_mismatches: Vec::new(),
         }
+    }
+
+    /// Trustless review: instead of believing the companion's `is_change` flag,
+    /// the device RE-DERIVES its own addresses and decides for itself which
+    /// outputs are change (pay one of our keys) and which are external
+    /// recipients. This mirrors the input-side `prev_script` re-derivation in
+    /// `sign_request`, so a malicious or buggy companion cannot hide a
+    /// destination by mislabelling it as change. `gap_limit` bounds how many
+    /// indices per branch we scan when checking ownership.
+    pub fn review_owned(
+        &self,
+        secp: &secp256k1::Secp256k1<secp256k1::All>,
+        master: &ExtPrivKey,
+        gap_limit: u32,
+    ) -> Result<ReviewSummary, Error> {
+        use crate::hd::{BRANCH_EXTERNAL, BRANCH_INTERNAL};
+        let account = master.account_key(secp, self.account)?;
+
+        // Precompute our own hash160s (external + change branches up to gap_limit).
+        let mut owned: Vec<[u8; 20]> = Vec::new();
+        for branch in [BRANCH_EXTERNAL, BRANCH_INTERNAL] {
+            for index in 0..gap_limit {
+                let key = account.address_key(secp, branch, index)?;
+                owned.push(hash160(&key.compressed_pubkey(secp)));
+            }
+        }
+
+        let mut recipients = Vec::new();
+        let mut change_total = 0i64;
+        let mut flagged_mismatches = Vec::new();
+        for o in &self.outputs {
+            let owned_here = match p2pkh_hash160(&o.pk_script) {
+                Some(h) => owned.contains(&h),
+                None => false,
+            };
+            let addr = script_to_address(&o.pk_script)
+                .unwrap_or_else(|| "<non-standard script>".to_string());
+            if owned_here {
+                change_total += o.value;
+            } else {
+                recipients.push((addr.clone(), o.value));
+                if o.is_change {
+                    flagged_mismatches.push((addr, o.value));
+                }
+            }
+        }
+
+        let input_total = self.input_total();
+        Ok(ReviewSummary {
+            recipients,
+            change_total,
+            input_total,
+            fee: input_total - self.output_total(),
+            flagged_mismatches,
+        })
+    }
+}
+
+/// Extract the 20-byte hash160 from a standard mainnet P2PKH script, if it is one.
+fn p2pkh_hash160(script: &[u8]) -> Option<[u8; 20]> {
+    if script.len() == 25
+        && script[0] == 0x76
+        && script[1] == 0xa9
+        && script[2] == 0x14
+        && script[23] == 0x88
+        && script[24] == 0xac
+    {
+        let mut h = [0u8; 20];
+        h.copy_from_slice(&script[3..23]);
+        Some(h)
+    } else {
+        None
     }
 }
 
