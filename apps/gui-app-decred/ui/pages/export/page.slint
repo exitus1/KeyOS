@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Export: show the account dpub (public only) as a QR for Cake Wallet to import
+// as a watch-only wallet. This is the pairing step of the airgap.
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, QrCodeCard, HeadingSm, TextSm, TextMd } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { Account, AccountState } from "../../account.slint";
+
+export component ExportPage inherits BasePage {
+    init => {
+        Account.export-account-xpub(0);
+    }
+
+    NavHeader {
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz4;
+
+            HeadingSm {
+                text: TR2.lookup(TrId.ExportTitle);
+                horizontal-alignment: center;
+            }
+
+            TextSm {
+                text: TR2.lookup(TrId.ExportHint);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+
+            if Account.state == AccountState.Exported: HorizontalLayout {
+                alignment: center;
+                QrCodeCard {
+                    data: Account.account-dpub;
+                }
+            }
+
+            if Account.state == AccountState.Error: TextMd {
+                text: Account.error-text;
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.CommonDone);
+                importance: Importance.primary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+        }
+    }
+}

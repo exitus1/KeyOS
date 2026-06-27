@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# This crate is meant to live inside the KeyOS workspace at
+# apps/gui-app-decred/. The `workspace = true` deps and the path deps
+# (slint-keyos-platform, i18n, security, fs, ...) resolve against that
+# workspace exactly as the Bitcoin app's do — they will NOT resolve standalone.
+#
+# decred-core is our own crate (../../.. layout depends on where you drop this).
+# Adjust the path once placed in the workspace; here it points at the sibling
+# crate in this prototype repo.
+
+[package]
+name = "gui-app-decred"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+# --- KeyOS workspace crates (same set the Bitcoin app pulls) ---
+anyhow = { workspace = true }
+async-channel = { workspace = true }
+foundation-ur = { workspace = true }       # animated QR (UR) encode/decode
+foundation-urtypes = { workspace = true }
+fs = { workspace = true }                  # SD-card read/write
+hex = { workspace = true }
+i18n = { version = "0.1.0", path = "../../i18n" }
+log = { workspace = true }
+log-server = { workspace = true }
+security = { workspace = true }            # GetSeed seam
+server = { workspace = true }
+settings = { workspace = true }
+slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
+thiserror = { workspace = true }
+
+# --- our verified Decred core (no BDK; BDK is Bitcoin-only) ---
+# In-workspace you would vendor decred-core under utils/ or a path dep.
+decred-core = { path = "../../utils/decred-core" }
+secp256k1 = "0.29"
+serde = { workspace = true, features = ["derive"] }
+
+[build-dependencies]
+slint-keyos-platform-build = { path = "../../slint-keyos-platform/build" }

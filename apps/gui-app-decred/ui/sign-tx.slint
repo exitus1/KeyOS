@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Signing flow state shared between Rust (sign_tx.rs) and the Slint pages.
+// The page renders one of these states; Rust drives transitions.
+
+export enum SignState {
+    // Nothing loaded — offer QR / SD entry points.
+    Idle,
+    // Camera open, assembling an animated-QR (UR) sign request.
+    Scanning,
+    // Decoded; showing recipients / amount / fee for confirmation.
+    Review,
+    // Signed; presenting the signed tx as an animated QR to scan back.
+    ShowQr,
+    // Signed; written to SD card.
+    Done,
+    // Something refused or failed (see error-text).
+    Error,
+}
+
+export enum OriginView {
+    Qr,
+    SdCard,
+}
+
+export global SignTx {
+    in property <SignState> state: SignState.Idle;
+    in property <OriginView> origin: OriginView.Qr;
+
+    // Review summary, pre-formatted as "1.2345 DCR" strings in Rust because
+    // Slint int is 32-bit and atom values overflow it.
+    in property <string> send-total;
+    in property <string> fee;
+    in property <string> change;
+    in property <int> recipient-count;
+
+    // Result / failure surfaces.
+    in property <string> saved-path;
+    in property <string> error-text;
+
+    // Animated-QR frames for the signed transaction (UR parts).
+    pure callback signed-qr-parts() -> [string];
+
+    // User actions.
+    callback start-qr-scan();
+    callback load-from-sd();
+    callback approve();
+    callback reject();
+}

@@ -1,0 +1,35 @@
+# decred-core
+#
+# The hard rule here: we hand-roll NOTHING that touches elliptic-curve math or
+# standard KDFs. Those come from audited crates. We only own Decred-specific
+# glue (BLAKE-256, sighash byte layout, tx serialization, address encoding,
+# derivation orchestration, airgap format).
+#
+# Targeting KeyOS means armv7a-unknown-xous-elf. The crate uses `alloc` (Vec /
+# String) but no std I/O. On a real device build you will likely flip these
+# deps to their no_std + alloc feature sets; versions below are the audited
+# lines those features live on. Left std-on here so `cargo test` runs on the
+# host first.
+
+[package]
+name = "decred-core"
+version = "0.1.0"
+edition = "2021"
+description = "Minimal Decred signing core (BIP39/BIP32/P2PKH/SigHashAll/ECDSA) for KeyOS"
+license = "MIT"
+
+[dependencies]
+secp256k1 = "0.29"
+sha2 = "0.10"
+hmac = "0.12"
+ripemd = "0.1"
+bip39 = "2.1"
+bs58 = "0.5"
+minicbor = { version = "0.24", features = ["alloc", "derive"] }
+
+[dev-dependencies]
+hex = "0.4"
+
+[features]
+default = ["std"]
+std = []

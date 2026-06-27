@@ -1,0 +1,218 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Sign: the core flow. One page, driven by SignTx.state.
+//   Idle     -> choose QR or SD as the source of the unsigned package
+//   Scanning -> animated-QR capture in progress
+//   Review   -> recipients / amount / fee, then Approve (fires the seed gate)
+//   ShowQr   -> signed tx as animated QR to scan back into the companion
+//   Done     -> signed tx written to SD card
+//   Error    -> refused or failed
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, DynamicQrCode, HeadingSm, HeadingMd, TextMd, TextSm, HLine, TimerCircularProgress } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { SignTx, SignState } from "../../sign-tx.slint";
+
+// A label/value row — used for the amount/fee summary.
+component SummaryRow inherits HorizontalLayout {
+    in property <string> label;
+    in property <string> value;
+    in property <bool> emphasis: false;
+
+    TextMd {
+        text: label;
+        color: Palette.content-tertiary;
+        horizontal-alignment: left;
+    }
+
+    Rectangle { }  // spacer
+
+    TextMd {
+        text: value;
+        color: emphasis ? Palette.content-primary : Palette.content-secondary;
+        horizontal-alignment: right;
+    }
+}
+
+export component SignPage inherits BasePage {
+    NavHeader {
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz4;
+
+            // --- Idle: pick a transport -------------------------------------
+            if SignTx.state == SignState.Idle: VerticalLayout {
+                spacing: Size.sz4;
+                HeadingSm {
+                    text: TR2.lookup(TrId.SignChooseSource);
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.SignChooseSourceHint);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                }
+            }
+
+            // --- Scanning ----------------------------------------------------
+            if SignTx.state == SignState.Scanning: VerticalLayout {
+                spacing: Size.sz4;
+                HorizontalLayout {
+                    alignment: center;
+                    TimerCircularProgress {
+                        indeterminate: true;
+                    }
+                }
+
+                TextMd {
+                    text: TR2.lookup(TrId.SignScanning);
+                    horizontal-alignment: center;
+                }
+            }
+
+            // --- Review ------------------------------------------------------
+            if SignTx.state == SignState.Review: VerticalLayout {
+                spacing: Size.sz3;
+                HeadingMd {
+                    text: TR2.lookup(TrId.SignReviewTitle);
+                    horizontal-alignment: center;
+                }
+
+                HLine { }
+
+                SummaryRow {
+                    label: TR2.lookup(TrId.SignSending);
+                    value: SignTx.send-total;
+                    emphasis: true;
+                }
+
+                SummaryRow {
+                    label: TR2.lookup(TrId.SignFee);
+                    value: SignTx.fee;
+                }
+
+                SummaryRow {
+                    label: TR2.lookup(TrId.SignChange);
+                    value: SignTx.change;
+                }
+
+                HLine { }
+
+                TextSm {
+                    text: TR2.lookup(TrId.SignReviewHint);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+            }
+
+            // --- ShowQr: signed, animated QR back ----------------------------
+            if SignTx.state == SignState.ShowQr: VerticalLayout {
+                spacing: Size.sz4;
+                HeadingSm {
+                    text: TR2.lookup(TrId.SignSignedTitle);
+                    horizontal-alignment: center;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    DynamicQrCode {
+                        get-parts(density) => {
+                            SignTx.signed-qr-parts();
+                        }
+                    }
+                }
+
+                TextSm {
+                    text: TR2.lookup(TrId.SignSignedQrHint);
+                    color: Palette.content-tertiary;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+            }
+
+            // --- Done: written to SD ----------------------------------------
+            if SignTx.state == SignState.Done: VerticalLayout {
+                spacing: Size.sz3;
+                HeadingSm {
+                    text: TR2.lookup(TrId.SignSavedTitle);
+                    horizontal-alignment: center;
+                }
+
+                TextSm {
+                    text: SignTx.saved-path;
+                    color: Palette.content-secondary;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+            }
+
+            // --- Error -------------------------------------------------------
+            if SignTx.state == SignState.Error: TextMd {
+                text: SignTx.error-text;
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+        }
+
+        ButtonSection {
+            // Idle: the two entry points.
+            if SignTx.state == SignState.Idle: Button {
+                label: TR2.lookup(TrId.SignScanQr);
+                importance: Importance.primary;
+                clicked => {
+                    SignTx.start-qr-scan();
+                }
+            }
+            if SignTx.state == SignState.Idle: Button {
+                label: TR2.lookup(TrId.SignLoadSd);
+                importance: Importance.secondary;
+                clicked => {
+                    SignTx.load-from-sd();
+                }
+            }
+
+            // Review: the consequential choice.
+            if SignTx.state == SignState.Review: Button {
+                label: TR2.lookup(TrId.SignApprove);
+                importance: Importance.primary;
+                clicked => {
+                    SignTx.approve();
+                }
+            }
+            if SignTx.state == SignState.Review: Button {
+                label: TR2.lookup(TrId.SignReject);
+                importance: Importance.secondary;
+                clicked => {
+                    SignTx.reject();
+                }
+            }
+
+            // Terminal states: one way out.
+            if SignTx.state == SignState.ShowQr || SignTx.state == SignState.Done || SignTx.state == SignState.Error: Button {
+                label: TR2.lookup(TrId.CommonDone);
+                importance: Importance.primary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+
+            // Scanning: let the user back out.
+            if SignTx.state == SignState.Scanning: Button {
+                label: TR2.lookup(TrId.CommonCancel);
+                importance: Importance.secondary;
+                clicked => {
+                    SignTx.reject();
+                }
+            }
+        }
+    }
+}

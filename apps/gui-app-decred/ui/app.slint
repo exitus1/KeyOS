@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Decred Wallet root. Mirrors gui-app-bitcoin/ui/app.slint: pull the platform
+// theme + generated router, re-export the app globals so Rust can reach them,
+// and host the Router inside the platform BaseWindow.
+
+import { CurrentTheme, Images, Utils } from "@ui/theme.slint";
+import { Router } from "gen/router.slint";
+import { TR } from "@ui/i18n/i18n.slint";
+import { BaseWindow } from "@ui/widgets.slint";
+
+import { SignTx } from "sign-tx.slint";
+import { Receive } from "receive.slint";
+import { Account } from "account.slint";
+
+export { Utils, Images, CurrentTheme, SignTx, Receive, Account }
+export { TR }
+export * from "gen/exports.slint";
+
+export component AppWindow inherits BaseWindow {
+    Router { }
+}

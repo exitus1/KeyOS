@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Watch-only account export (create_account.rs). Exports the account dpub for
+// Cake Wallet to import as a watch-only wallet.
+
+export enum AccountState {
+    Idle,
+    Exported,
+    Error,
+}
+
+export global Account {
+    in property <AccountState> state: AccountState.Idle;
+    in property <string> account-dpub;
+    in property <int> index;
+    in property <string> error-text;
+
+    // Derive m/44'/42'/index' and return its neutered dpub.
+    callback export-account-xpub(int);
+}

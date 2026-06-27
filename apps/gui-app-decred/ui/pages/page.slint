@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Home. Deliberately spare: a wordmark and three actions, one line of intent
+// each. No dashboards, balances, or chrome — this device signs and shows keys,
+// nothing else.
+
+import { BasePage, AppHeader, PageBody, ContentSection, ButtonSection, Button, HeadingSm, TextSm } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../gen/tr.slint";
+import { Navigate } from "../gen/navigate.slint";
+
+export component HomePage inherits BasePage {
+    AppHeader {
+        title: TR2.lookup(TrId.AppName);
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz3;
+
+            // One quiet line of orientation, then get out of the way.
+            TextSm {
+                text: TR2.lookup(TrId.HomeSubtitle);
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.HomeReceive);
+                importance: Importance.primary;
+                clicked => {
+                    Navigate.receive({ });
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.HomeSign);
+                importance: Importance.secondary;
+                clicked => {
+                    Navigate.sign({ });
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.HomeExport);
+                importance: Importance.secondary;
+                clicked => {
+                    Navigate.export({ });
+                }
+            }
+        }
+    }
+}

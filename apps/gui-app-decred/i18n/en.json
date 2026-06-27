@@ -1,0 +1,33 @@
+{
+  "appName": "Decred",
+
+  "home.subtitle": "Sign transactions and share keys. Nothing leaves this device unless you approve it.",
+  "home.receive": "Receive",
+  "home.sign": "Sign transaction",
+  "home.export": "Export wallet key",
+
+  "receive.title": "Receive Decred",
+  "receive.next": "Next address",
+
+  "sign.chooseSource": "Load a transaction",
+  "sign.chooseSourceHint": "Scan the QR from your wallet, or load it from an SD card.",
+  "sign.scanning": "Reading transaction…",
+  "sign.reviewTitle": "Review and sign",
+  "sign.sending": "Sending",
+  "sign.fee": "Network fee",
+  "sign.change": "Change",
+  "sign.reviewHint": "Check the amount and recipients. Approving unlocks your seed to sign.",
+  "sign.scanQr": "Scan QR",
+  "sign.loadSd": "Load from SD card",
+  "sign.approve": "Approve and sign",
+  "sign.reject": "Reject",
+  "sign.signedTitle": "Signed",
+  "sign.signedQrHint": "Scan this with your wallet to broadcast.",
+  "sign.savedTitle": "Saved to SD card",
+
+  "export.title": "Watch-only key",
+  "export.hint": "Import this into your wallet to track balances and build transactions. It cannot move funds.",
+
+  "common.done": "Done",
+  "common.cancel": "Cancel"
+}

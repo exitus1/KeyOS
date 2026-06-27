@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Decred Wallet — KeyOS app manifest.
+#
+# appId is the ASCII of "Decred Wallet" zero-padded to 16 bytes, matching the
+# convention the Bitcoin app uses ("Bitcoin Wallet" -> 0x4269...0000).
+appId = "0x4465637265642057616c6c6574000000"
+
+[appName]
+en = "Decred Wallet"
+
+[permissions]
+# gui-app: redraw/buffers/modals/theme. fs-generic: read+write files for the
+# SD-card signing path (unsigned.dcrtx in, signed.dcrtx out).
+template = ["gui-app", "fs-generic", "navigable"]
+
+# Seed access is the whole point of this app: GetSeed returns BIP39 *entropy*
+# from the secure element (gated by on-device user confirmation). We also read
+# device id / OS version for display + airgap package provenance. We do NOT
+# request set_seed here because wallet *creation* is handled by the OS Seed
+# Vault app; this app is signing + receive + (optional) account view only.
+#
+# If you want this app to also create/restore a Decred seed itself, add
+# "SetSeed" / "SetSeedAndPin" — but prefer routing users to the OS seed flow.
+"os/security" = ["GetSeed", "GetDeviceId", "GetOsVersionInfo"]
+
+"os/settings" = ["GetDeviceName", "GetLocale", "GetPrimeColor"]
+
+# Camera for animated-QR (UR) ingest of the unsigned-tx package, and to show
+# the signed-tx / address QR back. The QR *scanner* is provided by the OS QR
+# app; here we request camera directly for in-app animated-QR decode.
+
+# Filesystem scopes for the SD-card transport. Airlock is the vetted exchange
+# area; User/USB cover removable media.
+"os/fs" = [
+    "GetAirlockReadAccess",
+    "GetAirlockWriteAccess",
+    "GetUserReadAccess",
+    "GetUserWriteAccess",
+    "GetUsbReadAccess",
+    "GetUsbWriteAccess",
+]

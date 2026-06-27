@@ -108,6 +108,7 @@ fn app_main(cx: AppContext, ui: AppWindow) {
             HiddenApp { label: "Reg. Testing".into(), app_id: "0xc677731d8ee7380a38faa7cd97cbd3a5".into() },
             HiddenApp { label: "Playground".into(), app_id: "0x7c9f81f9bcee31425062fb0d8fbf3001".into() },
             HiddenApp { label: "Update".into(), app_id: "0x6b713041faef901f23743263a45dcb83".into() },
+        HiddenApp { label: "Decred".into(), app_id: "0x4465637265642057616c6c6574000000".into() },
         ];
 
         ui.global::<State>().set_hidden_apps(slint::ModelRc::new(VecModel::from(hidden_apps)));

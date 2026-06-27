@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Receive-address flow (receive.rs).
+
+export enum ReceiveState {
+    Idle,
+    Shown,
+    Error,
+}
+
+export global Receive {
+    in property <ReceiveState> state: ReceiveState.Idle;
+    in property <string> address;
+    in property <int> index;
+    in property <string> error-text;
+
+    // Derive + display the external-branch address at `index`.
+    callback show-address(int);
+}

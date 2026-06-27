@@ -90,7 +90,7 @@ component BitcoinTile inherits Rectangle {
         LineCard {
             width: parent.width;
             height: parent.height;
-            card-color: CardColor.dark-copper;
+            card-color: CardColor.blue;
 
             clicked => {
                 clicked();
@@ -216,11 +216,10 @@ component BitcoinTile inherits Rectangle {
 
                         VerticalLayout {
                             alignment: center;
-                            CircleIcon {
-                                icon: "bitcoin";
-                                line-color: CardColor.dark-copper;
-                                size: Size.sz12 * 2;
-                                icon-size: IconSize.px64;
+                            Image {
+                                source: @image-url("@ui/icons/decred.svg");
+                                width: Size.sz12 * 2;
+                                height: Size.sz12 * 2;
                             }
                         }
                     }
@@ -409,9 +408,9 @@ export component MainPage inherits BasePage {
                     currency: "Bitcoin USD";
                     last-change-percent: State.bitcoin-price-change-percent;
                     last-price-update-time: State.last-update-time;
-                    name: TR2.lookup(TrId.MainWallet);
+                    name: "Decred";
                     clicked => {
-                        CB.app-clicked(240px, 400px, "0x426974636f696e2057616c6c65740000");
+                        CB.app-clicked(240px, 400px, "0x4465637265642057616c6c6574000000");
                     }
                 }
 

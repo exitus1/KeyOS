@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Receive: derive an external-branch address on entry, show it as a QR plus a
+// monospace string, and allow stepping to the next index.
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, QrCodeCard, HeadingSm, TextSm, TextMd } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { TR2, TrId } from "../../gen/tr.slint";
+import { Navigate, Animate } from "../../gen/navigate.slint";
+import { Receive, ReceiveState } from "../../receive.slint";
+
+export component ReceivePage inherits BasePage {
+    // Derive index 0 as soon as the page is shown.
+    init => {
+        Receive.show-address(0);
+    }
+
+    NavHeader {
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz4;
+
+            HeadingSm {
+                text: TR2.lookup(TrId.ReceiveTitle);
+                horizontal-alignment: center;
+            }
+
+            if Receive.state == ReceiveState.Shown: VerticalLayout {
+                spacing: Size.sz4;
+
+                HorizontalLayout {
+                    alignment: center;
+                    QrCodeCard {
+                        data: Receive.address;
+                    }
+                }
+
+                // Full address, monospace, wraps. The one place we want density.
+                TextSm {
+                    text: Receive.address;
+                    color: Palette.content-secondary;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+            }
+
+            if Receive.state == ReceiveState.Error: TextMd {
+                text: Receive.error-text;
+                color: Palette.content-tertiary;
+                horizontal-alignment: center;
+            }
+        }
+
+        ButtonSection {
+            Button {
+                label: TR2.lookup(TrId.ReceiveNext);
+                importance: Importance.secondary;
+                enabled: Receive.state == ReceiveState.Shown;
+                clicked => {
+                    Receive.show-address(Receive.index + 1);
+                }
+            }
+
+            Button {
+                label: TR2.lookup(TrId.CommonDone);
+                importance: Importance.primary;
+                clicked => {
+                    Navigate.backward();
+                }
+            }
+        }
+    }
+}

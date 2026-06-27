@@ -161,6 +161,8 @@ members = [
     "xous/trng",
     "xous/xous-rs",
     "xtask",
+    "apps/gui-app-decred",
+    "utils/decred-core",
 ]
 
 [workspace.dependencies]
