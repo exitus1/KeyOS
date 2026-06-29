@@ -4,6 +4,7 @@ use slint_keyos_platform::slint::ComponentHandle;
 // Shared application state, held in a StoredValue<AppState> and threaded to
 // every feature module (same ownership model as the Bitcoin app's AppState).
 
+use decred_core::hd::ExtPrivKey;
 use secp256k1::Secp256k1;
 use slint_keyos_platform::slint::Weak;
 
@@ -26,6 +27,11 @@ pub struct AppState {
     /// transport it arrived on. Raw CBOR bytes are kept (not the parsed struct)
     /// so the parse is re-validated at sign time.
     pending: Option<(Origin, Vec<u8>)>,
+    /// Master key derived once at review time and reused to sign, so a single
+    /// scan/approve only prompts for seed access once. Held only for the
+    /// review->approve window; cleared (and zeroized — `ExtPrivKey: Drop`)
+    /// alongside `pending`.
+    cached_master: Option<ExtPrivKey>,
     /// Animated-QR parts (UR frames) for the most recently signed tx, read back
     /// by the DynamicQrCode via the `signed-qr-parts` callback.
     signed_parts: Vec<String>,
@@ -39,6 +45,7 @@ impl AppState {
             security: crate::Security::default(),
             account: 0,
             pending: None,
+            cached_master: None,
             signed_parts: Vec::new(),
         }
     }
@@ -59,9 +66,23 @@ impl AppState {
         self.pending.clone()
     }
 
-    /// Drop any pending request (Reject / Cancel).
+    /// Cache the master key derived during review so signing can reuse it
+    /// without a second secure-element prompt.
+    pub fn cache_master(&mut self, master: ExtPrivKey) {
+        self.cached_master = Some(master);
+    }
+
+    /// The cached review-time master key, if still held. Returns a clone; the
+    /// clone is zeroized when the caller drops it (`ExtPrivKey: Drop`).
+    pub fn cached_master(&self) -> Option<ExtPrivKey> {
+        self.cached_master.clone()
+    }
+
+    /// Drop any pending request (Reject / Cancel / post-sign), zeroizing the
+    /// cached master key along with it.
     pub fn clear_pending(&mut self) {
         self.pending = None;
+        self.cached_master = None;
     }
 
     /// Store the animated-QR parts for the signed tx.

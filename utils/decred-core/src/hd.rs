@@ -42,6 +42,19 @@ pub struct ExtPrivKey {
     pub child_number: u32,
 }
 
+/// Scrub private material when an `ExtPrivKey` (master or any derived child) is
+/// dropped. Every intermediate produced along a derivation path is erased as it
+/// goes out of scope, so the seed-derived secret never lingers in freed memory.
+/// `non_secure_erase` zeroes the secp256k1 secret; `zeroize` does a volatile
+/// (non-elidable) wipe of the chain code.
+impl Drop for ExtPrivKey {
+    fn drop(&mut self) {
+        use zeroize::Zeroize;
+        self.secret.non_secure_erase();
+        self.chain_code.zeroize();
+    }
+}
+
 impl ExtPrivKey {
     /// BIP32 master from a 512-bit BIP39 seed.
     pub fn master_from_seed(seed: &[u8]) -> Result<Self, Error> {

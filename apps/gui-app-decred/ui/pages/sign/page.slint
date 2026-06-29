@@ -171,11 +171,12 @@ export component SignPage inherits BasePage {
                         padding-right: 18px;
                         spacing: 0px;
 
-                        // RECIPIENT — device-decoded destination; verify every character.
+                        // RECIPIENTS — device-decoded destinations; verify every
+                        // character AND every per-recipient amount.
                         VerticalLayout {
                             padding-top: 10px;
                             padding-bottom: 10px;
-                            spacing: 4px;
+                            spacing: 10px;
                             Text {
                                 text: "SENDING TO";
                                 color: #2970ff;
@@ -183,12 +184,21 @@ export component SignPage inherits BasePage {
                                 font-weight: 600;
                                 letter-spacing: 1.5px;
                             }
-                            Text {
-                                text: SignTx.recipient;
-                                color: #ffffff;
-                                font-size: 20px;
-                                font-weight: 500;
-                                wrap: char-wrap;
+                            for r in SignTx.recipients: VerticalLayout {
+                                spacing: 2px;
+                                Text {
+                                    text: r.address;
+                                    color: #ffffff;
+                                    font-size: 18px;
+                                    font-weight: 500;
+                                    wrap: char-wrap;
+                                }
+                                Text {
+                                    text: r.amount;
+                                    color: #9bbcff;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                }
                             }
                         }
                         Rectangle { height: 1px; background: #161616; }

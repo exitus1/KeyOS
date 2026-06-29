@@ -23,6 +23,12 @@ export enum OriginView {
     SdCard,
 }
 
+// One external recipient, pre-formatted in Rust for on-device verification.
+export struct RecipientRow {
+    address: string,
+    amount: string,
+}
+
 export global SignTx {
     in property <SignState> state: SignState.Idle;
     in property <OriginView> origin: OriginView.Qr;
@@ -33,8 +39,9 @@ export global SignTx {
     in property <string> fee;
     in property <string> change;
     in property <int> recipient-count;
-    // Destination address(es) — THE critical thing to verify on-device.
-    in property <string> recipient;
+    // Per-recipient address + amount — THE critical thing to verify on-device.
+    // Each row is shown individually so every destination amount is auditable.
+    in property <[RecipientRow]> recipients;
     // Count of outputs the companion mislabelled as change but that
     // are NOT ours — a detected lie. >0 means show a hard warning and
     // gate the approve button.

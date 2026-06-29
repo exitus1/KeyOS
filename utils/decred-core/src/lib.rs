@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 // decred-core: a no_std-friendly Decred signing core for KeyOS apps.
 //
 // Scope is deliberately narrow: BIP39 entropy -> BIP32 (Decred version bytes)

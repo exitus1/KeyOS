@@ -1,6 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 use decred_core::airgap::decode_sign_request;
 fn main() {
-    let bytes = std::fs::read("/home/mike/karamble_unsigned.dcrtx").unwrap();
+    let path = std::env::args().nth(1).unwrap_or_else(|| "karamble_unsigned.dcrtx".to_string());
+    let bytes = std::fs::read(&path).unwrap();
     let req = decode_sign_request(&bytes).expect("decode failed");
     println!("format_version: {}  tx_version: {}  account: {}", req.format_version, req.tx_version, req.account);
     let mut in_total = 0i64;
