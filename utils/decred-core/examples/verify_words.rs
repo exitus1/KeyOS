@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 fn main() {
     let words = "cruel brand clog below only series umbrella sauce alcohol answer loud brief skirt visual spray vanish view drip punch magnet release wedding clever route";
     match bip39::Mnemonic::parse(words) {

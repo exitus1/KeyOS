@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 use decred_core::hd::{ExtPrivKey, BRANCH_EXTERNAL, p2pkh_address};
 use decred_core::hashing::hash160;
 use secp256k1::Secp256k1;

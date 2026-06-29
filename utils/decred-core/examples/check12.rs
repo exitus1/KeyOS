@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 fn main() {
     let words = "city quit shell buddy sponsor giant blast device oak bonus viable consider";
     let m = bip39::Mnemonic::parse(words).expect("parse");

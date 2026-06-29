@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 fn main() {
     let hexstr = "e2dd56fb34312964c142143735de8810";
     let entropy: Vec<u8> = (0..hexstr.len()).step_by(2)

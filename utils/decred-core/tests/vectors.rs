@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 //! Reference vectors lifted verbatim from dcrd source. These are the oracle:
 //! if decred-core disagrees with any of them, decred-core is wrong, because
 //! these exact strings/bytes are what the live network produced and validated.

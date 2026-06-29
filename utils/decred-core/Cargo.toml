@@ -16,7 +16,7 @@ name = "decred-core"
 version = "0.1.0"
 edition = "2021"
 description = "Minimal Decred signing core (BIP39/BIP32/P2PKH/SigHashAll/ECDSA) for KeyOS"
-license = "MIT"
+license = "Apache-2.0"
 
 [dependencies]
 secp256k1 = "0.29"

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 fn main() {
     let words = "kiwi proud grass check junk among list purchase chronic hero spirit caught";
     let m = match bip39::Mnemonic::parse(words) {

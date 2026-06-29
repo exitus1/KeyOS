@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+//
 use decred_core::airgap::{encode_sign_request, InputMeta, OutputMeta, SignRequest, FORMAT_VERSION};
 use decred_core::address::{decode_p2pkh, p2pkh_script};
 

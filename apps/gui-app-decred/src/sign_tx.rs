@@ -53,12 +53,16 @@ pub fn init(state: StoredValue<AppState>) {
     // User tapped "Load from SD card".
     sign.on_load_from_sd({
         move || {
-            // SIM: Airlock/SD is unavailable in the hosted simulator, so this
-            // button injects a known in-memory test tx to exercise the GUI
-            // review->approve->sign flow. On hardware, restore the real
-            // load_from_sd(state) call here.
-            if let Err(e) = debug_inject_karamble_file(state) {
-                log::error!("test tx inject failed: {e:?}");
+            // On hardware, read the real unsigned.dcrtx off the Airlock scope.
+            // The hosted simulator has no Airlock image, so there the button
+            // feeds an adversarial fixture through the same `ingest` path to
+            // exercise the GUI review->approve->sign flow.
+            #[cfg(target_os = "xous")]
+            let r = load_from_sd(state);
+            #[cfg(not(target_os = "xous"))]
+            let r = debug_inject_karamble_file(state);
+            if let Err(e) = r {
+                log::error!("sd load failed: {e:?}");
                 show_error(state, &e.to_string());
             }
         }
@@ -112,7 +116,9 @@ pub fn begin_scan(state: StoredValue<AppState>) -> Result<()> {
     Ok(())
 }
 
-/// Read the unsigned package off removable media.
+/// Read the unsigned package off removable media. Hardware-only: the simulator
+/// has no Airlock image (see the SD button wiring above).
+#[cfg(target_os = "xous")]
 fn load_from_sd(state: StoredValue<AppState>) -> Result<()> {
     // `fs` is the KeyOS filesystem API. Path/scoping mirrors the Bitcoin app's
     // file PSBT load; we read raw CBOR bytes, not a PSBT.
@@ -127,8 +133,14 @@ fn load_from_sd(state: StoredValue<AppState>) -> Result<()> {
 
 /// Common path for both transports: decode the package, derive a review
 /// summary for the on-device confirmation screen, and stash it pending
-/// approval. We decode (cheap) here but DEFER key derivation until the user
-/// approves, so the secure-element prompt only fires on real intent.
+/// approval.
+///
+/// NOTE: trustless review re-derives our own addresses to classify outputs, so
+/// this DOES touch the seed (via `load_master_key`) at ingest time — the
+/// secure-element gate fires here, and again at `approve_and_sign`. A single
+/// scan/approve therefore prompts twice; consolidating to one prompt is a
+/// known follow-up (would require caching the derived key across the review
+/// window, which widens the in-memory exposure).
 /// Indices per branch scanned to decide change vs external recipient.
 const OWNERSHIP_GAP_LIMIT: u32 = 200;
 
@@ -143,6 +155,15 @@ pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Res
         req.review_owned(&s.secp, &master, OWNERSHIP_GAP_LIMIT)
             .map_err(|e| anyhow!("review failed: {e}"))?
     };
+
+    // A negative fee means the declared outputs exceed the declared inputs:
+    // the tx is malformed or the companion is lying. It can never be a valid
+    // Decred transaction, so refuse it before it ever reaches the review screen.
+    if summary.fee < 0 {
+        return Err(anyhow!(
+            "invalid transaction: outputs exceed inputs (negative fee)"
+        ));
+    }
 
     // Persist the raw bytes + origin so approve_and_sign can re-decode and sign.
     {
@@ -165,9 +186,6 @@ fn render_review(state: StoredValue<AppState>, summary: &ReviewSummary) {
     sign.set_fee(fmt_dcr(summary.fee).into());
     sign.set_change(fmt_dcr(summary.change_total).into());
     sign.set_recipient_count(summary.recipients.len() as i32);
-    sign.set_flagged_count(summary.flagged_mismatches.len() as i32);
-    // Reset the acknowledgment each time a new tx is reviewed.
-    sign.set_mismatch_acknowledged(false);
     sign.set_flagged_count(summary.flagged_mismatches.len() as i32);
     // Reset the acknowledgment each time a new tx is reviewed.
     sign.set_mismatch_acknowledged(false);
@@ -217,11 +235,30 @@ fn approve_and_sign(state: StoredValue<AppState>) -> Result<()> {
         // 25th word; wire a prompt here if you support passphrases).
         let master = load_master_key(&s.secp, &s.security, "")
             .map_err(|e| anyhow!("seed error: {e}"))?;
+        // Defense in depth: recompute ownership with the key we just derived
+        // (no extra seed prompt — `master` is already in hand) and REFUSE to
+        // sign if the companion mislabelled a recipient as change and the user
+        // never acknowledged the warning. The UI already gates the Approve
+        // button on this; this is the backstop so signing can never bypass it.
+        let summary = req
+            .review_owned(&s.secp, &master, OWNERSHIP_GAP_LIMIT)
+            .map_err(|e| anyhow!("review failed: {e}"))?;
+        if !summary.flagged_mismatches.is_empty()
+            && !s.ui().global::<SignTx>().get_mismatch_acknowledged()
+        {
+            return Err(anyhow!(
+                "refusing to sign: unacknowledged change/recipient mismatch"
+            ));
+        }
         // sign_request re-derives per-input keys from `master`, verifies each
         // prev_script (ScriptMismatch => refuse), signs SigHashAll low-S, and
         // returns the fully serialized network tx bytes.
         sign_request(&s.secp, &master, &req).map_err(|e| anyhow!("sign failed: {e}"))?
     };
+
+    // Signing succeeded: drop the stashed unsigned package so a stale request
+    // can't be re-signed and doesn't linger in memory.
+    state.borrow_mut().clear_pending();
 
     match origin {
         Origin::Qr => emit_qr(state, &signed),
@@ -290,13 +327,19 @@ fn show_error(state: StoredValue<AppState>, msg: &str) {
 // prev_script is derived from THIS device's own index-0 key, so signing's
 // anti-tamper script check (ScriptMismatch) passes exactly as on real hardware.
 // ---------------------------------------------------------------------------
-/// DEBUG (sim only): load karamble's REAL Pulse-built unsigned tx from disk and
-/// feed it through the same `ingest` path. Tests interop + trustless review.
+/// DEBUG (sim only): load a real Pulse-built unsigned tx from disk and feed it
+/// through the same `ingest` path. Tests interop + trustless review.
+#[cfg(not(target_os = "xous"))]
 pub fn debug_inject_karamble_file(state: StoredValue<AppState>) -> Result<()> {
-    // FUZZ MODE (sim only): cycle through every *.dcrtx in ~/fuzz/ on each load,
-    // so we can tap through a batch of adversarial files and watch the device
-    // reject each one. Index persists in a /tmp counter file.
-    let dir = "/home/mike/fuzz";
+    // FUZZ MODE (sim only): cycle through every *.dcrtx in the fuzz dir on each
+    // load, so we can tap through a batch of adversarial files and watch the
+    // device reject each one. Index persists in a /tmp counter file. The dir is
+    // $DECRED_FUZZ_DIR, falling back to $HOME/fuzz — never a hardcoded path.
+    let dir = std::env::var("DECRED_FUZZ_DIR").unwrap_or_else(|_| {
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        format!("{home}/fuzz")
+    });
+    let dir = dir.as_str();
     let mut files: Vec<std::path::PathBuf> = std::fs::read_dir(dir)
         .map_err(|e| anyhow!("read fuzz dir: {e}"))?
         .filter_map(|e| e.ok().map(|e| e.path()))
@@ -320,6 +363,8 @@ pub fn debug_inject_karamble_file(state: StoredValue<AppState>) -> Result<()> {
     ingest(state, Origin::SdCard, &bytes)
 }
 
+#[cfg(not(target_os = "xous"))]
+#[allow(dead_code)]
 pub fn debug_inject_test_tx(state: StoredValue<AppState>) -> Result<()> {
     use decred_core::airgap::{encode_sign_request, InputMeta, OutputMeta, FORMAT_VERSION};
     use decred_core::hashing::hash160;
