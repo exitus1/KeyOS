@@ -41,12 +41,11 @@ const SIGMA: [[usize; 16]; 10] = [
 
 struct State {
     h: [u32; 8],
-    t: u64, // bits hashed so far
 }
 
 impl State {
     fn new() -> Self {
-        State { h: IV, t: 0 }
+        State { h: IV }
     }
 
     /// Compress one 64-byte block. `counter` is the total bit length that this

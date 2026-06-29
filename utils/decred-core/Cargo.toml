@@ -26,6 +26,7 @@ ripemd = "0.1"
 bip39 = "2.1"
 bs58 = "0.5"
 minicbor = { version = "0.24", features = ["alloc", "derive"] }
+zeroize = { version = "1", default-features = false }
 
 [dev-dependencies]
 hex = "0.4"
