@@ -43,7 +43,7 @@ pub fn init(state: StoredValue<AppState>) {
 
 fn derive_for_display(state: StoredValue<AppState>, index: u32) -> Result<String> {
     let s = state.borrow();
-    let master = load_master_key(&s.secp, &s.security, "").map_err(|e| anyhow!("{e}"))?;
+    let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
     let addr = receive_address(&s.secp, &master, s.account, index).map_err(|e| anyhow!("{e}"))?;
     Ok(addr)
 }

@@ -140,7 +140,7 @@ pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Res
     // output ourselves instead of trusting the companion is_change flag.
     let summary: ReviewSummary = {
         let s = state.borrow();
-        let master = load_master_key(&s.secp, &s.security, "")
+        let master = load_master_key(&s.secp, &s.security, &s.passphrase)
             .map_err(|e| anyhow!("seed error: {e}"))?;
         req.review_owned(&s.secp, &master, OWNERSHIP_GAP_LIMIT)
             .map_err(|e| anyhow!("review failed: {e}"))?
@@ -215,7 +215,7 @@ fn approve_and_sign(state: StoredValue<AppState>) -> Result<()> {
         // load_master_key triggers the on-device user confirmation gate and is
         // the single seam that touches the seed (empty passphrase = no BIP39
         // 25th word; wire a prompt here if you support passphrases).
-        let master = load_master_key(&s.secp, &s.security, "")
+        let master = load_master_key(&s.secp, &s.security, &s.passphrase)
             .map_err(|e| anyhow!("seed error: {e}"))?;
         // sign_request re-derives per-input keys from `master`, verifies each
         // prev_script (ScriptMismatch => refuse), signs SigHashAll low-S, and
@@ -347,7 +347,7 @@ pub fn debug_inject_test_tx(state: StoredValue<AppState>) -> Result<()> {
 
     let s = state.borrow();
     // Derive the device's own account-0, external/0 key to build a spendable input.
-    let master = load_master_key(&s.secp, &s.security, "").map_err(|e| anyhow!("seed error: {e}"))?;
+    let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("seed error: {e}"))?;
     let acct = master.account_key(&s.secp, 0).map_err(|e| anyhow!("acct: {e}"))?;
     let key0 = acct.address_key(&s.secp, BRANCH_EXTERNAL, 0).map_err(|e| anyhow!("addr0: {e}"))?;
     let pubkey0 = key0.compressed_pubkey(&s.secp);

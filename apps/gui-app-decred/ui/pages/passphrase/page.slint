@@ -1,0 +1,211 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Passphrase flow, ported step-by-step from gui-app-bitcoin's enter-passphrase
+// (warning modal -> enter -> confirm-with-fingerprint), with Foundation's own
+// copy ("Bitcoin" -> "Decred") plus one added sentence making the seed-backup
+// limitation explicit.
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { Passphrase } from "../../passphrase.slint";
+
+export component PassphrasePage inherits BasePage {
+    // 0 = warning modal, 1 = enter, 2 = confirm
+    property <int> stage: 0;
+    property <string> entry: "";
+
+    NavHeader {
+        clicked => {
+            if (stage == 2) {
+                stage = 1;
+            } else if (stage == 1) {
+                stage = 0;
+            } else {
+                Navigate.backward();
+            }
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz3;
+
+            // ---- Stage 0: warning (Bitcoin app's "Using a Passphrase" modal) ----
+            if stage == 0: Text {
+                text: "Using a Passphrase";
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 700;
+                horizontal-alignment: center;
+            }
+            if stage == 0: Text {
+                text: "A passphrase acts as a second layer of security to protect your Decred.\n\nTo access Decred protected by a passphrase, you must reenter the exact same characters.\n\nIt is crucial to back up your passphrase to avoid loss of funds. Your seed backup ALONE cannot recover it — restoring this wallet needs your seed AND the exact passphrase.";
+                color: #b8b8b8;
+                font-size: 14px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+
+            // ---- Stage 1: enter ------------------------------------------------
+            if stage == 1: Text {
+                text: "Enter Passphrase";
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 700;
+                horizontal-alignment: center;
+            }
+            if stage == 1: Text {
+                text: "Type with care. All passphrases are valid. Ensure you back up your passphrase.";
+                color: #6b6b6b;
+                font-size: 13px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+            if stage == 1: Rectangle {
+                height: 56px;
+                border-radius: 16px;
+                background: #08080a;
+                border-width: 1px;
+                border-color: #2970ff;
+                HorizontalLayout {
+                    padding-left: 18px;
+                    padding-right: 18px;
+                    TextInput {
+                        vertical-alignment: center;
+                        color: #ffffff;
+                        font-size: 17px;
+                        text: root.entry;
+                        edited => {
+                            root.entry = self.text;
+                        }
+                        accepted => {
+                            root.entry = self.text;
+                            Passphrase.preview(self.text);
+                            if (Passphrase.error == "") {
+                                stage = 2;
+                            }
+                        }
+                    }
+                }
+            }
+            if stage == 1 && root.entry == "": Text {
+                text: "Enter passphrase...";
+                color: #6b6b6b;
+                font-size: 12px;
+                horizontal-alignment: center;
+            }
+
+            // ---- Stage 2: confirm (passphrase + fingerprint, like Bitcoin) -----
+            if stage == 2: Text {
+                text: "Confirm Passphrase";
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 700;
+                horizontal-alignment: center;
+            }
+            if stage == 2: Rectangle {
+                height: 96px;
+                border-radius: 16px;
+                background: #08080a;
+                border-width: 1px;
+                border-color: #1c1c1c;
+                VerticalLayout {
+                    padding: 14px;
+                    spacing: 6px;
+                    Text {
+                        text: "Passphrase";
+                        color: #2970ff;
+                        font-size: 11px;
+                        font-weight: 700;
+                        letter-spacing: 1.5px;
+                    }
+                    Text {
+                        text: root.entry;
+                        color: #ffffff;
+                        font-size: 16px;
+                        font-weight: 600;
+                        wrap: char-wrap;
+                    }
+                    Text {
+                        text: "Fingerprint";
+                        color: #2970ff;
+                        font-size: 11px;
+                        font-weight: 700;
+                        letter-spacing: 1.5px;
+                    }
+                    Text {
+                        text: Passphrase.code;
+                        color: #ffffff;
+                        font-size: 16px;
+                        font-weight: 600;
+                    }
+                }
+            }
+            if stage == 2: Text {
+                text: "Your passphrase will be erased upon shutdown, or can be manually cleared by returning to this screen.";
+                color: #6b6b6b;
+                font-size: 13px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+
+            if Passphrase.error != "": Text {
+                text: Passphrase.error;
+                color: #ff6b6b;
+                font-size: 12px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+        }
+
+        ButtonSection {
+            if stage == 0: Button {
+                label: "Continue";
+                importance: Importance.primary;
+                background: #2970ff;
+                clicked => {
+                    stage = 1;
+                }
+            }
+            if stage == 1: Button {
+                label: "Apply Passphrase";
+                importance: Importance.primary;
+                background: #2970ff;
+                clicked => {
+                    Passphrase.preview(root.entry);
+                    if (Passphrase.error == "") {
+                        stage = 2;
+                    }
+                }
+            }
+            if stage == 2: Button {
+                label: "Confirm";
+                importance: Importance.primary;
+                background: #2970ff;
+                clicked => {
+                    Passphrase.apply(root.entry);
+                    if (Passphrase.error == "") {
+                        Navigate.home({ });
+                    }
+                }
+            }
+            if stage == 2: Button {
+                label: "Back";
+                importance: Importance.secondary;
+                clicked => {
+                    stage = 1;
+                }
+            }
+            if Passphrase.active: Button {
+                label: "Clear Passphrase";
+                importance: Importance.secondary;
+                clicked => {
+                    Passphrase.clear();
+                    root.entry = "";
+                    stage = 0;
+                }
+            }
+        }
+    }
+}

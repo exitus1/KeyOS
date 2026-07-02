@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Passphrase (hidden) wallet surface — see src/passphrase.rs.
+
+export global Passphrase {
+    // True while a non-empty passphrase wallet is open this session.
+    in property <bool> active: false;
+    // Wallet code: first 8 chars of this wallet's first receive address.
+    // Same passphrase -> same code, always; a typo shows a different code.
+    in property <string> code;
+    in-out property <string> error;
+
+    // Derive and show this passphrase's fingerprint WITHOUT switching wallets
+    // (the Bitcoin app's try_passphrase pattern; confirm step applies it).
+    callback preview(string);
+    // Open the wallet for this passphrase ("" = default wallet).
+    callback apply(string);
+    // Leave the hidden wallet, returning to the default wallet.
+    callback clear();
+}

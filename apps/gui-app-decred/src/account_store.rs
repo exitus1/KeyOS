@@ -25,6 +25,9 @@ pub struct NamedAccount {
 pub struct AccountStore {
     pub accounts: Vec<NamedAccount>,
     pub active: u32,
+    /// True for passphrase (hidden) wallets: keep the account list in memory
+    /// only and never write it to disk, so hidden wallets leave no trace.
+    pub ephemeral: bool,
 }
 
 impl AccountStore {
@@ -67,8 +70,21 @@ impl AccountStore {
         store
     }
 
-    /// Persist the account list to disk.
+    /// A fresh in-memory store for a hidden (passphrase) wallet: one default
+    /// account, nothing ever written to disk.
+    pub fn ephemeral() -> Self {
+        AccountStore {
+            accounts: vec![NamedAccount { index: 0, name: "Main".into() }],
+            active: 0,
+            ephemeral: true,
+        }
+    }
+
+    /// Persist the account list to disk. No-op for hidden wallets.
     pub fn save(&self) {
+        if self.ephemeral {
+            return;
+        }
         let path = Self::sim_path();
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);

@@ -11,6 +11,7 @@ import { Palette, Size, Importance } from "@ui/theme.slint";
 import { TR2, TrId } from "../gen/tr.slint";
 import { Navigate } from "../gen/navigate.slint";
 import { Account } from "../account.slint";
+import { Passphrase } from "../passphrase.slint";
 
 export component HomePage inherits BasePage {
 
@@ -50,6 +51,30 @@ export component HomePage inherits BasePage {
                             font-weight: 700;
                             letter-spacing: 1.5px;
                         }
+                    }
+                }
+            }
+
+            if Passphrase.active: Rectangle {
+                height: 30px;
+                border-radius: 15px;
+                background: #2a1c0e;
+                border-width: 1px;
+                border-color: #ff9f2d;
+                TouchArea {
+                    clicked => {
+                        Navigate.passphrase({ });
+                    }
+                }
+                VerticalLayout {
+                    alignment: center;
+                    Text {
+                        text: "HIDDEN WALLET · " + Passphrase.code;
+                        color: #ffb45e;
+                        font-size: 11px;
+                        font-weight: 800;
+                        letter-spacing: 1.5px;
+                        horizontal-alignment: center;
                     }
                 }
             }

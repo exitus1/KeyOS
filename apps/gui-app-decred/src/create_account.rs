@@ -19,7 +19,7 @@ use crate::{Account, AccountRow, AccountState};
 use slint_keyos_platform::slint::{ModelRc, VecModel};
 
 /// Push the named-account list into the Slint model, marking the active one.
-fn refresh_rows(state: StoredValue<AppState>) {
+pub(crate) fn refresh_rows(state: StoredValue<AppState>) {
     let (rows, active_name, active) = {
         let s = state.borrow();
         let active = s.accounts.active;
@@ -123,7 +123,7 @@ pub fn init(state: StoredValue<AppState>) {
 /// Derive the account key at m/44'/42'/index' and return its neutered dpub.
 fn export_dpub(state: StoredValue<AppState>, index: u32) -> Result<String> {
     let s = state.borrow();
-    let master = load_master_key(&s.secp, &s.security, "").map_err(|e| anyhow!("{e}"))?;
+    let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
     let account = master.account_key(&s.secp, index).map_err(|e| anyhow!("{e}"))?;
     // Export the NEUTERED account key (dpub) — public only, safe to hand to a
     // watch-only Cake Wallet. Never exports private material.

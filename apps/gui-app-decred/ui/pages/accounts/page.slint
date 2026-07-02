@@ -133,6 +133,13 @@ export component AccountsPage inherits BasePage {
 
         ButtonSection {
             if !creating: Button {
+                label: "Passphrase wallet…";
+                importance: Importance.secondary;
+                clicked => {
+                    Navigate.passphrase({ });
+                }
+            }
+            if !creating: Button {
                 label: "New account";
                 importance: Importance.primary;
                 background: #2970ff;
