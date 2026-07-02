@@ -77,6 +77,9 @@ component BitcoinTile inherits Rectangle {
     in property <string> last-change-percent: "+10.20%";
     in property <string> last-price-update-time: "2 minutes ago";
     in property <CardColor> tile-card-color: CardColor.blue;
+    in property <image> graph-image: State.bitcoin-graph-image;
+    in property <string> subtitle-1: "";
+    in property <string> subtitle-2: "";
 
     height: 292px;
     border-radius: Size.sz6;
@@ -181,7 +184,7 @@ component BitcoinTile inherits Rectangle {
                                 VerticalLayout {
                                     Image {
                                         image-fit: preserve;
-                                        source: State.bitcoin-graph-image;
+                                        source: graph-image;
                                     }
                                 }
 
@@ -208,20 +211,32 @@ component BitcoinTile inherits Rectangle {
                         padding-right: Size.sz4;
                         VerticalLayout {
                             alignment: center;
+                            spacing: 2px;
                             TextLg {
                                 text: name;
                                 color: LightPalette.content-primary-inverse;
                                 bold: true;
                             }
+                            if subtitle-1 != "": TextSm {
+                                text: subtitle-1;
+                                color: LightPalette.content-primary-inverse.transparentize(0.35);
+                            }
+                            if subtitle-2 != "": TextSm {
+                                text: subtitle-2;
+                                color: LightPalette.content-primary-inverse.transparentize(0.35);
+                            }
                         }
 
                         VerticalLayout {
                             alignment: center;
-                            Image {
-                                source: @image-url("@ui/icons/decred.svg");
-                                width: Size.sz12 * 2;
-                                height: Size.sz12 * 2;
-                                colorize: #ffffff;
+                            // Foundation's own badge component, exactly as the
+                            // stock Bitcoin card used it - exact-size icon
+                            // rasterization (crisp) + CardColor ring.
+                            CircleIcon {
+                                icon: "decred";
+                                line-color: CardColor.decred;
+                                size: Size.sz12 * 2;
+                                icon-size: IconSize.px96;
                             }
                         }
                     }
@@ -414,6 +429,9 @@ export component MainPage inherits BasePage {
                     last-price-update-time: "mock";
                     name: "Decred";
                     tile-card-color: CardColor.decred;
+                    graph-image: State.decred-graph-image;
+                    subtitle-1: "Last transaction";
+                    subtitle-2: "2 days ago";
                     clicked => {
                         CB.app-clicked(240px, 400px, "0x4465637265642057616c6c6574000000");
                     }

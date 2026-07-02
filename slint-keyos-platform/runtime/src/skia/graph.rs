@@ -15,6 +15,20 @@ pub struct PricePoint {
 }
 
 pub fn draw_graph(data: &[PricePoint], w: u32, h: u32, max_height: u32, is_dark_mode: bool) -> Image {
+    // Stock copper line (Bitcoin card).
+    draw_graph_rgb(data, w, h, max_height, is_dark_mode, (0xbf, 0x75, 0x5f), (0xD6, 0x8B, 0x6E))
+}
+
+/// Same renderer with a caller-chosen line color (e.g. Decred green).
+pub fn draw_graph_rgb(
+    data: &[PricePoint],
+    w: u32,
+    h: u32,
+    max_height: u32,
+    is_dark_mode: bool,
+    rgb: (u8, u8, u8),
+    fill_rgb: (u8, u8, u8),
+) -> Image {
     let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::new(w, h);
     let mut pixmap = tiny_skia::PixmapMut::from_bytes(pixel_buffer.make_mut_bytes(), w, h).unwrap();
     pixmap.fill(Color::TRANSPARENT);
@@ -30,7 +44,7 @@ pub fn draw_graph(data: &[PricePoint], w: u32, h: u32, max_height: u32, is_dark_
     } else {
         Color::from_rgba8(0xf6, 0xf6, 0xf6, 0xff)
     };
-    let fg_color = Color::from_rgba8(0xbf, 0x75, 0x5f, 0xff);
+    let fg_color = Color::from_rgba8(rgb.0, rgb.1, rgb.2, 0xff);
     let stale_fg_color = match is_dark_mode {
         true => Color::from_rgba8(0x5a, 0x59, 0x5a, 0xff), // #5A595A
         false => Color::from_rgba8(0x95, 0x93, 0x94, 0xff), // #959394
@@ -144,8 +158,8 @@ pub fn draw_graph(data: &[PricePoint], w: u32, h: u32, max_height: u32, is_dark_
         [(0.0, Color::from_rgba8(0x86, 0x83, 0x85, 0x33)), (1.0, Color::from_rgba8(0x23, 0x1f, 0x20, 0xff))]
     };
     let fresh_stops = [
-        (0.0, Color::from_rgba8(0xD6, 0x8B, 0x6E, 0x00)), // 0% alpha
-        (1.0, Color::from_rgba8(0xD6, 0x8B, 0x6E, 0xbf)), // 75% alpha
+        (0.0, Color::from_rgba8(fill_rgb.0, fill_rgb.1, fill_rgb.2, 0x00)), // 0% alpha
+        (1.0, Color::from_rgba8(fill_rgb.0, fill_rgb.1, fill_rgb.2, 0xbf)), // 75% alpha
     ];
 
     let stale_stops = stale_stops.into_iter().map(|(pos, color)| GradientStop::new(pos, color)).collect();

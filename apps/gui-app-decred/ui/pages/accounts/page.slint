@@ -144,8 +144,7 @@ export component AccountsPage inherits BasePage {
         ButtonSection {
             if !creating && Passphrase.active: Button {
                 label: "Back to normal accounts";
-                importance: Importance.primary;
-                background: #ff9f2d;
+                importance: Importance.secondary;
                 clicked => {
                     Passphrase.clear();
                 }
