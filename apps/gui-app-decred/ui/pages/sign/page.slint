@@ -92,35 +92,26 @@ export component SignPage inherits BasePage {
                 Text {
                     text: "Review transaction";
                     color: #ffffff;
-                    font-size: 24px;
-                    font-weight: 700;
+                    font-size: 26px;
+                    font-weight: 800;
                     horizontal-alignment: center;
                 }
-                Text {
-                    text: "Verify every detail on this screen.";
-                    color: #6b6b6b;
-                    font-size: 13px;
-                    horizontal-alignment: center;
-                }
-
-                Rectangle { height: 10px; }
-                // Which account/wallet this request spends from.
-                Rectangle {
-                    height: 26px;
-                    border-radius: 13px;
-                    background: #101a2e;
-                    border-width: 1px;
-                    border-color: #2970ff;
-                    VerticalLayout {
-                        alignment: center;
-                        Text {
-                            text: "SPENDING FROM: " + SignTx.signing-account;
-                            color: #7ea6ff;
-                            font-size: 11px;
-                            font-weight: 700;
-                            letter-spacing: 1.5px;
-                            horizontal-alignment: center;
-                        }
+                // Account woven into the header, main-screen style.
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 6px;
+                    Text {
+                        text: "spending from";
+                        color: #6b6b6b;
+                        font-size: 15px;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: SignTx.signing-account;
+                        color: #7ea6ff;
+                        font-size: 17px;
+                        font-weight: 800;
+                        vertical-alignment: center;
                     }
                 }
                 if Passphrase.active: Rectangle { height: 6px; }
@@ -222,8 +213,8 @@ export component SignPage inherits BasePage {
                         Text {
                             text: SignTx.send-total;
                             color: #ffffff;
-                            font-size: 38px;
-                            font-weight: 700;
+                            font-size: 42px;
+                            font-weight: 800;
                             horizontal-alignment: center;
                         }
                     }
@@ -253,8 +244,8 @@ export component SignPage inherits BasePage {
                             if i == 0: Text {
                                 text: SignTx.recipient-count > 1 ? "SENDING TO (MULTIPLE)" : "SENDING TO";
                                 color: #2970ff;
-                                font-size: 12px;
-                                font-weight: 600;
+                                font-size: 13px;
+                                font-weight: 700;
                                 letter-spacing: 1.5px;
                             }
                             HorizontalLayout {
@@ -263,13 +254,13 @@ export component SignPage inherits BasePage {
                                 Text {
                                     text: r.top-first;
                                     color: #2dd8a3;
-                                    font-size: 19px;
+                                    font-size: 23px;
                                     font-weight: 800;
                                 }
                                 Text {
                                     text: r.top-rest;
                                     color: #ffffff;
-                                    font-size: 19px;
+                                    font-size: 23px;
                                     font-weight: 500;
                                 }
                             }
@@ -279,20 +270,20 @@ export component SignPage inherits BasePage {
                                 Text {
                                     text: r.bottom-rest;
                                     color: #ffffff;
-                                    font-size: 19px;
+                                    font-size: 23px;
                                     font-weight: 500;
                                 }
                                 Text {
                                     text: r.bottom-last;
                                     color: #2dd8a3;
-                                    font-size: 19px;
+                                    font-size: 23px;
                                     font-weight: 800;
                                 }
                             }
                             Text {
                                 text: r.amount;
                                 color: #e8e8e8;
-                                font-size: 15px;
+                                font-size: 17px;
                                 font-weight: 700;
                             }
                         }
@@ -301,15 +292,15 @@ export component SignPage inherits BasePage {
                             height: 44px;
                             Text {
                                 text: "Network fee";
-                                color: #6b6b6b;
-                                font-size: 14px;
+                                color: #9aa0ab;
+                                font-size: 16px;
                                 vertical-alignment: center;
                                 horizontal-stretch: 1;
                             }
                             Text {
                                 text: SignTx.fee;
                                 color: SignTx.fee-warning ? #ff9f2d : #e8e8e8;
-                                font-size: 15px;
+                                font-size: 17px;
                                 font-weight: 500;
                                 vertical-alignment: center;
                                 horizontal-alignment: right;
@@ -323,7 +314,7 @@ export component SignPage inherits BasePage {
                             Text {
                                 text: SignTx.fee-rate;
                                 color: #6b6b6b;
-                                font-size: 11px;
+                                font-size: 12px;
                                 horizontal-alignment: right;
                             }
                         }
@@ -332,15 +323,15 @@ export component SignPage inherits BasePage {
                             height: 44px;
                             Text {
                                 text: "Change";
-                                color: #6b6b6b;
-                                font-size: 14px;
+                                color: #9aa0ab;
+                                font-size: 16px;
                                 vertical-alignment: center;
                                 horizontal-stretch: 1;
                             }
                             Text {
                                 text: SignTx.change;
                                 color: #e8e8e8;
-                                font-size: 15px;
+                                font-size: 17px;
                                 font-weight: 500;
                                 vertical-alignment: center;
                                 horizontal-alignment: right;
@@ -354,7 +345,7 @@ export component SignPage inherits BasePage {
                             Text {
                                 text: "✓ verified to your own keys";
                                 color: #2dd8a3;
-                                font-size: 11px;
+                                font-size: 12px;
                                 horizontal-alignment: right;
                             }
                         }

@@ -21,39 +21,15 @@ export component HomePage inherits BasePage {
 
             // MOCK balance card — placeholder values (see balance.slint).
             DcrAccountCard {
-                name: "Decred";
+                name: Account.active-name;
                 crypto-balance: Balance.dcr-amount;
                 fiat-balance: Balance.fiat-amount;
+                clicked => {
+                    Navigate.accounts({ });
+                }
             }
 
-            // Active account — always visible, tap to switch.
-            Rectangle { height: 6px; }
-            Rectangle {
-                height: 34px;
-                border-radius: 17px;
-                background: #101a2e;
-                border-width: 1px;
-                border-color: #2970ff;
-                TouchArea {
-                    clicked => {
-                        Navigate.accounts({ });
-                    }
-                }
-                HorizontalLayout {
-                    alignment: center;
-                    spacing: 6px;
-                    VerticalLayout {
-                        alignment: center;
-                        Text {
-                            text: "ACCOUNT: " + Account.active-name;
-                            color: #7ea6ff;
-                            font-size: 12px;
-                            font-weight: 700;
-                            letter-spacing: 1.5px;
-                        }
-                    }
-                }
-            }
+            // (account name + tap-to-switch now live ON the balance card)
 
             if Passphrase.active: Rectangle {
                 height: 30px;

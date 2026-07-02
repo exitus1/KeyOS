@@ -1,13 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { CircleIcon } from "@ui/widgets.slint";
+import { CardColor, IconSize } from "@ui/theme.slint";
 //
 // Clean Decred account card (app-scoped). Flat dark surface, clear hierarchy:
-// small brand label, large balance, muted USD subtitle, simple logo badge.
+// brand label, bold account name, large balance (companion-relayed once
+// QuantumLink lands; mock until then), muted USD subtitle, crisp logo badge.
+// Tapping the card opens the accounts page.
 export component DcrAccountCard inherits Rectangle {
     in property <string> name: "Decred";
     in property <string> crypto-balance;
     in property <string> fiat-balance;
 
-    height: 150px;
+    callback clicked();
+
+    TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    height: 168px;
     border-radius: 20px;
     clip: true;
     background: #0e0e12;
@@ -28,20 +40,26 @@ export component DcrAccountCard inherits Rectangle {
             Text {
                 text: "DECRED";
                 color: #2970ff;
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: 700;
                 letter-spacing: 2px;
             }
             Text {
+                text: name;
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 800;
+            }
+            Text {
                 text: crypto-balance;
                 color: #ffffff;
-                font-size: 46px;
+                font-size: 38px;
                 font-weight: 800;
             }
             Text {
                 text: fiat-balance;
                 color: #9aa0ab;
-                font-size: 22px;
+                font-size: 18px;
                 font-weight: 600;
             }
         }
@@ -50,19 +68,11 @@ export component DcrAccountCard inherits Rectangle {
         VerticalLayout {
             alignment: center;
             horizontal-stretch: 0;
-            Rectangle {
-                width: 96px;
-                height: 96px;
-                border-radius: 24px;
-                background: #2970ff;
-                border-width: 1px;
-                border-color: #2970ff;
-                Image {
-                    width: 64px;
-                    height: 64px;
-                    source: @image-url("@ui/icons/decred-logo.svg");
-                    colorize: #ffffff;
-                }
+            CircleIcon {
+                icon: "decred";
+                line-color: CardColor.decred;
+                size: 96px;
+                icon-size: IconSize.px96;
             }
         }
     }
