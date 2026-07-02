@@ -86,8 +86,31 @@ pub fn init(state: StoredValue<AppState>) {
         move |index| {
             match export_dpub(state, index as u32) {
                 Ok(dpub) => {
+                    // Name lookup + verification head/tail for the page.
+                    let name = {
+                        let s = state.borrow();
+                        s.accounts
+                            .accounts
+                            .iter()
+                            .find(|a| a.index == index as u32)
+                            .map(|a| a.name.clone())
+                            .unwrap_or_else(|| format!("Account #{index} (unnamed)"))
+                    };
+                    let head: String = dpub.chars().take(12).collect();
+                    let tail: String = dpub
+                        .chars()
+                        .rev()
+                        .take(12)
+                        .collect::<Vec<_>>()
+                        .into_iter()
+                        .rev()
+                        .collect();
                     let ui = state.borrow().ui();
                     let acct = ui.global::<Account>();
+                    acct.set_export_name(name.into());
+                    acct.set_export_path(format!("m/44'/42'/{index}'").into());
+                    acct.set_dpub_head(head.into());
+                    acct.set_dpub_tail(tail.into());
                     acct.set_account_dpub(dpub.into());
                     acct.set_state(AccountState::Exported);
                 }

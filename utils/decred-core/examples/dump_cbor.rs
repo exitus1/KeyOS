@@ -22,6 +22,7 @@ fn main() {
             pk_script: hex::decode("76a914c671a001f211d63e0b0b4791e6d343c85b1e72f088ac").unwrap(),
             is_change: false,
         }],
+        account_fp: None,
     };
     let bytes = encode_sign_request(&req).unwrap();
     println!("=== CBOR SignRequest, {} bytes ===", bytes.len());

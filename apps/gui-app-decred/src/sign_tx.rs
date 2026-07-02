@@ -143,6 +143,22 @@ pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Res
         let s = state.borrow();
         let master = load_master_key(&s.secp, &s.security, &s.passphrase)
             .map_err(|e| anyhow!("seed error: {e}"))?;
+        // WRONG-WALLET DETECTION (optional field from the companion): if the
+        // request names the account fingerprint it was built against, verify
+        // it matches this wallet+account before showing anything. Pure UX -
+        // ScriptMismatch would still protect funds without it.
+        if let Some(fp) = req.account_fp {
+            let ours = master
+                .account_key(&s.secp, req.account)
+                .map_err(|e| anyhow!("derivation failed: {e}"))?
+                .fingerprint(&s.secp);
+            if ours != fp {
+                return Err(anyhow!(
+                    "This transaction was built for a DIFFERENT wallet or account. \
+                     Open the wallet it belongs to (check the passphrase) and try again."
+                ));
+            }
+        }
         req.review_owned(&s.secp, &master, OWNERSHIP_GAP_LIMIT)
             .map_err(|e| anyhow!("review failed: {e}"))?
     };
@@ -442,6 +458,7 @@ pub fn debug_inject_test_tx(state: StoredValue<AppState>) -> Result<()> {
         expiry: 0,
         inputs: vec![input],
         outputs: vec![output],
+        account_fp: None,
     };
     let bytes = encode_sign_request(&req).map_err(|e| anyhow!("encode: {e}"))?;
     log::info!("debug_inject_test_tx: built {} byte unsigned package", bytes.len());

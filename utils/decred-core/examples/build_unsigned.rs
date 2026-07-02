@@ -36,6 +36,7 @@ fn main() {
         expiry: 0,
         inputs: vec![input],
         outputs: vec![output],
+        account_fp: None,
     };
     let bytes = encode_sign_request(&req).expect("encode");
     std::fs::write("unsigned.dcrtx", &bytes).expect("write file");

@@ -1,17 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Export: show the account dpub (public only) as a QR for Cake Wallet to import
-// as a watch-only wallet. This is the pairing step of the airgap.
+// Export: show an account's dpub (public only) as a QR for DCR Pulse to
+// import as a watch-only wallet - the pairing step of the airgap.
+//
+// Browsing accounts here is LOCAL: it does not change the app's active
+// account (the old stepper silently did, which meant "just looking" at
+// account 3's key left Receive handing out account-3 addresses).
 
 import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, QrCodeCard, HeadingSm, TextSm, TextMd } from "@ui/widgets.slint";
 import { Palette, Size, Importance } from "@ui/theme.slint";
 import { TR2, TrId } from "../../gen/tr.slint";
 import { Navigate } from "../../gen/navigate.slint";
 import { Account, AccountState } from "../../account.slint";
+import { Passphrase } from "../../passphrase.slint";
 
 export component ExportPage inherits BasePage {
+    // Local browse index - starts at the active account, never writes back.
+    property <int> browse-index: Account.active-index;
+
     init => {
-        Account.export-account-xpub(Account.active-index);
+        Account.export-account-xpub(browse-index);
     }
 
     NavHeader {
@@ -22,53 +30,134 @@ export component ExportPage inherits BasePage {
 
     PageBody {
         ContentSection {
-            spacing: Size.sz4;
+            spacing: Size.sz3;
 
             HeadingSm {
-                text: TR2.lookup(TrId.ExportTitle);
+                text: "Watch-only key";
                 horizontal-alignment: center;
             }
 
             TextSm {
-                text: TR2.lookup(TrId.ExportHint);
+                text: "Import into a companion wallet to track balances and build transactions. This key can SEE this account's entire history - it can never spend.";
                 color: Palette.content-tertiary;
                 horizontal-alignment: center;
                 wrap: word-wrap;
             }
 
-            // Account selector: switch which m/44'/42'/N' account we export.
+            if Passphrase.active: Rectangle {
+                height: 26px;
+                border-radius: 13px;
+                background: #2a1c0e;
+                border-width: 1px;
+                border-color: #ff9f2d;
+                VerticalLayout {
+                    alignment: center;
+                    Text {
+                        text: "HIDDEN WALLET · " + Passphrase.code;
+                        color: #ffb45e;
+                        font-size: 11px;
+                        font-weight: 800;
+                        letter-spacing: 1.5px;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+            if Passphrase.active: Text {
+                text: "Importing this key into another device makes the hidden wallet visible there - its balance and history will appear on that device. The passphrase itself stays secret.";
+                color: #ffb45e;
+                font-size: 11px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+
+            // Account browser (local; does not change the active account).
             HorizontalLayout {
                 alignment: center;
                 spacing: Size.sz3;
                 Button {
-                    label: "<";
+                    label: "‹";
                     importance: Importance.secondary;
-                    enabled: Account.active-index > 0;
+                    enabled: browse-index > 0;
                     clicked => {
-                        Account.set-active-account(Account.active-index - 1);
-                        Account.export-account-xpub(Account.active-index);
+                        browse-index -= 1;
+                        Account.export-account-xpub(browse-index);
                     }
                 }
-                Text {
-                    text: "Account " + Account.active-index;
-                    color: #ffffff;
-                    font-size: 18px;
-                    font-weight: 700;
-                    vertical-alignment: center;
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 2px;
+                    Text {
+                        text: Account.export-name;
+                        color: #ffffff;
+                        font-size: 18px;
+                        font-weight: 700;
+                        horizontal-alignment: center;
+                    }
+                    Text {
+                        text: Account.export-path;
+                        color: #6b6b6b;
+                        font-size: 11px;
+                        horizontal-alignment: center;
+                    }
                 }
                 Button {
-                    label: ">";
+                    label: "›";
                     importance: Importance.secondary;
                     clicked => {
-                        Account.set-active-account(Account.active-index + 1);
-                        Account.export-account-xpub(Account.active-index);
+                        browse-index += 1;
+                        Account.export-account-xpub(browse-index);
                     }
                 }
             }
-            if Account.state == AccountState.Exported: HorizontalLayout {
-                alignment: center;
-                QrCodeCard {
-                    data: Account.account-dpub;
+
+            if Account.state == AccountState.Exported: VerticalLayout {
+                spacing: Size.sz3;
+
+                HorizontalLayout {
+                    alignment: center;
+                    QrCodeCard {
+                        data: Account.account-dpub;
+                    }
+                }
+
+                // Verification tail: confirm Pulse imported THIS key.
+                Rectangle {
+                    border-radius: 12px;
+                    background: #0d0d10;
+                    border-width: 1px;
+                    border-color: #1f2233;
+                    horizontal-stretch: 1;
+                    VerticalLayout {
+                        padding: 10px;
+                        spacing: 4px;
+                        HorizontalLayout {
+                            alignment: center;
+                            spacing: 8px;
+                            Text {
+                                text: Account.dpub-head;
+                                color: #2dd8a3;
+                                font-size: 15px;
+                                font-weight: 800;
+                            }
+                            Text {
+                                text: "…";
+                                color: #6b6b6b;
+                                font-size: 15px;
+                            }
+                            Text {
+                                text: Account.dpub-tail;
+                                color: #2dd8a3;
+                                font-size: 15px;
+                                font-weight: 800;
+                            }
+                        }
+                        Text {
+                            text: "After importing, check these characters match in your wallet.";
+                            color: #6b6b6b;
+                            font-size: 11px;
+                            horizontal-alignment: center;
+                        }
+                    }
                 }
             }
 
@@ -84,6 +173,8 @@ export component ExportPage inherits BasePage {
             Button {
                 label: TR2.lookup(TrId.CommonDone);
                 importance: Importance.primary;
+                background: #2970ff;
+                label-color: #ffffff;
                 clicked => {
                     Navigate.backward();
                 }

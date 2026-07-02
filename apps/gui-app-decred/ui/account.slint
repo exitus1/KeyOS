@@ -21,6 +21,12 @@ export struct AccountRow {
 export global Account {
     in property <AccountState> state: AccountState.Idle;
     in property <string> account-dpub;
+    // Display metadata for the export page: the exported account's name,
+    // its derivation path, and head/tail of the dpub for verification.
+    in property <string> export-name;
+    in property <string> export-path;
+    in property <string> dpub-head;
+    in property <string> dpub-tail;
     in property <int> index;
     in property <string> error-text;
 

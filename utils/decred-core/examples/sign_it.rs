@@ -48,6 +48,7 @@ fn main() {
         format_version: FORMAT_VERSION,
         tx_version: 1, account: 0, lock_time: 0, expiry: 0,
         inputs: vec![input], outputs: vec![output],
+        account_fp: None,
     };
 
     let signed = sign_request(&secp, &master, &req).expect("SIGN FAILED");

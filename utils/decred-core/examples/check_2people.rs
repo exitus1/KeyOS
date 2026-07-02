@@ -15,7 +15,7 @@ fn main() {
     let s = req.review_owned(&secp, &master, 200).unwrap();
     println!("--- review_owned ---");
     println!("recipients shown: {}", s.recipients.len());
-    for (a,amt) in &s.recipients { println!("  SENDING TO {} ({} DCR)", a, amt as f64/1e8); }
+    for (a,amt) in &s.recipients { println!("  SENDING TO {} ({} DCR)", a, *amt as f64/1e8); }
     println!("change_total: {} ({} DCR)", s.change_total, s.change_total as f64/1e8);
     println!("FLAGGED LIES: {}", s.flagged_mismatches.len());
 }
