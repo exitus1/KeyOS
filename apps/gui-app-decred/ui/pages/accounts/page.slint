@@ -1,0 +1,166 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Accounts: list the named BIP44 accounts (m/44'/42'/N'), switch the active
+// one by tapping, and create new named accounts. Seed/wallet creation lives
+// in the OS Seed Vault — this page only manages sub-accounts of the active
+// seed. Account metadata is names + indices only; nothing sensitive.
+
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button } from "@ui/widgets.slint";
+import { Palette, Size, Importance } from "@ui/theme.slint";
+import { Navigate } from "../../gen/navigate.slint";
+import { Account, AccountRow } from "../../account.slint";
+
+export component AccountsPage inherits BasePage {
+    // Whether the inline "name a new account" editor is open.
+    property <bool> creating: false;
+    property <string> new-name: "";
+
+    NavHeader {
+        clicked => {
+            Navigate.backward();
+        }
+    }
+
+    PageBody {
+        ContentSection {
+            spacing: Size.sz3;
+
+            Text {
+                text: "Accounts";
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 700;
+                horizontal-alignment: center;
+            }
+            Text {
+                text: "Separate balances under this wallet";
+                color: #6b6b6b;
+                font-size: 13px;
+                horizontal-alignment: center;
+            }
+
+            Rectangle { height: 6px; }
+
+            for row in Account.rows: Rectangle {
+                height: 64px;
+                border-radius: 16px;
+                background: row.active ? #101a2e : #08080a;
+                border-width: row.active ? 1.5px : 1px;
+                border-color: row.active ? #2970ff : #1c1c1c;
+
+                TouchArea {
+                    clicked => {
+                        Account.set-active-account(row.idx);
+                    }
+                }
+
+                HorizontalLayout {
+                    padding-left: 18px;
+                    padding-right: 18px;
+
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 2px;
+                        horizontal-stretch: 1;
+                        Text {
+                            text: row.name;
+                            color: #ffffff;
+                            font-size: 17px;
+                            font-weight: 600;
+                        }
+                        Text {
+                            text: row.path;
+                            color: #6b6b6b;
+                            font-size: 12px;
+                        }
+                    }
+
+                    if row.active: VerticalLayout {
+                        alignment: center;
+                        Text {
+                            text: "ACTIVE";
+                            color: #2970ff;
+                            font-size: 11px;
+                            font-weight: 800;
+                            letter-spacing: 1.5px;
+                        }
+                    }
+                }
+            }
+
+            // --- inline create editor ---
+            if creating: Rectangle {
+                height: 56px;
+                border-radius: 16px;
+                background: #08080a;
+                border-width: 1px;
+                border-color: #2970ff;
+                HorizontalLayout {
+                    padding-left: 18px;
+                    padding-right: 18px;
+                    TextInput {
+                        vertical-alignment: center;
+                        color: #ffffff;
+                        font-size: 17px;
+                        text: root.new-name;
+                        edited => {
+                            root.new-name = self.text;
+                        }
+                        accepted => {
+                            root.new-name = self.text;
+                            Account.create-account(self.text);
+                            if (Account.name-error == "") {
+                                creating = false;
+                                root.new-name = "";
+                            }
+                        }
+                    }
+                }
+            }
+            if creating && root.new-name == "": Text {
+                text: "Type a name for the new account";
+                color: #6b6b6b;
+                font-size: 12px;
+                horizontal-alignment: center;
+            }
+            if creating && Account.name-error != "": Text {
+                text: Account.name-error;
+                color: #ff6b6b;
+                font-size: 12px;
+                horizontal-alignment: center;
+            }
+        }
+
+        ButtonSection {
+            if !creating: Button {
+                label: "New account";
+                importance: Importance.primary;
+                background: #2970ff;
+                clicked => {
+                    Account.name-error = "";
+                    root.new-name = "";
+                    creating = true;
+                }
+            }
+            if creating: Button {
+                label: "Create";
+                importance: Importance.primary;
+                background: #2970ff;
+                clicked => {
+                    Account.create-account(root.new-name);
+                    if (Account.name-error == "") {
+                        creating = false;
+                        root.new-name = "";
+                    }
+                }
+            }
+            if creating: Button {
+                label: "Cancel";
+                importance: Importance.secondary;
+                clicked => {
+                    creating = false;
+                }
+            }
+        }
+    }
+}

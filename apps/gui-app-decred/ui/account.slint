@@ -9,6 +9,15 @@ export enum AccountState {
     Error,
 }
 
+// One row in the accounts picker list. `path` is pre-formatted in Rust
+// because Slint cannot concatenate ints into strings.
+export struct AccountRow {
+    idx: int,
+    name: string,
+    path: string,
+    active: bool,
+}
+
 export global Account {
     in property <AccountState> state: AccountState.Idle;
     in property <string> account-dpub;
@@ -21,4 +30,14 @@ export global Account {
     in-out property <int> active-index: 0;
     // Set the active account (updates state.account so receive/sign/export use it).
     callback set-active-account(int);
+
+    // --- accounts picker page ---
+    // Named account list (from the on-device AccountStore).
+    in property <[AccountRow]> rows;
+    // Name of the active account, for display on other pages.
+    in property <string> active-name;
+    // Validation error from the last create attempt ("" = success).
+    in-out property <string> name-error;
+    // Create a named account at the next free index and make it active.
+    callback create-account(string);
 }

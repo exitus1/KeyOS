@@ -35,12 +35,15 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(ui: Weak<AppWindow>) -> Self {
+        let accounts = crate::account_store::AccountStore::load();
         AppState {
             ui,
             secp: Secp256k1::new(),
             security: crate::Security::default(),
-            account: 0,
-            accounts: crate::account_store::AccountStore::load(),
+            // Restore the last-active account so receive/sign/export pick up
+            // where the user left off.
+            account: accounts.active,
+            accounts,
             pending: None,
             signed_parts: Vec::new(),
         }

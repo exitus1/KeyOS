@@ -10,6 +10,7 @@ import { DcrAccountCard } from "../dcr-account-card.slint";
 import { Palette, Size, Importance } from "@ui/theme.slint";
 import { TR2, TrId } from "../gen/tr.slint";
 import { Navigate } from "../gen/navigate.slint";
+import { Account } from "../account.slint";
 
 export component HomePage inherits BasePage {
 
@@ -22,6 +23,35 @@ export component HomePage inherits BasePage {
                 name: "Decred";
                 crypto-balance: Balance.dcr-amount;
                 fiat-balance: Balance.fiat-amount;
+            }
+
+            // Active account — always visible, tap to switch.
+            Rectangle { height: 6px; }
+            Rectangle {
+                height: 34px;
+                border-radius: 17px;
+                background: #101a2e;
+                border-width: 1px;
+                border-color: #2970ff;
+                TouchArea {
+                    clicked => {
+                        Navigate.accounts({ });
+                    }
+                }
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 6px;
+                    VerticalLayout {
+                        alignment: center;
+                        Text {
+                            text: "ACCOUNT: " + Account.active-name;
+                            color: #7ea6ff;
+                            font-size: 12px;
+                            font-weight: 700;
+                            letter-spacing: 1.5px;
+                        }
+                    }
+                }
             }
 
             // Prominent, centered mission line.
@@ -71,6 +101,13 @@ export component HomePage inherits BasePage {
                 importance: Importance.secondary;
                 clicked => {
                     Navigate.export({ });
+                }
+            }
+            Button {
+                label: "Accounts";
+                importance: Importance.secondary;
+                clicked => {
+                    Navigate.accounts({ });
                 }
             }
             Button {
