@@ -17,4 +17,8 @@ export global Account {
 
     // Derive m/44'/42'/index' and return its neutered dpub.
     callback export-account-xpub(int);
+    // The currently-active account index the whole app operates on.
+    in-out property <int> active-index: 0;
+    // Set the active account (updates state.account so receive/sign/export use it).
+    callback set-active-account(int);
 }

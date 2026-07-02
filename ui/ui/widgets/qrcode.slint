@@ -88,7 +88,9 @@ export component AnimatedQrCode inherits QrCodeCard {
         interval: interval;
         running: animate;
         triggered() => {
-            index += 1;
+            // Wrap so animated UR frames loop continuously — a scanning device
+            // must be able to catch every frame over repeated passes.
+            index = parts.length > 0 ? Math.mod(index + 1, parts.length) : 0;
         }
     }
 }

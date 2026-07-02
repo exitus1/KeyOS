@@ -22,6 +22,8 @@ pub struct AppState {
     pub security: crate::Security,
     /// Default account index the UI is currently operating on (m/44'/42'/N').
     pub account: u32,
+    /// Persistent named-account list (index + name), loaded at startup.
+    pub accounts: crate::account_store::AccountStore,
     /// The decoded-but-not-yet-signed package awaiting user approval, with the
     /// transport it arrived on. Raw CBOR bytes are kept (not the parsed struct)
     /// so the parse is re-validated at sign time.
@@ -38,6 +40,7 @@ impl AppState {
             secp: Secp256k1::new(),
             security: crate::Security::default(),
             account: 0,
+            accounts: crate::account_store::AccountStore::load(),
             pending: None,
             signed_parts: Vec::new(),
         }

@@ -41,6 +41,8 @@ export global SignTx {
     in property <int> flagged-count: 0;
     // Whether the user has acknowledged the mismatch warning.
     in-out property <bool> mismatch-acknowledged: false;
+    // True when the fee is suspiciously large relative to the send.
+    in property <bool> fee-warning: false;
 
     // Result / failure surfaces.
     in property <string> saved-path;

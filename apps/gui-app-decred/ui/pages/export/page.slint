@@ -11,7 +11,7 @@ import { Account, AccountState } from "../../account.slint";
 
 export component ExportPage inherits BasePage {
     init => {
-        Account.export-account-xpub(0);
+        Account.export-account-xpub(Account.active-index);
     }
 
     NavHeader {
@@ -36,6 +36,35 @@ export component ExportPage inherits BasePage {
                 wrap: word-wrap;
             }
 
+            // Account selector: switch which m/44'/42'/N' account we export.
+            HorizontalLayout {
+                alignment: center;
+                spacing: Size.sz3;
+                Button {
+                    label: "<";
+                    importance: Importance.secondary;
+                    enabled: Account.active-index > 0;
+                    clicked => {
+                        Account.set-active-account(Account.active-index - 1);
+                        Account.export-account-xpub(Account.active-index);
+                    }
+                }
+                Text {
+                    text: "Account " + Account.active-index;
+                    color: #ffffff;
+                    font-size: 18px;
+                    font-weight: 700;
+                    vertical-alignment: center;
+                }
+                Button {
+                    label: ">";
+                    importance: Importance.secondary;
+                    clicked => {
+                        Account.set-active-account(Account.active-index + 1);
+                        Account.export-account-xpub(Account.active-index);
+                    }
+                }
+            }
             if Account.state == AccountState.Exported: HorizontalLayout {
                 alignment: center;
                 QrCodeCard {

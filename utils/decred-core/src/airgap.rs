@@ -110,6 +110,21 @@ pub struct ReviewSummary {
     /// does this, so each entry is evidence the companion is faulty or hostile
     /// — these MUST be surfaced loudly and block reflexive approval.
     pub flagged_mismatches: Vec<(String, i64)>,
+    /// True when the fee is suspiciously large: > 0.1 DCR absolute, or
+    /// > 5% of the amount sent (only when the fee also exceeds 0.01 DCR,
+    /// so tiny everyday transactions never false-alarm).
+    pub fee_warning: bool,
+}
+
+/// Alarm threshold for the review screen's high-fee warning.
+fn fee_is_worrying(fee: i64, recipients: &[(String, i64)]) -> bool {
+    const ABS: i64 = 10_000_000; // 0.1 DCR
+    const MIN_FOR_PCT: i64 = 1_000_000; // 0.01 DCR
+    if fee > ABS {
+        return true;
+    }
+    let sent: i64 = recipients.iter().map(|(_, a)| *a).sum();
+    fee > MIN_FOR_PCT && sent > 0 && fee > sent / 20
 }
 
 impl SignRequest {
@@ -118,6 +133,52 @@ impl SignRequest {
     }
     pub fn output_total(&self) -> i64 {
         self.outputs.iter().map(|o| o.value).sum()
+    }
+
+    /// Maximum legal atom amount: 21,000,000 DCR of total supply.
+    pub const MAX_AMOUNT: i64 = 2_100_000_000_000_000;
+
+    /// Structural + economic sanity. REFUSES packages whose math cannot be
+    /// honest: empty txs, out-of-range or overflowing amounts, duplicate
+    /// inputs (which inflate the apparent input total and understate the
+    /// fee), and outputs exceeding inputs (negative fee). The network would
+    /// reject all of these too, but the device must never even display them
+    /// as if they were reviewable.
+    pub fn validate(&self) -> Result<(), Error> {
+        if self.inputs.is_empty() || self.outputs.is_empty() {
+            return Err(Error::EmptyTx);
+        }
+        if self.inputs.len() > 1_000 || self.outputs.len() > 1_000 {
+            return Err(Error::TooLarge);
+        }
+        let mut in_total: i64 = 0;
+        for i in &self.inputs {
+            if i.value_in <= 0 || i.value_in > Self::MAX_AMOUNT {
+                return Err(Error::ValueOutOfRange);
+            }
+            in_total = in_total.checked_add(i.value_in).ok_or(Error::ValueOverflow)?;
+        }
+        if in_total > Self::MAX_AMOUNT {
+            return Err(Error::ValueOutOfRange);
+        }
+        let mut out_total: i64 = 0;
+        for o in &self.outputs {
+            if o.value < 0 || o.value > Self::MAX_AMOUNT {
+                return Err(Error::ValueOutOfRange);
+            }
+            out_total = out_total.checked_add(o.value).ok_or(Error::ValueOverflow)?;
+        }
+        if out_total > in_total {
+            return Err(Error::NegativeFee);
+        }
+        for (a, i) in self.inputs.iter().enumerate() {
+            for j in &self.inputs[a + 1..] {
+                if i.prev_hash == j.prev_hash && i.prev_index == j.prev_index && i.tree == j.tree {
+                    return Err(Error::DuplicateInput);
+                }
+            }
+        }
+        Ok(())
     }
 
     /// Build the display summary (recipients, change, fee).
@@ -134,12 +195,15 @@ impl SignRequest {
             }
         }
         let input_total = self.input_total();
+        let fee = input_total - self.output_total();
+        let fee_warning = fee_is_worrying(fee, &recipients);
         ReviewSummary {
             recipients,
             change_total,
             input_total,
-            fee: input_total - self.output_total(),
+            fee,
             flagged_mismatches: Vec::new(),
+            fee_warning,
         }
     }
 
@@ -189,12 +253,15 @@ impl SignRequest {
         }
 
         let input_total = self.input_total();
+        let fee = input_total - self.output_total();
+        let fee_warning = fee_is_worrying(fee, &recipients);
         Ok(ReviewSummary {
             recipients,
             change_total,
             input_total,
-            fee: input_total - self.output_total(),
+            fee,
             flagged_mismatches,
+            fee_warning,
         })
     }
 }
@@ -218,6 +285,7 @@ fn p2pkh_hash160(script: &[u8]) -> Option<[u8; 20]> {
 
 /// Best-effort: decode a mainnet P2PKH script back to an address for display.
 fn script_to_address(script: &[u8]) -> Option<String> {
+    // P2PKH: OP_DUP OP_HASH160 <20> OP_EQUALVERIFY OP_CHECKSIG -> "Ds..."
     if script.len() == 25
         && script[0] == 0x76
         && script[1] == 0xa9
@@ -227,10 +295,19 @@ fn script_to_address(script: &[u8]) -> Option<String> {
     {
         let mut h = [0u8; 20];
         h.copy_from_slice(&script[3..23]);
-        Some(crate::hashing::check_encode(&h, crate::address::PKH_ADDR_ID_MAINNET))
-    } else {
-        None
+        return Some(crate::hashing::check_encode(&h, crate::address::PKH_ADDR_ID_MAINNET));
     }
+    // P2SH: OP_HASH160 <20> OP_EQUAL -> "Dc..." (multisig etc.)
+    if script.len() == 23
+        && script[0] == 0xa9
+        && script[1] == 0x14
+        && script[22] == 0x87
+    {
+        let mut h = [0u8; 20];
+        h.copy_from_slice(&script[2..22]);
+        return Some(crate::hashing::check_encode(&h, [0x07, 0x1a]));
+    }
+    None
 }
 
 /// End-to-end: turn a decoded `SignRequest` into a broadcast-ready Decred tx,
@@ -248,6 +325,7 @@ pub fn sign_request(
     master: &ExtPrivKey,
     req: &SignRequest,
 ) -> Result<Vec<u8>, Error> {
+    req.validate()?;
     let account = master.account_key(secp, req.account)?;
 
     // Assemble the unsigned tx (sigScripts empty for sighash computation).

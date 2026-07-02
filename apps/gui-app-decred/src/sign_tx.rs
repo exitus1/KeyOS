@@ -134,6 +134,8 @@ const OWNERSHIP_GAP_LIMIT: u32 = 200;
 
 pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Result<()> {
     let req: SignRequest = decode_sign_request(bytes).map_err(|e| anyhow!("bad package: {e}"))?;
+    // REFUSE dishonest math before anything is even shown for review.
+    req.validate().map_err(|e| anyhow!("REFUSED: {e}"))?;
     // TRUSTLESS REVIEW: re-derive our own addresses and classify each
     // output ourselves instead of trusting the companion is_change flag.
     let summary: ReviewSummary = {
@@ -166,16 +168,14 @@ fn render_review(state: StoredValue<AppState>, summary: &ReviewSummary) {
     sign.set_change(fmt_dcr(summary.change_total).into());
     sign.set_recipient_count(summary.recipients.len() as i32);
     sign.set_flagged_count(summary.flagged_mismatches.len() as i32);
-    // Reset the acknowledgment each time a new tx is reviewed.
-    sign.set_mismatch_acknowledged(false);
-    sign.set_flagged_count(summary.flagged_mismatches.len() as i32);
+    sign.set_fee_warning(summary.fee_warning);
     // Reset the acknowledgment each time a new tx is reviewed.
     sign.set_mismatch_acknowledged(false);
     // Join recipient address(es) + amount for on-screen verification.
     let recipient_str: String = summary
         .recipients
         .iter()
-        .map(|(addr, _amt)| addr.clone())
+        .map(|(addr, amt)| format!("{addr}\n{}", fmt_dcr(*amt)))
         .collect::<Vec<_>>()
         .join("\n\n");
     sign.set_recipient(recipient_str.into());
@@ -266,10 +266,29 @@ fn approve_and_sign(state: StoredValue<AppState>) -> Result<()> {
 /// Render the signed tx as an animated UR QR ("dcr-signed-tx") for Cake Wallet
 /// to scan and broadcast.
 fn emit_qr(state: StoredValue<AppState>, signed: &[u8]) -> Result<()> {
-    // TODO: encode `signed` as animated UR frames ("dcr-signed-tx") via
-    // foundation-ur and store each frame string. For now store a single hex
-    // frame so the DynamicQrCode has data to render in the simulator.
-    let parts = vec![hex::encode(signed)];
+    use foundation_ur::Encoder;
+    // Bytes per QR frame. ~90 keeps each frame comfortably scannable; the tx is
+    // split across `sequence_count()` frames that the DynamicQrCode animates.
+    const MAX_FRAGMENT_LEN: usize = 90;
+
+    // "bytes" is the generic UR type any BC-UR reader (a phone, Cake) can decode.
+    // Switch to a Decred-specific "dcr-signed-tx" type once both ends agree on it.
+    let mut encoder = Encoder::new();
+    encoder.start("bytes", signed, MAX_FRAGMENT_LEN);
+
+    // Emit a FOUNTAIN stream, not just the fixed set. foundation-ur keeps
+    // producing XOR-combined fragments past sequence_count(); a fountain decoder
+    // (e.g. Cake's) reassembles from any sufficient subset without waiting for
+    // the animation to cycle back to a missed frame. Emit ~3x the fragment count
+    // (min 8) so the redundancy helps even for small txs.
+    let seq = encoder.sequence_count().max(1) as usize;
+    let frame_count = (seq * 3).max(8);
+    let mut parts = Vec::with_capacity(frame_count);
+    for _ in 0..frame_count {
+        parts.push(encoder.next_part().to_string());
+    }
+
+    log::info!("emit_qr: {} byte tx -> {} UR fountain frame(s) (seq={})", signed.len(), parts.len(), seq);
     state.borrow_mut().set_signed_parts(parts);
     let ui = state.borrow().ui();
     ui.global::<SignTx>().set_state(SignState::ShowQr);

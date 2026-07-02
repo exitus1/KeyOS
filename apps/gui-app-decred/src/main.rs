@@ -13,6 +13,7 @@
 
 use slint_keyos_platform::{app, gui_server_api::InputMessage, StoredValue};
 
+mod account_store;
 mod create_account;
 mod keys;
 mod receive;

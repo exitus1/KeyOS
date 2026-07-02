@@ -128,6 +128,34 @@ export component SignPage inherits BasePage {
                     }
                 }
                 if SignTx.flagged-count > 0: Rectangle { height: 12px; }
+                // ORANGE ALARM: fee is technically valid but suspiciously large.
+                if SignTx.fee-warning: Rectangle {
+                    height: 84px;
+                    border-radius: 16px;
+                    background: #2a1c0e;
+                    border-width: 1.5px;
+                    border-color: #ff9f2d;
+                    VerticalLayout {
+                        padding: 12px;
+                        spacing: 4px;
+                        Text {
+                            text: "⚠ UNUSUALLY HIGH FEE";
+                            color: #ffb45e;
+                            font-size: 14px;
+                            font-weight: 800;
+                            letter-spacing: 1px;
+                            horizontal-alignment: center;
+                        }
+                        Text {
+                            text: "This transaction pays a very large network fee. That money goes to miners and cannot be recovered. Check the fee below.";
+                            color: #ffd9ad;
+                            font-size: 12px;
+                            horizontal-alignment: center;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+                if SignTx.fee-warning: Rectangle { height: 12px; }
 
                 // Amount hero
                 Rectangle {
@@ -203,7 +231,7 @@ export component SignPage inherits BasePage {
                             }
                             Text {
                                 text: SignTx.fee;
-                                color: #e8e8e8;
+                                color: SignTx.fee-warning ? #ff9f2d : #e8e8e8;
                                 font-size: 15px;
                                 font-weight: 500;
                                 vertical-alignment: center;
@@ -303,8 +331,8 @@ export component SignPage inherits BasePage {
 
             // Acknowledgment gate: when the companion lied about change, the
             // user MUST consciously acknowledge before Approve unlocks.
-            if SignTx.state == SignState.Review && SignTx.flagged-count > 0 && !SignTx.mismatch-acknowledged: Button {
-                label: "I understand — these are NOT change";
+            if SignTx.state == SignState.Review && (SignTx.flagged-count > 0 || SignTx.fee-warning) && !SignTx.mismatch-acknowledged: Button {
+                label: SignTx.flagged-count > 0 ? "I understand — these are NOT change" : "I understand — the fee is very high";
                 importance: Importance.secondary;
                 background: #5a1a1a;
                 label-color: #ffd0d0;
@@ -317,9 +345,9 @@ export component SignPage inherits BasePage {
             if SignTx.state == SignState.Review: Button {
                 label: TR2.lookup(TrId.SignApprove);
                 importance: Importance.primary;
-                background: (SignTx.flagged-count > 0 && !SignTx.mismatch-acknowledged) ? #1a2a44 : #2970ff;
+                background: ((SignTx.flagged-count > 0 || SignTx.fee-warning) && !SignTx.mismatch-acknowledged) ? #1a2a44 : #2970ff;
                 label-color: #ffffff;
-                enabled: !(SignTx.flagged-count > 0 && !SignTx.mismatch-acknowledged);
+                enabled: !((SignTx.flagged-count > 0 || SignTx.fee-warning) && !SignTx.mismatch-acknowledged);
                 clicked => {
                     SignTx.approve();
                 }

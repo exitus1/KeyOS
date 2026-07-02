@@ -45,6 +45,18 @@ pub enum Error {
     /// A re-derived input key did not reproduce the prev_script the host
     /// claimed we were spending. This is the anti-tamper tripwire: refuse.
     ScriptMismatch,
+    /// The package has no inputs or no outputs.
+    EmptyTx,
+    /// An amount was negative, zero where disallowed, or above max supply.
+    ValueOutOfRange,
+    /// Summing amounts overflowed i64 (hostile values).
+    ValueOverflow,
+    /// Outputs exceed inputs: a negative fee is impossible on the network.
+    NegativeFee,
+    /// The same coin (outpoint) was listed twice, inflating the input total.
+    DuplicateInput,
+    /// Unreasonably many inputs or outputs.
+    TooLarge,
 }
 
 impl core::fmt::Display for Error {
@@ -56,6 +68,12 @@ impl core::fmt::Display for Error {
             Error::UnsupportedVersion => "unsupported package version",
             Error::SigHashIndex => "input index out of range",
             Error::ScriptMismatch => "input script does not match key (refusing to sign)",
+            Error::EmptyTx => "transaction has no inputs or outputs",
+            Error::ValueOutOfRange => "amount outside valid range",
+            Error::ValueOverflow => "amount overflow (hostile values)",
+            Error::NegativeFee => "outputs exceed inputs (impossible fee)",
+            Error::DuplicateInput => "same coin listed twice",
+            Error::TooLarge => "too many inputs or outputs",
         };
         f.write_str(s)
     }

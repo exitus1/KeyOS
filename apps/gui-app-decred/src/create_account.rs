@@ -40,6 +40,17 @@ pub fn init(state: StoredValue<AppState>) {
             }
         }
     });
+    // Switch the active account index; everything downstream (receive, sign,
+    // export, balance) derives from state.account, so this is all it takes.
+    acct.on_set_active_account({
+        move |index| {
+            let idx = index.max(0) as u32;
+            state.borrow_mut().account = idx;
+            let ui = state.borrow().ui();
+            ui.global::<Account>().set_active_index(idx as i32);
+            log::info!("active account -> {}", idx);
+        }
+    });
 }
 
 /// Derive the account key at m/44'/42'/index' and return its neutered dpub.
