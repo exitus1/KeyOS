@@ -78,6 +78,9 @@ export global Utils {
     pure callback shorten-string(string, int) -> string;
 
     pure public function get-card-bg-color(color: CardColor) -> brush {
+        if (color == CardColor.decred) {
+            return #2970ff;
+        }
         if (color == CardColor.blue) {
             return UIColors.blue-500;
         }
@@ -112,6 +115,9 @@ export global Utils {
     }
 
     pure public function get-card-line-top-color(color: CardColor) -> brush {
+        if (color == CardColor.decred) {
+            return #6b9bff;
+        }
         if (color == CardColor.blue) {
             return UIColors.blue-300;
         }
@@ -146,6 +152,9 @@ export global Utils {
     }
 
     pure public function get-card-line-bottom-color(color: CardColor) -> brush {
+        if (color == CardColor.decred) {
+            return #1a49c4;
+        }
         if (color == CardColor.blue) {
             return UIColors.blue-700;
         }

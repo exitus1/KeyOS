@@ -5,15 +5,22 @@
 // Seed/wallet creation lives in the OS Seed Vault, NOT here — this app only
 // manages BIP44 sub-accounts within the active seed/passphrase context.
 //
-// Storage: in the hosted simulator the KeyOS Airlock/AppData disk image is not
-// present, so we persist to a real on-disk path (~/.decred-sim/accounts.txt),
-// mirroring the std::fs fallback sign_tx.rs already uses for the sim. On real
-// hardware this should write to fs::Location::AppData via the platform fs API.
+// Storage: the platform fs API at fs::Location::AppData (per-app sandboxed,
+// works identically in the hosted simulator and on hardware). Writes go
+// through FileBacked<String>, which gives atomic rename-into-place with a
+// .old fallback, so a crash mid-write can never corrupt the account list.
 //
 // Format (line-based, no serde needed):
 //   active:N
 //   <index>\t<name>
 //   <index>\t<name>
+
+use slint_keyos_platform::{file_backed::FileBacked, fs};
+
+use crate::fs_permissions::FileSystemPermissions;
+
+/// Account list file inside this app's AppData sandbox.
+const ACCOUNTS_FILE: &str = "accounts.txt";
 
 #[derive(Clone, Debug)]
 pub struct NamedAccount {
@@ -31,20 +38,13 @@ pub struct AccountStore {
 }
 
 impl AccountStore {
-    /// Sim-only persistence path. A real file that survives sim restarts.
-    fn sim_path() -> std::path::PathBuf {
-        let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
-        std::path::Path::new(&home).join(".decred-sim").join("accounts.txt")
-    }
-
-    /// Load the account list from disk. An empty store means "first launch"
+    /// Load the account list from AppData. An empty store means "first launch"
     /// (no accounts created yet), which the onboarding flow keys off of.
     pub fn load() -> Self {
-        let path = Self::sim_path();
         let mut store = AccountStore::default();
-        match std::fs::read_to_string(&path) {
-            Ok(text) => {
-                for line in text.lines() {
+        match FileBacked::<String, FileSystemPermissions>::load(ACCOUNTS_FILE, fs::Location::AppData) {
+            Ok(fb) => {
+                for line in fb.lines() {
                     if let Some(rest) = line.strip_prefix("active:") {
                         store.active = rest.trim().parse().unwrap_or(0);
                     } else if let Some((idx, name)) = line.split_once('\t') {
@@ -57,10 +57,9 @@ impl AccountStore {
                     }
                 }
                 log::info!(
-                    "AccountStore: loaded {} account(s), active={} from {}",
+                    "AccountStore: loaded {} account(s), active={} from AppData",
                     store.accounts.len(),
                     store.active,
-                    path.display()
                 );
             }
             Err(_) => {
@@ -80,27 +79,21 @@ impl AccountStore {
         }
     }
 
-    /// Persist the account list to disk. No-op for hidden wallets.
+    /// Persist the account list to AppData (atomic write with .old fallback).
+    /// No-op for hidden wallets.
     pub fn save(&self) {
         if self.ephemeral {
             return;
-        }
-        let path = Self::sim_path();
-        if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
         }
         let mut out = format!("active:{}\n", self.active);
         for a in &self.accounts {
             out.push_str(&format!("{}\t{}\n", a.index, a.name));
         }
-        match std::fs::write(&path, out) {
-            Ok(_) => log::info!(
-                "AccountStore: saved {} account(s) to {}",
-                self.accounts.len(),
-                path.display()
-            ),
-            Err(e) => log::error!("AccountStore: save failed: {e}"),
-        }
+        let (mut fb, _restored) =
+            FileBacked::<String, FileSystemPermissions>::new(ACCOUNTS_FILE, fs::Location::AppData);
+        *fb.guard() = out;
+        fb.save();
+        log::info!("AccountStore: saved {} account(s) to AppData", self.accounts.len());
     }
 
     pub fn is_empty(&self) -> bool {

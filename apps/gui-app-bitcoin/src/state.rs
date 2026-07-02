@@ -557,6 +557,7 @@ impl From<CardColor> for AccountColor {
             CardColor::DarkCopper => AccountColor::DarkCopper,
             CardColor::Teal => AccountColor::Teal,
             CardColor::Blue => AccountColor::Blue,
+            CardColor::Decred => AccountColor::Blue,
             CardColor::Orange => AccountColor::Blue,
             CardColor::Red => AccountColor::Blue,
         }

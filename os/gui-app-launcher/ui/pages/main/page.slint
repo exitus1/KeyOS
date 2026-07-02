@@ -76,6 +76,7 @@ component BitcoinTile inherits Rectangle {
     in property <string> currency: "Bitcoin USD";
     in property <string> last-change-percent: "+10.20%";
     in property <string> last-price-update-time: "2 minutes ago";
+    in property <CardColor> tile-card-color: CardColor.blue;
 
     height: 292px;
     border-radius: Size.sz6;
@@ -90,7 +91,7 @@ component BitcoinTile inherits Rectangle {
         LineCard {
             width: parent.width;
             height: parent.height;
-            card-color: CardColor.blue;
+            card-color: tile-card-color;
 
             clicked => {
                 clicked();
@@ -412,6 +413,7 @@ export component MainPage inherits BasePage {
                     last-change-percent: "DCR @ $12.00";
                     last-price-update-time: "mock";
                     name: "Decred";
+                    tile-card-color: CardColor.decred;
                     clicked => {
                         CB.app-clicked(240px, 400px, "0x4465637265642057616c6c6574000000");
                     }

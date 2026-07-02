@@ -9,6 +9,7 @@ import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button } 
 import { Palette, Size, Importance } from "@ui/theme.slint";
 import { Navigate } from "../../gen/navigate.slint";
 import { Account, AccountRow } from "../../account.slint";
+import { Passphrase } from "../../passphrase.slint";
 
 export component AccountsPage inherits BasePage {
     // Whether the inline "name a new account" editor is open.
@@ -33,10 +34,19 @@ export component AccountsPage inherits BasePage {
                 horizontal-alignment: center;
             }
             Text {
-                text: "Separate balances under this wallet";
-                color: #6b6b6b;
+                text: Passphrase.active
+                    ? "Accounts of hidden wallet " + Passphrase.code
+                    : "Separate balances under this wallet";
+                color: Passphrase.active ? #ffb45e : #6b6b6b;
                 font-size: 13px;
                 horizontal-alignment: center;
+            }
+            if Passphrase.active: Text {
+                text: "Hidden wallet accounts are not saved. Next time you open this wallet only Main will be listed - recreate accounts in the same order to reach the same coins.";
+                color: #6b6b6b;
+                font-size: 11px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
             }
 
             Rectangle { height: 6px; }
@@ -132,6 +142,14 @@ export component AccountsPage inherits BasePage {
         }
 
         ButtonSection {
+            if !creating && Passphrase.active: Button {
+                label: "Back to normal accounts";
+                importance: Importance.primary;
+                background: #ff9f2d;
+                clicked => {
+                    Passphrase.clear();
+                }
+            }
             if !creating: Button {
                 label: "Passphrase wallet…";
                 importance: Importance.secondary;
