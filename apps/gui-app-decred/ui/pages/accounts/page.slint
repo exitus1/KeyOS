@@ -29,22 +29,22 @@ export component AccountsPage inherits BasePage {
             Text {
                 text: "Accounts";
                 color: #ffffff;
-                font-size: 24px;
-                font-weight: 700;
+                font-size: 27px;
+                font-weight: 800;
                 horizontal-alignment: center;
             }
             Text {
                 text: Passphrase.active
                     ? "Accounts of hidden wallet " + Passphrase.code
                     : "Separate balances under this wallet";
-                color: Passphrase.active ? #ffb45e : #6b6b6b;
-                font-size: 13px;
+                color: Passphrase.active ? #ffb45e : #9aa0ab;
+                font-size: 15px;
                 horizontal-alignment: center;
             }
             if Passphrase.active: Text {
                 text: "Hidden wallet accounts are not saved. Next time you open this wallet only Main will be listed - recreate accounts in the same order to reach the same coins.";
-                color: #6b6b6b;
-                font-size: 11px;
+                color: #9aa0ab;
+                font-size: 13px;
                 horizontal-alignment: center;
                 wrap: word-wrap;
             }
@@ -52,11 +52,22 @@ export component AccountsPage inherits BasePage {
             Rectangle { height: 6px; }
 
             for row in Account.rows: Rectangle {
-                height: 64px;
-                border-radius: 16px;
-                background: row.active ? #101a2e : #08080a;
-                border-width: row.active ? 1.5px : 1px;
+                height: 92px;
+                border-radius: 20px;
+                background: row.active
+                    ? @linear-gradient(135deg, #16255280 0%, #0b122650 100%)
+                    : #0c0c10;
+                border-width: row.active ? 2px : 1px;
                 border-color: row.active ? #2970ff : #1c1c1c;
+                clip: true;
+
+                // Accent edge: a slim colored bar keyed to the account.
+                Rectangle {
+                    x: 0;
+                    width: 5px;
+                    height: parent.height;
+                    background: row.accent;
+                }
 
                 TouchArea {
                     clicked => {
@@ -65,34 +76,74 @@ export component AccountsPage inherits BasePage {
                 }
 
                 HorizontalLayout {
-                    padding-left: 18px;
+                    padding-left: 20px;
                     padding-right: 18px;
+                    spacing: 16px;
+
+                    // Avatar: accent circle with the account's initial.
+                    VerticalLayout {
+                        alignment: center;
+                        Rectangle {
+                            width: 48px;
+                            height: 48px;
+                            border-radius: 24px;
+                            background: row.accent.with-alpha(0.18);
+                            border-width: 1.5px;
+                            border-color: row.accent;
+                            Text {
+                                text: row.initial;
+                                color: row.accent;
+                                font-size: 22px;
+                                font-weight: 800;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
 
                     VerticalLayout {
                         alignment: center;
-                        spacing: 2px;
+                        spacing: 3px;
                         horizontal-stretch: 1;
                         Text {
                             text: row.name;
                             color: #ffffff;
-                            font-size: 17px;
-                            font-weight: 600;
+                            font-size: 22px;
+                            font-weight: 800;
                         }
                         Text {
                             text: row.path;
-                            color: #6b6b6b;
-                            font-size: 12px;
+                            color: #9aa0ab;
+                            font-size: 14px;
                         }
                     }
 
+                    // Right: bold filled ACTIVE pill, or a quiet chevron.
                     if row.active: VerticalLayout {
                         alignment: center;
+                        Rectangle {
+                            width: 76px;
+                            height: 30px;
+                            border-radius: 15px;
+                            background: #2970ff;
+                            Text {
+                                text: "ACTIVE";
+                                color: #ffffff;
+                                font-size: 13px;
+                                font-weight: 800;
+                                letter-spacing: 1.5px;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+                    if !row.active: VerticalLayout {
+                        alignment: center;
                         Text {
-                            text: "ACTIVE";
-                            color: #2970ff;
-                            font-size: 11px;
-                            font-weight: 800;
-                            letter-spacing: 1.5px;
+                            text: "›";
+                            color: #3a3a44;
+                            font-size: 26px;
+                            font-weight: 700;
                         }
                     }
                 }
@@ -100,7 +151,7 @@ export component AccountsPage inherits BasePage {
 
             // --- inline create editor ---
             if creating: Rectangle {
-                height: 56px;
+                height: 60px;
                 border-radius: 16px;
                 background: #08080a;
                 border-width: 1px;
@@ -111,7 +162,7 @@ export component AccountsPage inherits BasePage {
                     TextInput {
                         vertical-alignment: center;
                         color: #ffffff;
-                        font-size: 17px;
+                        font-size: 20px;
                         text: root.new-name;
                         edited => {
                             root.new-name = self.text;
@@ -129,14 +180,14 @@ export component AccountsPage inherits BasePage {
             }
             if creating && root.new-name == "": Text {
                 text: "Type a name for the new account";
-                color: #6b6b6b;
-                font-size: 12px;
+                color: #9aa0ab;
+                font-size: 14px;
                 horizontal-alignment: center;
             }
             if creating && Account.name-error != "": Text {
                 text: Account.name-error;
                 color: #ff6b6b;
-                font-size: 12px;
+                font-size: 14px;
                 horizontal-alignment: center;
             }
         }

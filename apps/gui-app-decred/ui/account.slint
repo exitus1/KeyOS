@@ -16,6 +16,10 @@ export struct AccountRow {
     name: string,
     path: string,
     active: bool,
+    // First letter of the name, uppercased (Slint has no substring).
+    initial: string,
+    // Deterministic per-account accent color for the avatar circle.
+    accent: color,
 }
 
 export global Account {

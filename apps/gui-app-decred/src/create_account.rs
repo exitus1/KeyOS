@@ -27,11 +27,30 @@ pub(crate) fn refresh_rows(state: StoredValue<AppState>) {
             .accounts
             .accounts
             .iter()
-            .map(|a| AccountRow {
-                idx: a.index as i32,
-                name: a.name.as_str().into(),
-                path: format!("m/44'/42'/{}'", a.index).into(),
-                active: a.index == active,
+            .map(|a| {
+                // Small deterministic accent palette, cycled by index.
+                const PALETTE: [(u8, u8, u8); 5] = [
+                    (0x29, 0x70, 0xff), // decred blue
+                    (0x2d, 0xd8, 0xa3), // decred teal
+                    (0x8b, 0x5c, 0xf6), // violet
+                    (0xf5, 0x9e, 0x0b), // amber
+                    (0xec, 0x48, 0x99), // pink
+                ];
+                let (r, g, b) = PALETTE[(a.index as usize) % PALETTE.len()];
+                let initial: String = a
+                    .name
+                    .chars()
+                    .next()
+                    .map(|c| c.to_uppercase().collect::<String>())
+                    .unwrap_or_default();
+                AccountRow {
+                    idx: a.index as i32,
+                    name: a.name.as_str().into(),
+                    path: format!("m/44'/42'/{}'", a.index).into(),
+                    active: a.index == active,
+                    initial: initial.into(),
+                    accent: slint_keyos_platform::slint::Color::from_rgb_u8(r, g, b),
+                }
             })
             .collect();
         (rows, s.accounts.active_name(), active)

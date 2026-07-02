@@ -8,8 +8,8 @@
 //   Done     -> signed tx written to SD card
 //   Error    -> refused or failed
 
-import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, DynamicQrCode, HeadingSm, HeadingMd, TextMd, TextSm, HLine, TimerCircularProgress } from "@ui/widgets.slint";
-import { Palette, Size, Importance } from "@ui/theme.slint";
+import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, DynamicQrCode, HeadingSm, HeadingMd, TextMd, TextSm, HLine, TimerCircularProgress, Icon } from "@ui/widgets.slint";
+import { Palette, Size, Importance, IconSize } from "@ui/theme.slint";
 import { TR2, TrId } from "../../gen/tr.slint";
 import { Navigate } from "../../gen/navigate.slint";
 import { SignTx, SignState, RecipientView } from "../../sign-tx.slint";
@@ -102,14 +102,14 @@ export component SignPage inherits BasePage {
                     spacing: 6px;
                     Text {
                         text: "spending from";
-                        color: #6b6b6b;
-                        font-size: 15px;
+                        color: #9aa0ab;
+                        font-size: 16px;
                         vertical-alignment: center;
                     }
                     Text {
                         text: SignTx.signing-account;
                         color: #7ea6ff;
-                        font-size: 17px;
+                        font-size: 18px;
                         font-weight: 800;
                         vertical-alignment: center;
                     }
@@ -205,7 +205,7 @@ export component SignPage inherits BasePage {
                         Text {
                             text: "SENDING";
                             color: #2970ff;
-                            font-size: 12px;
+                            font-size: 14px;
                             font-weight: 600;
                             letter-spacing: 2px;
                             horizontal-alignment: center;
@@ -244,7 +244,7 @@ export component SignPage inherits BasePage {
                             if i == 0: Text {
                                 text: SignTx.recipient-count > 1 ? "SENDING TO (MULTIPLE)" : "SENDING TO";
                                 color: #2970ff;
-                                font-size: 13px;
+                                font-size: 14px;
                                 font-weight: 700;
                                 letter-spacing: 1.5px;
                             }
@@ -280,11 +280,22 @@ export component SignPage inherits BasePage {
                                     font-weight: 800;
                                 }
                             }
-                            Text {
-                                text: r.amount;
-                                color: #e8e8e8;
-                                font-size: 17px;
-                                font-weight: 700;
+                            Rectangle { height: 4px; }
+                            HorizontalLayout {
+                                Text {
+                                    text: "Amount";
+                                    color: #9aa0ab;
+                                    font-size: 18px;
+                                    vertical-alignment: center;
+                                    horizontal-stretch: 1;
+                                }
+                                Text {
+                                    text: r.amount;
+                                    color: #ffffff;
+                                    font-size: 20px;
+                                    font-weight: 800;
+                                    horizontal-alignment: right;
+                                }
                             }
                         }
                         Rectangle { height: 1px; background: #161616; }
@@ -293,15 +304,15 @@ export component SignPage inherits BasePage {
                             Text {
                                 text: "Network fee";
                                 color: #9aa0ab;
-                                font-size: 16px;
+                                font-size: 18px;
                                 vertical-alignment: center;
                                 horizontal-stretch: 1;
                             }
                             Text {
                                 text: SignTx.fee;
-                                color: SignTx.fee-warning ? #ff9f2d : #e8e8e8;
-                                font-size: 17px;
-                                font-weight: 500;
+                                color: SignTx.fee-warning ? #ff9f2d : #ffffff;
+                                font-size: 19px;
+                                font-weight: 700;
                                 vertical-alignment: center;
                                 horizontal-alignment: right;
                             }
@@ -313,8 +324,8 @@ export component SignPage inherits BasePage {
                             }
                             Text {
                                 text: SignTx.fee-rate;
-                                color: #6b6b6b;
-                                font-size: 12px;
+                                color: #9aa0ab;
+                                font-size: 13px;
                                 horizontal-alignment: right;
                             }
                         }
@@ -324,15 +335,15 @@ export component SignPage inherits BasePage {
                             Text {
                                 text: "Change";
                                 color: #9aa0ab;
-                                font-size: 16px;
+                                font-size: 18px;
                                 vertical-alignment: center;
                                 horizontal-stretch: 1;
                             }
                             Text {
                                 text: SignTx.change;
-                                color: #e8e8e8;
-                                font-size: 17px;
-                                font-weight: 500;
+                                color: #ffffff;
+                                font-size: 19px;
+                                font-weight: 700;
                                 vertical-alignment: center;
                                 horizontal-alignment: right;
                             }
@@ -343,9 +354,10 @@ export component SignPage inherits BasePage {
                                 horizontal-stretch: 1;
                             }
                             Text {
-                                text: "✓ verified to your own keys";
+                                text: "verified to your own keys";
                                 color: #2dd8a3;
-                                font-size: 12px;
+                                font-size: 14px;
+                                font-weight: 600;
                                 horizontal-alignment: right;
                             }
                         }
@@ -382,15 +394,75 @@ export component SignPage inherits BasePage {
 
             // --- Done: written to SD ----------------------------------------
             if SignTx.state == SignState.Done: VerticalLayout {
-                spacing: Size.sz3;
-                HeadingSm {
-                    text: TR2.lookup(TrId.SignSavedTitle);
-                    horizontal-alignment: center;
+                spacing: Size.sz4;
+
+                Rectangle { height: 24px; }
+
+                // Success mark: teal ring + check, verification-green like
+                // every other "confirmed good" element in the app.
+                HorizontalLayout {
+                    alignment: center;
+                    Rectangle {
+                        width: 88px;
+                        height: 88px;
+                        border-radius: 44px;
+                        background: #2dd8a326;
+                        border-width: 2.5px;
+                        border-color: #2dd8a3;
+                        // Platform icon registry checkmark - the same
+                        // exact-size pipeline as every crisp icon in the OS.
+                        Icon {
+                            name: "check";
+                            size: IconSize.px48;
+                            color: #2dd8a3;
+                        }
+                    }
                 }
 
-                TextSm {
-                    text: SignTx.saved-path;
-                    color: Palette.content-secondary;
+                Text {
+                    text: "Transaction signed";
+                    color: #ffffff;
+                    font-size: 27px;
+                    font-weight: 800;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: "Saved to the SD card. Nothing has been sent yet.";
+                    color: #9aa0ab;
+                    font-size: 15px;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+
+                Rectangle {
+                    border-radius: 14px;
+                    background: #0d0d10;
+                    border-width: 1px;
+                    border-color: #1f2233;
+                    VerticalLayout {
+                        padding: 14px;
+                        spacing: 4px;
+                        Text {
+                            text: "FILE";
+                            color: #2970ff;
+                            font-size: 12px;
+                            font-weight: 800;
+                            letter-spacing: 1.5px;
+                        }
+                        Text {
+                            text: SignTx.saved-path;
+                            color: #ffffff;
+                            font-size: 15px;
+                            font-weight: 600;
+                            wrap: char-wrap;
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Move the card to your online wallet and broadcast it there. This device stays offline.";
+                    color: #9aa0ab;
+                    font-size: 14px;
                     horizontal-alignment: center;
                     wrap: word-wrap;
                 }
@@ -458,6 +530,8 @@ export component SignPage inherits BasePage {
             if SignTx.state == SignState.ShowQr || SignTx.state == SignState.Done || SignTx.state == SignState.Error: Button {
                 label: TR2.lookup(TrId.CommonDone);
                 importance: Importance.primary;
+                background: #2970ff;
+                label-color: #ffffff;
                 clicked => {
                     SignTx.reject();
                     Navigate.backward();

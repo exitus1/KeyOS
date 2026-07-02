@@ -35,35 +35,60 @@ export component PassphrasePage inherits BasePage {
             if stage == 0: Text {
                 text: "Using a Passphrase";
                 color: #ffffff;
-                font-size: 24px;
-                font-weight: 700;
+                font-size: 27px;
+                font-weight: 800;
                 horizontal-alignment: center;
             }
+            if stage == 0: Rectangle { height: 8px; }
             if stage == 0: Text {
-                text: "A passphrase acts as a second layer of security to protect your Decred.\n\nTo access Decred protected by a passphrase, you must reenter the exact same characters.\n\nIt is crucial to back up your passphrase to avoid loss of funds. Your seed backup ALONE cannot recover it — restoring this wallet needs your seed AND the exact passphrase.";
-                color: #b8b8b8;
-                font-size: 14px;
+                text: "A passphrase acts as a second layer of security to protect your Decred.";
+                color: #c9cdd6;
+                font-size: 16px;
                 horizontal-alignment: center;
                 wrap: word-wrap;
+            }
+            if stage == 0: Text {
+                text: "To access Decred protected by a passphrase, you must reenter the exact same characters.";
+                color: #c9cdd6;
+                font-size: 16px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+            if stage == 0: Rectangle {
+                border-radius: 16px;
+                background: #2a1c0e;
+                border-width: 1px;
+                border-color: #ff9f2d;
+                VerticalLayout {
+                    padding: 14px;
+                    Text {
+                        text: "It is crucial to back up your passphrase. Your seed backup ALONE cannot recover this wallet — restoring it needs your seed AND the exact passphrase.";
+                        color: #ffd9ad;
+                        font-size: 15px;
+                        font-weight: 600;
+                        horizontal-alignment: center;
+                        wrap: word-wrap;
+                    }
+                }
             }
 
             // ---- Stage 1: enter ------------------------------------------------
             if stage == 1: Text {
                 text: "Enter Passphrase";
                 color: #ffffff;
-                font-size: 24px;
-                font-weight: 700;
+                font-size: 27px;
+                font-weight: 800;
                 horizontal-alignment: center;
             }
             if stage == 1: Text {
                 text: "Type with care. All passphrases are valid. Ensure you back up your passphrase.";
-                color: #6b6b6b;
-                font-size: 13px;
+                color: #9aa0ab;
+                font-size: 15px;
                 horizontal-alignment: center;
                 wrap: word-wrap;
             }
             if stage == 1: Rectangle {
-                height: 56px;
+                height: 64px;
                 border-radius: 16px;
                 background: #08080a;
                 border-width: 1px;
@@ -74,7 +99,7 @@ export component PassphrasePage inherits BasePage {
                     TextInput {
                         vertical-alignment: center;
                         color: #ffffff;
-                        font-size: 17px;
+                        font-size: 20px;
                         text: root.entry;
                         edited => {
                             root.entry = self.text;
@@ -91,8 +116,8 @@ export component PassphrasePage inherits BasePage {
             }
             if stage == 1 && root.entry == "": Text {
                 text: "Enter passphrase...";
-                color: #6b6b6b;
-                font-size: 12px;
+                color: #9aa0ab;
+                font-size: 14px;
                 horizontal-alignment: center;
             }
 
@@ -100,12 +125,12 @@ export component PassphrasePage inherits BasePage {
             if stage == 2: Text {
                 text: "Confirm Passphrase";
                 color: #ffffff;
-                font-size: 24px;
-                font-weight: 700;
+                font-size: 27px;
+                font-weight: 800;
                 horizontal-alignment: center;
             }
             if stage == 2: Rectangle {
-                height: 96px;
+                height: 128px;
                 border-radius: 16px;
                 background: #08080a;
                 border-width: 1px;
@@ -114,38 +139,39 @@ export component PassphrasePage inherits BasePage {
                     padding: 14px;
                     spacing: 6px;
                     Text {
-                        text: "Passphrase";
+                        text: "PASSPHRASE";
                         color: #2970ff;
-                        font-size: 11px;
-                        font-weight: 700;
+                        font-size: 12px;
+                        font-weight: 800;
                         letter-spacing: 1.5px;
                     }
                     Text {
                         text: root.entry;
                         color: #ffffff;
-                        font-size: 16px;
-                        font-weight: 600;
+                        font-size: 21px;
+                        font-weight: 700;
                         wrap: char-wrap;
                     }
+                    Rectangle { height: 4px; }
                     Text {
-                        text: "Fingerprint";
+                        text: "FINGERPRINT";
                         color: #2970ff;
-                        font-size: 11px;
-                        font-weight: 700;
+                        font-size: 12px;
+                        font-weight: 800;
                         letter-spacing: 1.5px;
                     }
                     Text {
                         text: Passphrase.code;
-                        color: #ffffff;
-                        font-size: 16px;
-                        font-weight: 600;
+                        color: #2dd8a3;
+                        font-size: 21px;
+                        font-weight: 800;
                     }
                 }
             }
             if stage == 2: Text {
                 text: "Your passphrase will be erased upon shutdown, or can be manually cleared by returning to this screen.";
-                color: #6b6b6b;
-                font-size: 13px;
+                color: #9aa0ab;
+                font-size: 15px;
                 horizontal-alignment: center;
                 wrap: word-wrap;
             }
@@ -153,7 +179,7 @@ export component PassphrasePage inherits BasePage {
             if Passphrase.error != "": Text {
                 text: Passphrase.error;
                 color: #ff6b6b;
-                font-size: 12px;
+                font-size: 14px;
                 horizontal-alignment: center;
                 wrap: word-wrap;
             }
