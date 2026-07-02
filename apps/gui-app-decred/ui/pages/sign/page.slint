@@ -12,7 +12,8 @@ import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, D
 import { Palette, Size, Importance } from "@ui/theme.slint";
 import { TR2, TrId } from "../../gen/tr.slint";
 import { Navigate } from "../../gen/navigate.slint";
-import { SignTx, SignState } from "../../sign-tx.slint";
+import { SignTx, SignState, RecipientView } from "../../sign-tx.slint";
+import { Passphrase } from "../../passphrase.slint";
 
 // A label/value row — used for the amount/fee summary.
 component SummaryRow inherits HorizontalLayout {
@@ -82,7 +83,10 @@ export component SignPage inherits BasePage {
             }
 
             // --- Review (ported from decred_review.slint mockup) -------------
-            if SignTx.state == SignState.Review: VerticalLayout {
+            // Flickable: multi-recipient reviews can exceed the screen; the
+            // content scrolls while Approve/Reject stay pinned below.
+            if SignTx.state == SignState.Review: Flickable {
+                VerticalLayout {
                 spacing: 0px;
 
                 Text {
@@ -99,7 +103,47 @@ export component SignPage inherits BasePage {
                     horizontal-alignment: center;
                 }
 
-                Rectangle { height: 20px; }
+                Rectangle { height: 10px; }
+                // Which account/wallet this request spends from.
+                Rectangle {
+                    height: 26px;
+                    border-radius: 13px;
+                    background: #101a2e;
+                    border-width: 1px;
+                    border-color: #2970ff;
+                    VerticalLayout {
+                        alignment: center;
+                        Text {
+                            text: "SPENDING FROM: " + SignTx.signing-account;
+                            color: #7ea6ff;
+                            font-size: 11px;
+                            font-weight: 700;
+                            letter-spacing: 1.5px;
+                            horizontal-alignment: center;
+                        }
+                    }
+                }
+                if Passphrase.active: Rectangle { height: 6px; }
+                if Passphrase.active: Rectangle {
+                    height: 26px;
+                    border-radius: 13px;
+                    background: #2a1c0e;
+                    border-width: 1px;
+                    border-color: #ff9f2d;
+                    VerticalLayout {
+                        alignment: center;
+                        Text {
+                            text: "HIDDEN WALLET · " + Passphrase.code;
+                            color: #ffb45e;
+                            font-size: 11px;
+                            font-weight: 800;
+                            letter-spacing: 1.5px;
+                            horizontal-alignment: center;
+                        }
+                    }
+                }
+
+                Rectangle { height: 12px; }
                 // HARD WARNING: companion mislabelled non-owned outputs as change.
                 if SignTx.flagged-count > 0: Rectangle {
                     height: 92px;
@@ -199,24 +243,57 @@ export component SignPage inherits BasePage {
                         padding-right: 18px;
                         spacing: 0px;
 
-                        // RECIPIENT — device-decoded destination; verify every character.
-                        VerticalLayout {
+                        // RECIPIENTS — device-decoded destinations in the same
+                        // verification grid as the Receive screen: 5-char
+                        // groups, outer groups emphasized.
+                        for r[i] in SignTx.recipients: VerticalLayout {
                             padding-top: 10px;
                             padding-bottom: 10px;
                             spacing: 4px;
-                            Text {
-                                text: "SENDING TO";
+                            if i == 0: Text {
+                                text: SignTx.recipient-count > 1 ? "SENDING TO (MULTIPLE)" : "SENDING TO";
                                 color: #2970ff;
                                 font-size: 12px;
                                 font-weight: 600;
                                 letter-spacing: 1.5px;
                             }
+                            HorizontalLayout {
+                                spacing: 8px;
+                                alignment: start;
+                                Text {
+                                    text: r.top-first;
+                                    color: #2dd8a3;
+                                    font-size: 19px;
+                                    font-weight: 800;
+                                }
+                                Text {
+                                    text: r.top-rest;
+                                    color: #ffffff;
+                                    font-size: 19px;
+                                    font-weight: 500;
+                                }
+                            }
+                            HorizontalLayout {
+                                spacing: 8px;
+                                alignment: start;
+                                Text {
+                                    text: r.bottom-rest;
+                                    color: #ffffff;
+                                    font-size: 19px;
+                                    font-weight: 500;
+                                }
+                                Text {
+                                    text: r.bottom-last;
+                                    color: #2dd8a3;
+                                    font-size: 19px;
+                                    font-weight: 800;
+                                }
+                            }
                             Text {
-                                text: SignTx.recipient;
-                                color: #ffffff;
-                                font-size: 20px;
-                                font-weight: 500;
-                                wrap: char-wrap;
+                                text: r.amount;
+                                color: #e8e8e8;
+                                font-size: 15px;
+                                font-weight: 700;
                             }
                         }
                         Rectangle { height: 1px; background: #161616; }
@@ -235,6 +312,18 @@ export component SignPage inherits BasePage {
                                 font-size: 15px;
                                 font-weight: 500;
                                 vertical-alignment: center;
+                                horizontal-alignment: right;
+                            }
+                        }
+                        HorizontalLayout {
+                            Text {
+                                text: "";
+                                horizontal-stretch: 1;
+                            }
+                            Text {
+                                text: SignTx.fee-rate;
+                                color: #6b6b6b;
+                                font-size: 11px;
                                 horizontal-alignment: right;
                             }
                         }
@@ -257,8 +346,22 @@ export component SignPage inherits BasePage {
                                 horizontal-alignment: right;
                             }
                         }
+                        HorizontalLayout {
+                            Text {
+                                text: "";
+                                horizontal-stretch: 1;
+                            }
+                            Text {
+                                text: "✓ verified to your own keys";
+                                color: #2dd8a3;
+                                font-size: 11px;
+                                horizontal-alignment: right;
+                            }
+                        }
                     }
                 }
+            }
+
             }
 
             // --- ShowQr: signed, animated QR back ----------------------------

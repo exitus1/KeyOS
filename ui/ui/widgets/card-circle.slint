@@ -67,7 +67,12 @@ export component CardCircle inherits Rectangle {
 
         source: Utils.line-card(
             root.width, root.height, Palette.black,
-            [], // No background gradient
+            [
+            // Subtle sheen derived from the card color (matches the
+            // marketing-render look of the Bitcoin badge).
+            { color: Utils.get-card-line-top-color(line-color).with-alpha(0.30), stop: 0% },
+            { color: Utils.get-card-line-top-color(line-color).with-alpha(0.0), stop: 65% }
+        ],
             size / 2, 3px, [
             { color: Utils.get-card-line-top-color(line-color), stop: 0% },
             { color: Utils.get-card-line-bottom-color(line-color), stop: 100% }

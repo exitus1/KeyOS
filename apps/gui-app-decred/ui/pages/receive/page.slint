@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Receive: derive an external-branch address on entry, show it as a QR plus a
-// monospace string, and allow stepping to the next index.
+// Receive: a VERIFICATION screen, not just a display screen. Shows exactly
+// which account (and hidden wallet, if any) the address belongs to, the
+// address in 5-char groups with the first/last groups emphasized (the parts
+// humans actually compare), the exact derivation path, and index navigation.
 
 import { BasePage, NavHeader, PageBody, ContentSection, ButtonSection, Button, QrCodeCard, HeadingSm, TextSm, TextMd } from "@ui/widgets.slint";
 import { Palette, Size, Importance } from "@ui/theme.slint";
 import { TR2, TrId } from "../../gen/tr.slint";
 import { Navigate, Animate } from "../../gen/navigate.slint";
 import { Receive, ReceiveState } from "../../receive.slint";
+import { Account } from "../../account.slint";
+import { Passphrase } from "../../passphrase.slint";
 
 export component ReceivePage inherits BasePage {
     // Derive index 0 as soon as the page is shown.
@@ -23,15 +27,53 @@ export component ReceivePage inherits BasePage {
 
     PageBody {
         ContentSection {
-            spacing: Size.sz4;
+            spacing: Size.sz3;
 
             HeadingSm {
                 text: TR2.lookup(TrId.ReceiveTitle);
                 horizontal-alignment: center;
             }
 
+            // --- context: which account / which wallet ---
+            Rectangle {
+                height: 26px;
+                border-radius: 13px;
+                background: #101a2e;
+                border-width: 1px;
+                border-color: #2970ff;
+                VerticalLayout {
+                    alignment: center;
+                    Text {
+                        text: "ACCOUNT: " + Account.active-name;
+                        color: #7ea6ff;
+                        font-size: 11px;
+                        font-weight: 700;
+                        letter-spacing: 1.5px;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+            if Passphrase.active: Rectangle {
+                height: 26px;
+                border-radius: 13px;
+                background: #2a1c0e;
+                border-width: 1px;
+                border-color: #ff9f2d;
+                VerticalLayout {
+                    alignment: center;
+                    Text {
+                        text: "HIDDEN WALLET · " + Passphrase.code;
+                        color: #ffb45e;
+                        font-size: 11px;
+                        font-weight: 800;
+                        letter-spacing: 1.5px;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+
             if Receive.state == ReceiveState.Shown: VerticalLayout {
-                spacing: Size.sz4;
+                spacing: Size.sz3;
 
                 HorizontalLayout {
                     alignment: center;
@@ -40,22 +82,80 @@ export component ReceivePage inherits BasePage {
                     }
                 }
 
-                // Full address in a width-constrained box so char-wrap has room
-                // to lay out all 35 chars cleanly (QR above is untouched).
+                // --- verification grid: 5-char groups, ends emphasized ---
                 Rectangle {
                     border-radius: 12px;
                     background: #0d0d10;
                     border-width: 1px;
                     border-color: #1f2233;
                     horizontal-stretch: 1;
-                    HorizontalLayout {
-                        padding: 14px;
-                        TextSm {
-                            text: Receive.address;
-                            color: #e8e8e8;
-                            font-size: 16px;
+                    VerticalLayout {
+                        padding: 12px;
+                        spacing: 6px;
+                        HorizontalLayout {
+                            alignment: center;
+                            spacing: 10px;
+                            for chunk[i] in Receive.chunks-top: Text {
+                                text: chunk;
+                                color: i == 0 ? #2dd8a3 : #e8e8e8;
+                                font-size: 17px;
+                                font-weight: i == 0 ? 800 : 500;
+                            }
+                        }
+                        HorizontalLayout {
+                            alignment: center;
+                            spacing: 10px;
+                            for chunk[i] in Receive.chunks-bottom: Text {
+                                text: chunk;
+                                color: i == Receive.chunks-bottom.length - 1 ? #2dd8a3 : #e8e8e8;
+                                font-size: 17px;
+                                font-weight: i == Receive.chunks-bottom.length - 1 ? 800 : 500;
+                            }
+                        }
+                        Text {
+                            text: Receive.path;
+                            color: #6b6b6b;
+                            font-size: 11px;
                             horizontal-alignment: center;
-                            wrap: char-wrap;
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Compare the highlighted groups with DCR Pulse before sharing. Use a fresh address for each payment - this device cannot see balances.";
+                    color: #6b6b6b;
+                    font-size: 11px;
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                }
+
+                // --- index navigation ---
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 14px;
+                    Button {
+                        label: "‹ Prev";
+                        importance: Importance.secondary;
+                        enabled: Receive.index > 0;
+                        clicked => {
+                            Receive.show-address(Receive.index - 1);
+                        }
+                    }
+                    VerticalLayout {
+                        alignment: center;
+                        Text {
+                            text: "Address #" + Receive.index;
+                            color: #e8e8e8;
+                            font-size: 14px;
+                            font-weight: 600;
+                            horizontal-alignment: center;
+                        }
+                    }
+                    Button {
+                        label: "Next ›";
+                        importance: Importance.secondary;
+                        clicked => {
+                            Receive.show-address(Receive.index + 1);
                         }
                     }
                 }
@@ -69,15 +169,6 @@ export component ReceivePage inherits BasePage {
         }
 
         ButtonSection {
-            Button {
-                label: TR2.lookup(TrId.ReceiveNext);
-                importance: Importance.secondary;
-                enabled: Receive.state == ReceiveState.Shown;
-                clicked => {
-                    Receive.show-address(Receive.index + 1);
-                }
-            }
-
             Button {
                 label: TR2.lookup(TrId.CommonDone);
                 importance: Importance.primary;

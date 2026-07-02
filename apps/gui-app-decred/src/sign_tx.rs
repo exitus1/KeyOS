@@ -20,12 +20,13 @@ use slint_keyos_platform::slint::ComponentHandle;
 //        write signed.dcrtx (raw serialized full tx) back.
 
 use anyhow::{anyhow, Context, Result};
+use slint_keyos_platform::slint::{ModelRc, VecModel};
 use slint_keyos_platform::StoredValue;
 
 use crate::keys::load_master_key;
 use crate::state::AppState;
 // Slint-generated globals/enums (emitted into the crate root by `app!`).
-use crate::{OriginView, SignState, SignTx};
+use crate::{OriginView, RecipientView, SignState, SignTx};
 use decred_core::airgap::{decode_sign_request, sign_request, ReviewSummary, SignRequest};
 
 /// Where a given signing request arrived from. Mirrors the Bitcoin app's
@@ -152,14 +153,20 @@ pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Res
         s.set_pending(origin, bytes.to_vec());
     }
 
-    render_review(state, &summary);
+    render_review(state, &summary, req.account, req.inputs.len(), req.outputs.len());
     Ok(())
 }
 
 /// Push the human-readable review (recipients, change, fee) into Slint.
 /// Amounts are formatted to DCR strings here because Slint's `int` is 32-bit
 /// and atom values (1 DCR = 1e8 atoms) overflow it; the UI shows "1.2345 DCR".
-fn render_review(state: StoredValue<AppState>, summary: &ReviewSummary) {
+fn render_review(
+    state: StoredValue<AppState>,
+    summary: &ReviewSummary,
+    account: u32,
+    n_in: usize,
+    n_out: usize,
+) {
     let ui = state.borrow().ui();
     let sign = ui.global::<SignTx>();
     let send_total: i64 = summary.recipients.iter().map(|(_, amt)| *amt).sum();
@@ -179,6 +186,50 @@ fn render_review(state: StoredValue<AppState>, summary: &ReviewSummary) {
         .collect::<Vec<_>>()
         .join("\n\n");
     sign.set_recipient(recipient_str.into());
+
+    // Per-recipient verification cards: 5-char groups over two rows; the
+    // page emphasizes the outer groups (what humans actually compare).
+    let mut views: Vec<RecipientView> = Vec::new();
+    for (addr, amt) in &summary.recipients {
+        let groups: Vec<String> = addr
+            .as_bytes()
+            .chunks(5)
+            .map(|c| core::str::from_utf8(c).unwrap_or("").to_string())
+            .collect();
+        let split = groups.len().div_ceil(2);
+        let (top, bottom) = groups.split_at(split);
+        views.push(RecipientView {
+            top_first: top.first().cloned().unwrap_or_default().into(),
+            top_rest: top.get(1..).unwrap_or(&[]).join(" ").into(),
+            bottom_rest: bottom
+                .get(..bottom.len().saturating_sub(1))
+                .unwrap_or(&[])
+                .join(" ")
+                .into(),
+            bottom_last: bottom.last().cloned().unwrap_or_default().into(),
+            amount: fmt_dcr(*amt).into(),
+        });
+    }
+    sign.set_recipients(ModelRc::new(VecModel::from(views)));
+
+    // Which account this request spends from (named if we know it). Uses the
+    // REQUEST's account, which is what signing will actually use.
+    let account_label = {
+        let s = state.borrow();
+        s.accounts
+            .accounts
+            .iter()
+            .find(|a| a.index == account)
+            .map(|a| a.name.clone())
+            .unwrap_or_else(|| format!("Account #{account}"))
+    };
+    sign.set_signing_account(account_label.into());
+
+    // Estimated fee rate. Exact size is only known after signing, so this is
+    // an estimate from typical P2PKH input/output sizes.
+    let est_size = 12 + 166 * n_in as i64 + 36 * n_out as i64;
+    let rate = if est_size > 0 { summary.fee / est_size } else { 0 };
+    sign.set_fee_rate(format!("≈ {rate} atoms/B (est.)").into());
     // recipients rows (summary.recipients) would be mapped into a Slint model
     // here so each destination address + amount is shown individually.
     sign.set_state(SignState::Review);

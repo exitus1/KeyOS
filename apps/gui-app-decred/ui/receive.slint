@@ -11,6 +11,14 @@ export enum ReceiveState {
 export global Receive {
     in property <ReceiveState> state: ReceiveState.Idle;
     in property <string> address;
+    // Address split into 5-char groups for verification-friendly display,
+    // pre-split into two rows (Slint layouts reserve space for invisible
+    // items, so per-row models beat visibility tricks). First group of the
+    // top row and last group of the bottom row are emphasized.
+    in property <[string]> chunks-top;
+    in property <[string]> chunks-bottom;
+    // Exact derivation path of the shown address, e.g. m/44'/42'/0'/0/3.
+    in property <string> path;
     in property <int> index;
     in property <string> error-text;
 

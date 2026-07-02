@@ -3,6 +3,16 @@
 // Signing flow state shared between Rust (sign_tx.rs) and the Slint pages.
 // The page renders one of these states; Rust drives transitions.
 
+// One recipient on the review screen, pre-split for the verification grid:
+// two rows of 5-char groups with the outer groups emphasized.
+export struct RecipientView {
+    top-first: string,
+    top-rest: string,
+    bottom-rest: string,
+    bottom-last: string,
+    amount: string,
+}
+
 export enum SignState {
     // Nothing loaded — offer QR / SD entry points.
     Idle,
@@ -35,6 +45,12 @@ export global SignTx {
     in property <int> recipient-count;
     // Destination address(es) — THE critical thing to verify on-device.
     in property <string> recipient;
+    // Per-recipient verification cards (replaces the joined string above).
+    in property <[RecipientView]> recipients;
+    // Named account this request spends from (from the request, not the UI).
+    in property <string> signing-account;
+    // Estimated fee rate, e.g. "≈ 12 atoms/B (est.)".
+    in property <string> fee-rate;
     // Count of outputs the companion mislabelled as change but that
     // are NOT ours — a detected lie. >0 means show a hard warning and
     // gate the approve button.
