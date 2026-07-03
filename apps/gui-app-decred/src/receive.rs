@@ -1,19 +1,18 @@
-use slint_keyos_platform::slint::ComponentHandle;
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Receive screen: derive a fresh external-branch P2PKH address
-// (m/44'/42'/account'/0/index) from the secure element and show it as text +
-// QR for a sender (or Cake Wallet's "receive from cold storage" flow) to use.
+// (m/44'/42'/account'/0/index) and show it as text + QR for a sender (or the
+// companion's "receive from cold storage" flow) to use.
 //
-// Deriving a receive address requires reading the seed, so this also passes
-// through the user-confirmation gate. We expose the public address only; no
-// private material leaves this function.
-
+// Addresses are derived from the session's cached account xpub with public
+// CKD only — no private material is touched. The seed prompt fires at most
+// once per account per session (when the xpub is first derived and cached).
 use anyhow::{anyhow, Result};
+use slint_keyos_platform::slint::ComponentHandle;
 use slint_keyos_platform::slint::{ModelRc, SharedString, VecModel};
 use slint_keyos_platform::StoredValue;
 
-use crate::keys::{load_master_key, receive_address};
+use crate::keys::receive_address;
 use crate::state::AppState;
 use crate::{Receive, ReceiveState};
 
@@ -54,8 +53,9 @@ pub fn init(state: StoredValue<AppState>) {
 }
 
 fn derive_for_display(state: StoredValue<AppState>, index: u32) -> Result<(String, u32)> {
-    let s = state.borrow();
-    let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
-    let addr = receive_address(&s.secp, &master, s.account, index).map_err(|e| anyhow!("{e}"))?;
-    Ok((addr, s.account))
+    let mut s = state.borrow_mut();
+    let account = s.account;
+    let xpub = s.account_xpub(account).map_err(|e| anyhow!("{e}"))?;
+    let addr = receive_address(&s.secp, &xpub, index).map_err(|e| anyhow!("{e}"))?;
+    Ok((addr, account))
 }

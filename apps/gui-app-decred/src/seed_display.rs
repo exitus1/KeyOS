@@ -1,4 +1,3 @@
-use slint_keyos_platform::slint::ComponentHandle;
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Seed *display* (view / back up) screen. This app does NOT create or restore
@@ -6,10 +5,11 @@ use slint_keyos_platform::slint::ComponentHandle;
 // only displays the seed already in the secure element as 24 words or a SeedQR.
 // Reading the seed passes the OS user-confirmation gate. Encoders mirror
 // gui-app-onboarding/src/seed.rs so output is byte-identical to the OS backup.
-
 use anyhow::{anyhow, Result};
 use slint_keyos_platform::slint;
+use slint_keyos_platform::slint::ComponentHandle;
 use slint_keyos_platform::StoredValue;
+use zeroize::Zeroize;
 
 use crate::state::AppState;
 use crate::SeedDisplay;
@@ -42,35 +42,37 @@ pub fn init(state: StoredValue<AppState>) {
 
 fn get_seed_words(state: StoredValue<AppState>) -> Result<slint::ModelRc<slint::SharedString>> {
     let seed = read_seed(state)?;
-    let mnemonic = bip39::Mnemonic::from_entropy(seed.bytes())
-        .map_err(|e| anyhow!("mnemonic from entropy: {e}"))?;
-    let words: Vec<slint::SharedString> =
-        mnemonic.words().map(slint::SharedString::from).collect();
+    let mnemonic =
+        bip39::Mnemonic::from_entropy(seed.bytes()).map_err(|e| anyhow!("mnemonic from entropy: {e}"))?;
+    let words: Vec<slint::SharedString> = mnemonic.words().map(slint::SharedString::from).collect();
     Ok(slint::ModelRc::new(slint::VecModel::from(words)))
 }
 
 fn get_standard_seed_qr(state: StoredValue<AppState>) -> Result<slint::Image> {
     let seed = read_seed(state)?;
-    let mnemonic = bip39::Mnemonic::from_entropy(seed.bytes())
-        .map_err(|e| anyhow!("mnemonic from entropy: {e}"))?;
-    let indices: String = mnemonic.word_indices().map(|idx| format!("{idx:04}")).collect();
-    Ok(render_qr(indices.as_bytes()))
+    let mnemonic =
+        bip39::Mnemonic::from_entropy(seed.bytes()).map_err(|e| anyhow!("mnemonic from entropy: {e}"))?;
+    // The digit string IS the seed; wipe the heap copy once rendered.
+    let mut indices: String = mnemonic.word_indices().map(|idx| format!("{idx:04}")).collect();
+    let image = render_qr(indices.as_bytes());
+    indices.zeroize();
+    Ok(image)
 }
 
 fn get_compact_seed_qr(state: StoredValue<AppState>) -> Result<slint::Image> {
     let seed = read_seed(state)?;
-    let mnemonic = bip39::Mnemonic::from_entropy(seed.bytes())
-        .map_err(|e| anyhow!("mnemonic from entropy: {e}"))?;
-    let entropy = mnemonic.to_entropy();
-    Ok(render_qr(&entropy))
+    let mnemonic =
+        bip39::Mnemonic::from_entropy(seed.bytes()).map_err(|e| anyhow!("mnemonic from entropy: {e}"))?;
+    // Raw entropy on the heap; wipe once rendered.
+    let mut entropy = mnemonic.to_entropy();
+    let image = render_qr(&entropy);
+    entropy.zeroize();
+    Ok(image)
 }
 
 fn read_seed(state: StoredValue<AppState>) -> Result<security::Seed> {
     let s = state.borrow();
-    s.security
-        .seed()
-        .map_err(|_| anyhow!("seed access denied"))?
-        .ok_or_else(|| anyhow!("no seed on device"))
+    s.security.seed().map_err(|_| anyhow!("seed access denied"))?.ok_or_else(|| anyhow!("no seed on device"))
 }
 
 fn render_qr(data: &[u8]) -> slint::Image {

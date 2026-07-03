@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+//! Print the CBOR bytes of a reference SignRequest, annotated with the array
+//! layout — the quickest way to eyeball what a companion wallet must emit.
+
 use decred_core::airgap::{encode_sign_request, InputMeta, OutputMeta, SignRequest, FORMAT_VERSION};
 fn main() {
     let req = SignRequest {
@@ -29,7 +33,7 @@ fn main() {
     println!("{}", hex::encode(&bytes));
     println!();
     println!("This is ARRAY-encoded (minicbor default, no #[cbor(map)]):");
-    println!("  SignRequest = 7-element CBOR array");
+    println!("  SignRequest = 7-element CBOR array (8 when account_fp is present)");
     println!("  inputs[i]   = 8-element CBOR array");
     println!("  outputs[i]  = 4-element CBOR array");
 }
