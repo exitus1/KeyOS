@@ -190,13 +190,6 @@ export component AccountsPage inherits BasePage {
                 font-size: 14px;
                 horizontal-alignment: center;
             }
-            if !creating && Account.sd-note != "": Text {
-                text: Account.sd-note;
-                color: #2dd8a3;
-                font-size: 13px;
-                horizontal-alignment: center;
-                wrap: word-wrap;
-            }
         }
 
         ButtonSection {
@@ -212,13 +205,6 @@ export component AccountsPage inherits BasePage {
                 importance: Importance.secondary;
                 clicked => {
                     Navigate.passphrase({ });
-                }
-            }
-            if !creating: Button {
-                label: "Export all to SD card";
-                importance: Importance.secondary;
-                clicked => {
-                    Account.export-all-accounts();
                 }
             }
             if !creating: Button {

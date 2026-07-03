@@ -17,7 +17,6 @@
 
 #![forbid(unsafe_code)]
 
-pub mod account_export;
 pub mod address;
 pub mod airgap;
 pub mod balance;
@@ -87,10 +86,6 @@ pub use address::{decode_p2pkh, p2pkh_from_key, p2pkh_from_pubkey, p2pkh_script}
 pub use airgap::{
     decode_sign_request, encode_sign_request, sign_request, InputMeta, OutputMeta, ReviewSummary,
     SignRequest, FORMAT_VERSION,
-};
-pub use account_export::{
-    decode_account_export, encode_account_export, AccountExport, ExportedAccount,
-    ACCOUNT_EXPORT_FORMAT_VERSION,
 };
 pub use balance::{
     decode_balance_update, encode_balance_update, AccountBalance, BalanceUpdate,
