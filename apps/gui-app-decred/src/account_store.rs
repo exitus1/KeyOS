@@ -10,11 +10,10 @@
 // through FileBacked<String>, which gives atomic rename-into-place with a
 // .old fallback, so a crash mid-write can never corrupt the account list.
 //
-// Format (line-based, no serde needed; the fingerprint column is optional so
-// pre-fingerprint files load unchanged):
+// Format (line-based, no serde needed):
 //   active:N
 //   <index>\t<name>
-//   <index>\t<name>\t<fp hex, 8 chars>
+//   <index>\t<name>
 
 use slint_keyos_platform::{file_backed::FileBacked, fs};
 
@@ -27,12 +26,6 @@ const ACCOUNTS_FILE: &str = "accounts.txt";
 pub struct NamedAccount {
     pub index: u32,
     pub name: String,
-    /// Cached account fingerprint (hash160 of the account xpub's compressed
-    /// pubkey, first 4 bytes) - the account's true cross-airgap identity, the
-    /// same value SignRequest::account_fp and balance packages carry. Filled
-    /// in whenever a flow already holds the master key (receive, dpub export,
-    /// sign ingest), so matching never has to prompt the secure element.
-    pub fp: Option<[u8; 4]>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -54,16 +47,11 @@ impl AccountStore {
                 for line in fb.lines() {
                     if let Some(rest) = line.strip_prefix("active:") {
                         store.active = rest.trim().parse().unwrap_or(0);
-                    } else if let Some((idx, rest)) = line.split_once('\t') {
+                    } else if let Some((idx, name)) = line.split_once('\t') {
                         if let Ok(i) = idx.trim().parse::<u32>() {
-                            let (name, fp) = match rest.split_once('\t') {
-                                Some((n, f)) => (n, parse_fp(f.trim())),
-                                None => (rest, None),
-                            };
                             store.accounts.push(NamedAccount {
                                 index: i,
                                 name: name.to_string(),
-                                fp,
                             });
                         }
                     }
@@ -85,7 +73,7 @@ impl AccountStore {
     /// account, nothing ever written to disk.
     pub fn ephemeral() -> Self {
         AccountStore {
-            accounts: vec![NamedAccount { index: 0, name: "Main".into(), fp: None }],
+            accounts: vec![NamedAccount { index: 0, name: "Main".into() }],
             active: 0,
             ephemeral: true,
         }
@@ -99,10 +87,7 @@ impl AccountStore {
         }
         let mut out = format!("active:{}\n", self.active);
         for a in &self.accounts {
-            match a.fp {
-                Some(fp) => out.push_str(&format!("{}\t{}\t{}\n", a.index, a.name, fp_hex(fp))),
-                None => out.push_str(&format!("{}\t{}\n", a.index, a.name)),
-            }
+            out.push_str(&format!("{}\t{}\n", a.index, a.name));
         }
         let (mut fb, _restored) =
             FileBacked::<String, FileSystemPermissions>::new(ACCOUNTS_FILE, fs::Location::AppData);
@@ -142,7 +127,6 @@ impl AccountStore {
         self.accounts.push(NamedAccount {
             index,
             name: name.trim().to_string(),
-            fp: None,
         });
         self.active = index;
         self.save();
@@ -166,36 +150,4 @@ impl AccountStore {
             .map(|a| a.name.clone())
             .unwrap_or_default()
     }
-
-    /// Cache (or correct, e.g. after a seed restore) an account's fingerprint
-    /// and persist. Returns true when the stored value changed, so callers
-    /// know a companion-balance re-render is due.
-    pub fn set_fp(&mut self, index: u32, fp: [u8; 4]) -> bool {
-        let changed = match self.accounts.iter_mut().find(|a| a.index == index) {
-            Some(a) if a.fp != Some(fp) => {
-                a.fp = Some(fp);
-                true
-            }
-            _ => false,
-        };
-        if changed {
-            self.save();
-        }
-        changed
-    }
-}
-
-fn fp_hex(fp: [u8; 4]) -> String {
-    fp.iter().map(|b| format!("{b:02x}")).collect()
-}
-
-fn parse_fp(s: &str) -> Option<[u8; 4]> {
-    if s.len() != 8 || !s.is_ascii() {
-        return None;
-    }
-    let mut fp = [0u8; 4];
-    for (i, chunk) in fp.iter_mut().enumerate() {
-        *chunk = u8::from_str_radix(&s[i * 2..i * 2 + 2], 16).ok()?;
-    }
-    Some(fp)
 }

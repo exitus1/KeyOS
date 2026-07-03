@@ -4,7 +4,6 @@ use slint_keyos_platform::slint::ComponentHandle;
 // Shared application state, held in a StoredValue<AppState> and threaded to
 // every feature module (same ownership model as the Bitcoin app's AppState).
 
-use decred_core::balance::BalanceUpdate;
 use secp256k1::Secp256k1;
 use slint_keyos_platform::slint::Weak;
 
@@ -36,10 +35,6 @@ pub struct AppState {
     /// Animated-QR parts (UR frames) for the most recently signed tx, read back
     /// by the DynamicQrCode via the `signed-qr-parts` callback.
     signed_parts: Vec<String>,
-    /// The most recent companion-reported balance package and the transport
-    /// word it arrived on ("SD card" / "QR" / "QuantumLink"). Kept so account
-    /// switches and fingerprint backfills re-render without a re-import.
-    companion_balance: Option<(BalanceUpdate, String)>,
 }
 
 impl AppState {
@@ -56,7 +51,6 @@ impl AppState {
             accounts,
             pending: None,
             signed_parts: Vec::new(),
-            companion_balance: None,
         }
     }
 
@@ -89,15 +83,5 @@ impl AppState {
     /// Read the signed-tx QR parts (empty until a tx is signed).
     pub fn signed_qr_parts(&self) -> Vec<String> {
         self.signed_parts.clone()
-    }
-
-    /// Remember the latest companion balance package (set at SD/QR ingest).
-    pub fn set_companion_balance(&mut self, upd: BalanceUpdate, via: &str) {
-        self.companion_balance = Some((upd, via.to_string()));
-    }
-
-    /// The stored balance package, if one arrived at launch or this session.
-    pub fn companion_balance(&self) -> Option<&(BalanceUpdate, String)> {
-        self.companion_balance.as_ref()
     }
 }

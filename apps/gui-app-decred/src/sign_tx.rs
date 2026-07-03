@@ -215,22 +215,19 @@ pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Res
     req.validate().map_err(|e| anyhow!("REFUSED: {e}"))?;
     // TRUSTLESS REVIEW: re-derive our own addresses and classify each
     // output ourselves instead of trusting the companion is_change flag.
-    let (summary, ours): (ReviewSummary, [u8; 4]) = {
+    let summary: ReviewSummary = {
         let s = state.borrow();
         let master = load_master_key(&s.secp, &s.security, &s.passphrase)
             .map_err(|e| anyhow!("seed error: {e}"))?;
-        // The signing account's own fingerprint: checked against the request's
-        // optional wrong-wallet marker below, and cached in the account store
-        // so companion balance entries match without another seed prompt.
-        let ours = master
-            .account_key(&s.secp, req.account)
-            .map_err(|e| anyhow!("derivation failed: {e}"))?
-            .fingerprint(&s.secp);
         // WRONG-WALLET DETECTION (optional field from the companion): if the
         // request names the account fingerprint it was built against, verify
         // it matches this wallet+account before showing anything. Pure UX -
         // ScriptMismatch would still protect funds without it.
         if let Some(fp) = req.account_fp {
+            let ours = master
+                .account_key(&s.secp, req.account)
+                .map_err(|e| anyhow!("derivation failed: {e}"))?
+                .fingerprint(&s.secp);
             if ours != fp {
                 return Err(anyhow!(
                     "This transaction was built for a DIFFERENT wallet or account. \
@@ -238,17 +235,9 @@ pub fn ingest(state: StoredValue<AppState>, origin: Origin, bytes: &[u8]) -> Res
                 ));
             }
         }
-        let summary = req
-            .review_owned(&s.secp, &master, OWNERSHIP_GAP_LIMIT)
-            .map_err(|e| anyhow!("review failed: {e}"))?;
-        (summary, ours)
+        req.review_owned(&s.secp, &master, OWNERSHIP_GAP_LIMIT)
+            .map_err(|e| anyhow!("review failed: {e}"))?
     };
-
-    // Opportunistic fingerprint cache for the balance display (no-op unless
-    // req.account is a stored account and the value is new or changed).
-    if state.borrow_mut().accounts.set_fp(req.account, ours) {
-        crate::balance::render(state);
-    }
 
     // Persist the raw bytes + origin so approve_and_sign can re-decode and sign.
     {
@@ -339,7 +328,7 @@ fn render_review(
 }
 
 /// Format atoms (1e8 = 1 DCR) as a trimmed decimal DCR string.
-pub(crate) fn fmt_dcr(atoms: i64) -> String {
+fn fmt_dcr(atoms: i64) -> String {
     let neg = atoms < 0;
     let a = atoms.unsigned_abs();
     let whole = a / 100_000_000;

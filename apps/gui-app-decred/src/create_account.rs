@@ -104,13 +104,7 @@ pub fn init(state: StoredValue<AppState>) {
     acct.on_export_account_xpub({
         move |index| {
             match export_dpub(state, index as u32) {
-                Ok((dpub, fp)) => {
-                    // Cache the fingerprint while it is in hand: it is the
-                    // account's true cross-airgap identity, and lets companion
-                    // balances match without another secure-element prompt.
-                    if state.borrow_mut().accounts.set_fp(index as u32, fp) {
-                        crate::balance::render(state);
-                    }
+                Ok(dpub) => {
                     // Name lookup + verification head/tail for the page.
                     let name = {
                         let s = state.borrow();
@@ -163,20 +157,17 @@ pub fn init(state: StoredValue<AppState>) {
             refresh_rows(state);
             let ui = state.borrow().ui();
             ui.global::<Account>().set_active_index(idx as i32);
-            // The home card shows the ACTIVE account's companion balance.
-            crate::balance::render(state);
             log::info!("active account -> {}", idx);
         }
     });
 }
 
-/// Derive the account key at m/44'/42'/index' and return its neutered dpub
-/// plus its fingerprint (cached for companion balance matching).
-fn export_dpub(state: StoredValue<AppState>, index: u32) -> Result<(String, [u8; 4])> {
+/// Derive the account key at m/44'/42'/index' and return its neutered dpub.
+fn export_dpub(state: StoredValue<AppState>, index: u32) -> Result<String> {
     let s = state.borrow();
     let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
     let account = master.account_key(&s.secp, index).map_err(|e| anyhow!("{e}"))?;
     // Export the NEUTERED account key (dpub) — public only, safe to hand to a
     // watch-only Cake Wallet. Never exports private material.
-    Ok((account.to_dpub(&s.secp), account.fingerprint(&s.secp)))
+    Ok(account.to_dpub(&s.secp))
 }

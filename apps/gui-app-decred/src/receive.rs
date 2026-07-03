@@ -24,12 +24,7 @@ pub fn init(state: StoredValue<AppState>) {
     recv.on_show_address({
         move |index| {
             match derive_for_display(state, index as u32) {
-                Ok((addr, account, fp)) => {
-                    // Cache the fingerprint while it is in hand, so companion
-                    // balances match without another secure-element prompt.
-                    if state.borrow_mut().accounts.set_fp(account, fp) {
-                        crate::balance::render(state);
-                    }
+                Ok((addr, account)) => {
                     let ui = state.borrow().ui();
                     let recv = ui.global::<Receive>();
                     // 5-char verification groups; first/last are emphasized
@@ -58,14 +53,9 @@ pub fn init(state: StoredValue<AppState>) {
     });
 }
 
-fn derive_for_display(state: StoredValue<AppState>, index: u32) -> Result<(String, u32, [u8; 4])> {
+fn derive_for_display(state: StoredValue<AppState>, index: u32) -> Result<(String, u32)> {
     let s = state.borrow();
     let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
     let addr = receive_address(&s.secp, &master, s.account, index).map_err(|e| anyhow!("{e}"))?;
-    // The account fingerprint comes for free while the master key is in hand.
-    let fp = master
-        .account_key(&s.secp, s.account)
-        .map_err(|e| anyhow!("{e}"))?
-        .fingerprint(&s.secp);
-    Ok((addr, s.account, fp))
+    Ok((addr, s.account))
 }

@@ -19,7 +19,6 @@
 
 pub mod address;
 pub mod airgap;
-pub mod balance;
 pub mod blake256;
 pub mod hashing;
 pub mod hd;
@@ -86,10 +85,6 @@ pub use address::{decode_p2pkh, p2pkh_from_key, p2pkh_from_pubkey, p2pkh_script}
 pub use airgap::{
     decode_sign_request, encode_sign_request, sign_request, InputMeta, OutputMeta, ReviewSummary,
     SignRequest, FORMAT_VERSION,
-};
-pub use balance::{
-    decode_balance_update, encode_balance_update, AccountBalance, BalanceUpdate,
-    BALANCE_FORMAT_VERSION,
 };
 pub use hd::{
     ExtPrivKey, p2pkh_address, BRANCH_EXTERNAL, BRANCH_INTERNAL, COIN_TYPE_DCR, HARDENED,
