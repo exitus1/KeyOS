@@ -33,10 +33,11 @@ slint-keyos-platform = { path = "../../slint-keyos-platform/runtime" }
 thiserror = { workspace = true }
 
 # --- our verified Decred core (no BDK; BDK is Bitcoin-only) ---
-# In-workspace you would vendor decred-core under utils/ or a path dep.
+# Thin KeyOS adapter over the shared dcr-rs library; secp256k1 is re-exported
+# through it so the whole app provably uses one curve implementation.
 decred-core = { path = "../../utils/decred-core" }
-secp256k1 = "0.29"
-bip39 = "2.2"
+bip39 = "2.2"       # seed_display: entropy -> words/SeedQR (same crate dcr-rs pins)
+zeroize = "1"       # wipe heap copies of seed material after rendering
 serde = { workspace = true, features = ["derive"] }
 
 [build-dependencies]

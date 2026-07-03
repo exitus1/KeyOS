@@ -1,4 +1,3 @@
-use slint_keyos_platform::slint::ComponentHandle;
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // "Create account" here is lightweight: Decred wallet *creation* (generating /
@@ -9,14 +8,13 @@ use slint_keyos_platform::slint::ComponentHandle;
 //
 // Only the account dpub leaves the device — never a private key. The dpub is
 // derived from the secure-element seed, so this passes the confirmation gate.
-
 use anyhow::{anyhow, Result};
+use slint_keyos_platform::slint::ComponentHandle;
+use slint_keyos_platform::slint::{ModelRc, VecModel};
 use slint_keyos_platform::StoredValue;
 
-use crate::keys::load_master_key;
 use crate::state::AppState;
 use crate::{Account, AccountRow, AccountState};
-use slint_keyos_platform::slint::{ModelRc, VecModel};
 
 /// Push the named-account list into the Slint model, marking the active one.
 pub(crate) fn refresh_rows(state: StoredValue<AppState>) {
@@ -37,12 +35,8 @@ pub(crate) fn refresh_rows(state: StoredValue<AppState>) {
                     (0xec, 0x48, 0x99), // pink
                 ];
                 let (r, g, b) = PALETTE[(a.index as usize) % PALETTE.len()];
-                let initial: String = a
-                    .name
-                    .chars()
-                    .next()
-                    .map(|c| c.to_uppercase().collect::<String>())
-                    .unwrap_or_default();
+                let initial: String =
+                    a.name.chars().next().map(|c| c.to_uppercase().collect::<String>()).unwrap_or_default();
                 AccountRow {
                     idx: a.index as i32,
                     name: a.name.as_str().into(),
@@ -116,14 +110,8 @@ pub fn init(state: StoredValue<AppState>) {
                             .unwrap_or_else(|| format!("Account #{index} (unnamed)"))
                     };
                     let head: String = dpub.chars().take(12).collect();
-                    let tail: String = dpub
-                        .chars()
-                        .rev()
-                        .take(12)
-                        .collect::<Vec<_>>()
-                        .into_iter()
-                        .rev()
-                        .collect();
+                    let tail: String =
+                        dpub.chars().rev().take(12).collect::<Vec<_>>().into_iter().rev().collect();
                     let ui = state.borrow().ui();
                     let acct = ui.global::<Account>();
                     acct.set_export_name(name.into());
@@ -164,10 +152,10 @@ pub fn init(state: StoredValue<AppState>) {
 
 /// Derive the account key at m/44'/42'/index' and return its neutered dpub.
 fn export_dpub(state: StoredValue<AppState>, index: u32) -> Result<String> {
-    let s = state.borrow();
-    let master = load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
-    let account = master.account_key(&s.secp, index).map_err(|e| anyhow!("{e}"))?;
-    // Export the NEUTERED account key (dpub) — public only, safe to hand to a
-    // watch-only Cake Wallet. Never exports private material.
-    Ok(account.to_dpub(&s.secp))
+    let mut s = state.borrow_mut();
+    // The NEUTERED account key (dpub) — public only, safe to hand to a
+    // watch-only companion. Served from the session xpub cache; private
+    // material is never derived for an export.
+    let xpub = s.account_xpub(index).map_err(|e| anyhow!("{e}"))?;
+    Ok(xpub.to_base58())
 }

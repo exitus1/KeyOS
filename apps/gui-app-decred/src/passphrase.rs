@@ -29,16 +29,14 @@ pub fn init(state: StoredValue<AppState>) {
     // Show the fingerprint for the typed passphrase without switching wallets
     // (Bitcoin app's try_passphrase pattern). The confirm step applies it.
     pp.on_preview({
-        move |text| {
-            match derive_code(state, text.as_str()) {
-                Ok(code) => {
-                    let ui = state.borrow().ui();
-                    let g = ui.global::<Passphrase>();
-                    g.set_code(code.into());
-                    g.set_error("".into());
-                }
-                Err(e) => set_error(state, &e),
+        move |text| match derive_code(state, text.as_str()) {
+            Ok(code) => {
+                let ui = state.borrow().ui();
+                let g = ui.global::<Passphrase>();
+                g.set_code(code.into());
+                g.set_error("".into());
             }
+            Err(e) => set_error(state, &e),
         }
     });
 
@@ -62,10 +60,12 @@ pub fn init(state: StoredValue<AppState>) {
 /// same passphrase, same fingerprint, always.
 fn derive_code(state: StoredValue<AppState>, passphrase: &str) -> Result<String, String> {
     let s = state.borrow();
-    let master =
-        load_master_key(&s.secp, &s.security, passphrase).map_err(|e| format!("{e}"))?;
-    let addr = receive_address(&s.secp, &master, 0, 0)
-        .map_err(|e| format!("derivation failed: {e}"))?;
+    // Derives with the CANDIDATE passphrase, so the session xpub cache (keyed
+    // to the current wallet) cannot be used here. The master key and account
+    // intermediates are dropped — and zeroized — before this returns.
+    let master = load_master_key(&s.security, passphrase).map_err(|e| format!("{e}"))?;
+    let xpub = master.account_key(&s.secp, 0).map_err(|e| format!("derivation failed: {e}"))?.neuter(&s.secp);
+    let addr = receive_address(&s.secp, &xpub, 0).map_err(|e| format!("derivation failed: {e}"))?;
     Ok(addr.chars().take(8).collect())
 }
 
@@ -84,6 +84,9 @@ fn apply(state: StoredValue<AppState>, passphrase: &str) {
     {
         let mut s = state.borrow_mut();
         s.passphrase = passphrase.to_string();
+        // A different passphrase is a different wallet: drop every cached
+        // xpub, pending package and rendered QR from the previous identity.
+        s.reset_wallet_session();
         // Hidden wallets get a fresh in-memory account list (no disk trace);
         // returning to the default wallet reloads the persisted list.
         s.accounts = if hidden { AccountStore::ephemeral() } else { AccountStore::load() };
@@ -92,11 +95,9 @@ fn apply(state: StoredValue<AppState>, passphrase: &str) {
 
     let ui = state.borrow().ui();
     let pp = ui.global::<Passphrase>();
-    log::info!(
-        "passphrase wallet {}: code {}",
-        if hidden { "OPENED" } else { "cleared -> default" },
-        code
-    );
+    // Deliberately NOT logging the wallet code: it identifies the hidden
+    // wallet, and "no trace" must include the log stream.
+    log::info!("passphrase wallet {}", if hidden { "OPENED" } else { "cleared -> default" },);
     pp.set_active(hidden);
     pp.set_code(code.into());
     pp.set_error("".into());

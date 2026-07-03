@@ -1073,6 +1073,7 @@ dependencies = [
  "bitcoin_hashes 0.13.0",
  "serde",
  "unicode-normalization",
+ "zeroize",
 ]
 
 [[package]]
@@ -2808,18 +2809,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "decred-core"
-version = "0.1.0"
+name = "dcr-rs"
+version = "0.2.0"
+source = "git+https://github.com/jzbz/dcr-rs?rev=e87d4569883bfd589ffbd95592e5e2a5d0c744fa#e87d4569883bfd589ffbd95592e5e2a5d0c744fa"
 dependencies = [
  "bip39",
  "bs58",
- "foundation-ur",
- "hex",
  "hmac",
  "minicbor 0.24.4",
  "ripemd",
  "secp256k1 0.29.1",
  "sha2",
+ "zeroize",
+]
+
+[[package]]
+name = "decred-core"
+version = "0.2.0"
+dependencies = [
+ "dcr-rs",
+ "foundation-ur",
+ "hex",
 ]
 
 [[package]]
@@ -4517,7 +4527,6 @@ dependencies = [
  "hex",
  "i18n",
  "log 0.4.27",
- "secp256k1 0.29.1",
  "security",
  "serde",
  "server",
@@ -4526,6 +4535,7 @@ dependencies = [
  "slint-keyos-platform-build",
  "thiserror 2.0.11",
  "xous-api-log",
+ "zeroize",
 ]
 
 [[package]]

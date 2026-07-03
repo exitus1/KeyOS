@@ -15,27 +15,6 @@ import { Navigate } from "../../gen/navigate.slint";
 import { SignTx, SignState, RecipientView } from "../../sign-tx.slint";
 import { Passphrase } from "../../passphrase.slint";
 
-// A label/value row — used for the amount/fee summary.
-component SummaryRow inherits HorizontalLayout {
-    in property <string> label;
-    in property <string> value;
-    in property <bool> emphasis: false;
-
-    TextMd {
-        text: label;
-        color: Palette.content-tertiary;
-        horizontal-alignment: left;
-    }
-
-    Rectangle { }  // spacer
-
-    TextMd {
-        text: value;
-        color: emphasis ? Palette.content-primary : Palette.content-secondary;
-        horizontal-alignment: right;
-    }
-}
-
 export component SignPage inherits BasePage {
     init => {
         // Always start the signing flow clean (don't reopen on a stale QR/Done).
