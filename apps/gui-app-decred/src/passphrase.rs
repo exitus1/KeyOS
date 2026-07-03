@@ -101,6 +101,10 @@ fn apply(state: StoredValue<AppState>, passphrase: &str) {
     pp.set_code(code.into());
     pp.set_error("".into());
     crate::create_account::refresh_rows(state);
+    // Re-match the companion balance against the new wallet's account
+    // fingerprints (fp-keyed, so a hidden wallet's entries match only while
+    // that hidden wallet is open and its fingerprints are cached).
+    crate::balance::render(state);
 }
 
 fn set_error(state: StoredValue<AppState>, msg: &str) {
