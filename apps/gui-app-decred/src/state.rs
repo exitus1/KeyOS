@@ -4,6 +4,7 @@ use slint_keyos_platform::slint::ComponentHandle;
 // Shared application state, held in a StoredValue<AppState> and threaded to
 // every feature module (same ownership model as the Bitcoin app's AppState).
 
+use decred_core::account_export::ExportedAccount;
 use decred_core::balance::BalanceUpdate;
 use secp256k1::Secp256k1;
 use slint_keyos_platform::slint::Weak;
@@ -40,6 +41,9 @@ pub struct AppState {
     /// word it arrived on ("SD card" / "QR" / "QuantumLink"). Kept so account
     /// switches and fingerprint backfills re-render without a re-import.
     companion_balance: Option<(BalanceUpdate, String)>,
+    /// The account currently shown on the dpub-export page, ready for the
+    /// "Write to SD card" action (public key material only).
+    last_dpub_export: Option<ExportedAccount>,
 }
 
 impl AppState {
@@ -57,6 +61,7 @@ impl AppState {
             pending: None,
             signed_parts: Vec::new(),
             companion_balance: None,
+            last_dpub_export: None,
         }
     }
 
@@ -99,5 +104,15 @@ impl AppState {
     /// The stored balance package, if one arrived at launch or this session.
     pub fn companion_balance(&self) -> Option<&(BalanceUpdate, String)> {
         self.companion_balance.as_ref()
+    }
+
+    /// Remember the account shown on the dpub-export page (set per export).
+    pub fn set_last_dpub_export(&mut self, entry: ExportedAccount) {
+        self.last_dpub_export = Some(entry);
+    }
+
+    /// The export page's current account, for the SD write action.
+    pub fn last_dpub_export(&self) -> Option<ExportedAccount> {
+        self.last_dpub_export.clone()
     }
 }

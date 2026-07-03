@@ -13,6 +13,10 @@ use slint_keyos_platform::slint::ComponentHandle;
 use anyhow::{anyhow, Result};
 use slint_keyos_platform::StoredValue;
 
+use decred_core::account_export::{
+    encode_account_export, AccountExport, ExportedAccount, ACCOUNT_EXPORT_FORMAT_VERSION,
+};
+
 use crate::keys::load_master_key;
 use crate::state::AppState;
 use crate::{Account, AccountRow, AccountState};
@@ -111,16 +115,24 @@ pub fn init(state: StoredValue<AppState>) {
                     if state.borrow_mut().accounts.set_fp(index as u32, fp) {
                         crate::balance::render(state);
                     }
-                    // Name lookup + verification head/tail for the page.
-                    let name = {
+                    // Name lookup + verification head/tail for the page. The
+                    // stashed export carries the STORE name (empty when the
+                    // browse index is unnamed), not the display fallback.
+                    let store_name = {
                         let s = state.borrow();
                         s.accounts
                             .accounts
                             .iter()
                             .find(|a| a.index == index as u32)
                             .map(|a| a.name.clone())
-                            .unwrap_or_else(|| format!("Account #{index} (unnamed)"))
                     };
+                    state.borrow_mut().set_last_dpub_export(ExportedAccount {
+                        account: index as u32,
+                        dpub: dpub.clone(),
+                        name: store_name.clone().unwrap_or_default(),
+                    });
+                    let name = store_name
+                        .unwrap_or_else(|| format!("Account #{index} (unnamed)"));
                     let head: String = dpub.chars().take(12).collect();
                     let tail: String = dpub
                         .chars()
@@ -132,6 +144,7 @@ pub fn init(state: StoredValue<AppState>) {
                         .collect();
                     let ui = state.borrow().ui();
                     let acct = ui.global::<Account>();
+                    acct.set_sd_note("".into());
                     acct.set_export_name(name.into());
                     acct.set_export_path(format!("m/44'/42'/{index}'").into());
                     acct.set_dpub_head(head.into());
@@ -168,6 +181,90 @@ pub fn init(state: StoredValue<AppState>) {
             log::info!("active account -> {}", idx);
         }
     });
+
+    // Write the export page's current account to the SD card.
+    acct.on_write_account_export({
+        move || {
+            let note = match state.borrow().last_dpub_export() {
+                Some(entry) => match write_accounts_file(&[entry]) {
+                    Ok(()) => "accounts.dcr written to SD card".to_string(),
+                    Err(e) => {
+                        log::error!("account export write failed: {e:?}");
+                        format!("Write failed: {e}")
+                    }
+                },
+                None => "Nothing exported yet".to_string(),
+            };
+            let ui = state.borrow().ui();
+            ui.global::<Account>().set_sd_note(note.into());
+        }
+    });
+
+    // Write every named account to the SD card in one file (one seed prompt).
+    acct.on_export_all_accounts({
+        move || {
+            let note = match export_all_accounts(state) {
+                Ok(n) => format!(
+                    "{n} account{} written to accounts.dcr",
+                    if n == 1 { "" } else { "s" }
+                ),
+                Err(e) => {
+                    log::error!("export all accounts failed: {e:?}");
+                    format!("Export failed: {e}")
+                }
+            };
+            let ui = state.borrow().ui();
+            ui.global::<Account>().set_sd_note(note.into());
+            // Fingerprints were backfilled along the way; re-match balances.
+            crate::balance::render(state);
+        }
+    });
+}
+
+/// Derive every named account's dpub (one seed prompt) and write them all as
+/// a single accounts.dcr, sorted by index. Caches each fingerprint while the
+/// keys are in hand.
+fn export_all_accounts(state: StoredValue<AppState>) -> Result<usize> {
+    let (entries, fps) = {
+        let s = state.borrow();
+        let master =
+            load_master_key(&s.secp, &s.security, &s.passphrase).map_err(|e| anyhow!("{e}"))?;
+        let mut list: Vec<_> = s.accounts.accounts.iter().collect();
+        list.sort_by_key(|a| a.index);
+        let mut entries = Vec::with_capacity(list.len());
+        let mut fps = Vec::with_capacity(list.len());
+        for a in list {
+            let key = master.account_key(&s.secp, a.index).map_err(|e| anyhow!("{e}"))?;
+            entries.push(ExportedAccount {
+                account: a.index,
+                dpub: key.to_dpub(&s.secp),
+                name: a.name.clone(),
+            });
+            fps.push((a.index, key.fingerprint(&s.secp)));
+        }
+        (entries, fps)
+    };
+    {
+        let mut s = state.borrow_mut();
+        for (idx, fp) in fps {
+            s.accounts.set_fp(idx, fp);
+        }
+    }
+    write_accounts_file(&entries)?;
+    Ok(entries.len())
+}
+
+/// Encode the entries as an AccountExport and write accounts.dcr to the card.
+fn write_accounts_file(entries: &[ExportedAccount]) -> Result<()> {
+    let exp = AccountExport {
+        format_version: ACCOUNT_EXPORT_FORMAT_VERSION,
+        accounts: entries.to_vec(),
+    };
+    let bytes = encode_account_export(&exp).map_err(|e| anyhow!("{e}"))?;
+    let path = std::path::Path::new(crate::sign_tx::card_dir_pub()).join("accounts.dcr");
+    std::fs::write(&path, &bytes).map_err(|e| anyhow!("write {}: {e}", path.display()))?;
+    log::info!("wrote {} account(s) to {}", entries.len(), path.display());
+    Ok(())
 }
 
 /// Derive the account key at m/44'/42'/index' and return its neutered dpub

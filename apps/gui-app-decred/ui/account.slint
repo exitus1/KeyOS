@@ -36,6 +36,12 @@ export global Account {
 
     // Derive m/44'/42'/index' and return its neutered dpub.
     callback export-account-xpub(int);
+    // Write the account shown on the export page to the SD card (accounts.dcr).
+    callback write-account-export();
+    // Write every named account to the SD card in one file (one seed prompt).
+    callback export-all-accounts();
+    // Result note of the last SD write ("" = none yet / cleared on new export).
+    in property <string> sd-note;
     // The currently-active account index the whole app operates on.
     in-out property <int> active-index: 0;
     // Set the active account (updates state.account so receive/sign/export use it).

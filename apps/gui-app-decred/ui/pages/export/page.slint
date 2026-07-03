@@ -167,9 +167,24 @@ export component ExportPage inherits BasePage {
                 horizontal-alignment: center;
                 wrap: word-wrap;
             }
+
+            if Account.sd-note != "": Text {
+                text: Account.sd-note;
+                color: #2dd8a3;
+                font-size: 12px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
         }
 
         ButtonSection {
+            if Account.state == AccountState.Exported: Button {
+                label: "Write to SD card";
+                importance: Importance.secondary;
+                clicked => {
+                    Account.write-account-export();
+                }
+            }
             Button {
                 label: TR2.lookup(TrId.CommonDone);
                 importance: Importance.primary;
