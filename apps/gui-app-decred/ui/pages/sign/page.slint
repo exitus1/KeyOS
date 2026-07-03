@@ -52,6 +52,74 @@ export component SignPage inherits BasePage {
             spacing: Size.sz4;
 
             // --- Idle: pick a transport -------------------------------------
+            if SignTx.state == SignState.Picking: Flickable {
+                VerticalLayout {
+                spacing: Size.sz3;
+                Text {
+                    text: "Choose a transaction";
+                    color: #ffffff;
+                    font-size: 26px;
+                    font-weight: 800;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: "Files found on the card, newest first.";
+                    color: #9aa0ab;
+                    font-size: 15px;
+                    horizontal-alignment: center;
+                    TouchArea {
+                        clicked => {
+                            SignTx.debug-cycle();
+                        }
+                    }
+                }
+                Rectangle { height: 4px; }
+                for f in SignTx.sd-files: Rectangle {
+                    height: 68px;
+                    border-radius: 16px;
+                    background: #0c0c10;
+                    border-width: 1px;
+                    border-color: #1f2233;
+                    TouchArea {
+                        clicked => {
+                            SignTx.pick-file(f.name);
+                        }
+                    }
+                    HorizontalLayout {
+                        padding-left: 18px;
+                        padding-right: 18px;
+                        spacing: 12px;
+                        VerticalLayout {
+                            alignment: center;
+                            spacing: 2px;
+                            horizontal-stretch: 1;
+                            Text {
+                                text: f.name;
+                                color: #ffffff;
+                                font-size: 18px;
+                                font-weight: 700;
+                                overflow: elide;
+                            }
+                            Text {
+                                text: f.detail;
+                                color: #9aa0ab;
+                                font-size: 13px;
+                            }
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            Text {
+                                text: "›";
+                                color: #3a3a44;
+                                font-size: 26px;
+                                font-weight: 700;
+                            }
+                        }
+                    }
+                }
+            }
+            }
+
             if SignTx.state == SignState.Idle: VerticalLayout {
                 spacing: Size.sz4;
                 HeadingSm {
@@ -492,6 +560,13 @@ export component SignPage inherits BasePage {
                 importance: Importance.secondary;
                 clicked => {
                     SignTx.load-from-sd();
+                }
+            }
+            if SignTx.state == SignState.Picking: Button {
+                label: "Cancel";
+                importance: Importance.secondary;
+                clicked => {
+                    SignTx.state = SignState.Idle;
                 }
             }
 

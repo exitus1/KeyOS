@@ -13,9 +13,16 @@ export struct RecipientView {
     amount: string,
 }
 
+export struct SdFile {
+    name: string,
+    detail: string,
+}
+
 export enum SignState {
     // Nothing loaded — offer QR / SD entry points.
     Idle,
+    // Browsing the card: user picks which .dcrtx to load.
+    Picking,
     // Camera open, assembling an animated-QR (UR) sign request.
     Scanning,
     // Decoded; showing recipients / amount / fee for confirmation.
@@ -69,7 +76,14 @@ export global SignTx {
 
     // User actions.
     callback start-qr-scan();
+    // Enter the file picker (lists .dcrtx files on the card).
     callback load-from-sd();
+    // Files found on the card, newest first.
+    in property <[SdFile]> sd-files;
+    // Load the selected file by name.
+    callback pick-file(string);
+    // Hidden debug: rotate through all files (sim fuzz testing).
+    callback debug-cycle();
     callback approve();
     callback reject();
 }

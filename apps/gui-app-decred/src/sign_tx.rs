@@ -52,14 +52,31 @@ pub fn init(state: StoredValue<AppState>) {
     });
 
     // User tapped "Load from SD card".
+    // Enter the picker: list the card's .dcrtx files and show them.
     sign.on_load_from_sd({
         move || {
-            // SIM: Airlock/SD is unavailable in the hosted simulator, so this
-            // button injects a known in-memory test tx to exercise the GUI
-            // review->approve->sign flow. On hardware, restore the real
-            // load_from_sd(state) call here.
+            if let Err(e) = list_sd_files(state) {
+                log::error!("list sd files failed: {e:?}");
+                show_error(state, &e.to_string());
+            }
+        }
+    });
+
+    // User tapped a file in the picker.
+    sign.on_pick_file({
+        move |name| {
+            if let Err(e) = load_named_file(state, name.as_str()) {
+                log::error!("load {name} failed: {e:?}");
+                show_error(state, &e.to_string());
+            }
+        }
+    });
+
+    // Hidden debug affordance (sim): rotate through every file to fuzz-test.
+    sign.on_debug_cycle({
+        move || {
             if let Err(e) = debug_inject_karamble_file(state) {
-                log::error!("test tx inject failed: {e:?}");
+                log::error!("fuzz cycle failed: {e:?}");
                 show_error(state, &e.to_string());
             }
         }
@@ -114,6 +131,60 @@ pub fn begin_scan(state: StoredValue<AppState>) -> Result<()> {
 }
 
 /// Read the unsigned package off removable media.
+/// Directory the card's sign-request files live in. In the hosted sim this is
+/// the local fuzz folder (our stand-in for a microSD); on hardware it is the
+/// Airlock. Only this one function differs between sim and device.
+fn card_dir() -> &'static str {
+    "/home/mike/fuzz"
+}
+
+/// List .dcrtx files on the card, newest first, and enter the picker.
+fn list_sd_files(state: StoredValue<AppState>) -> Result<()> {
+    let dir = card_dir();
+    let mut entries: Vec<(std::path::PathBuf, std::time::SystemTime)> = std::fs::read_dir(dir)
+        .map_err(|e| anyhow!("no card / cannot read {dir}: {e}"))?
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|p| p.extension().map(|x| x == "dcrtx").unwrap_or(false))
+        .map(|p| {
+            let m = std::fs::metadata(&p).and_then(|m| m.modified()).unwrap_or(std::time::UNIX_EPOCH);
+            (p, m)
+        })
+        .collect();
+    if entries.is_empty() {
+        return Err(anyhow!("No transaction files (.dcrtx) found on the card."));
+    }
+    entries.sort_by(|a, b| b.1.cmp(&a.1)); // newest first
+
+    let rows: Vec<crate::SdFile> = entries
+        .iter()
+        .map(|(p, _)| {
+            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("?").to_string();
+            let kb = std::fs::metadata(p).map(|m| m.len()).unwrap_or(0) as f64 / 1024.0;
+            crate::SdFile { name: name.into(), detail: format!("{kb:.1} KB").into() }
+        })
+        .collect();
+
+    let ui = state.borrow().ui();
+    let sign = ui.global::<SignTx>();
+    sign.set_sd_files(slint_keyos_platform::slint::ModelRc::new(
+        slint_keyos_platform::slint::VecModel::from(rows),
+    ));
+    sign.set_state(SignState::Picking);
+    Ok(())
+}
+
+/// Load one named file from the card and go to review.
+fn load_named_file(state: StoredValue<AppState>, name: &str) -> Result<()> {
+    if name.contains('/') || name.contains('\\') {
+        return Err(anyhow!("invalid file name"));
+    }
+    let path = std::path::Path::new(card_dir()).join(name);
+    let bytes = std::fs::read(&path).map_err(|e| anyhow!("read {}: {e}", path.display()))?;
+    ingest(state, Origin::SdCard, &bytes)
+}
+
+#[allow(dead_code)]
 fn load_from_sd(state: StoredValue<AppState>) -> Result<()> {
     // `fs` is the KeyOS filesystem API. Path/scoping mirrors the Bitcoin app's
     // file PSBT load; we read raw CBOR bytes, not a PSBT.
