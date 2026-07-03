@@ -10,6 +10,9 @@ export component DcrAccountCard inherits Rectangle {
     in property <string> name: "Decred";
     in property <string> crypto-balance;
     in property <string> fiat-balance;
+    // Small "* via SD card" source tag, and optional freshness.
+    in property <string> source-note;
+    in property <string> as-of;
 
     callback clicked();
 
@@ -61,6 +64,11 @@ export component DcrAccountCard inherits Rectangle {
                 color: #9aa0ab;
                 font-size: 18px;
                 font-weight: 600;
+            }
+            if source-note != "": Text {
+                text: source-note;
+                color: #6b7280;
+                font-size: 11px;
             }
         }
 

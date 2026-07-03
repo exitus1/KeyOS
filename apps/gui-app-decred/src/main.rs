@@ -14,6 +14,7 @@
 use slint_keyos_platform::{app, gui_server_api::InputMessage, StoredValue};
 
 mod account_store;
+mod balance;
 mod create_account;
 mod passphrase;
 mod keys;
@@ -38,6 +39,7 @@ fn app_main(cx: AppContext, ui: AppWindow) {
     let state = StoredValue::new(AppState::new(ui.as_weak()));
 
     // Feature wiring. Each module installs its Slint callbacks against `state`.
+    balance::init(state);
     receive::init(state);
     sign_tx::init(state);
     create_account::init(state);

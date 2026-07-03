@@ -24,6 +24,8 @@ export component HomePage inherits BasePage {
                 name: Account.active-name;
                 crypto-balance: Balance.dcr-amount;
                 fiat-balance: Balance.fiat-amount;
+                source-note: Balance.source-note;
+                as-of: Balance.as-of;
                 clicked => {
                     Navigate.accounts({ });
                 }

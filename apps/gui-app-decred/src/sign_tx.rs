@@ -138,6 +138,11 @@ fn card_dir() -> &'static str {
     "/home/mike/fuzz"
 }
 
+/// Public accessor so other modules (balance) read from the same card path.
+pub fn card_dir_pub() -> &'static str {
+    card_dir()
+}
+
 /// List .dcrtx files on the card, newest first, and enter the picker.
 fn list_sd_files(state: StoredValue<AppState>) -> Result<()> {
     let dir = card_dir();
