@@ -91,7 +91,7 @@ fn sanitize(field: &str, max_chars: usize) -> String {
 
 /// Parse the shared key=value text and push it to the display. `default_via`
 /// is the transport word used when the payload doesn't name its own.
-fn apply_text(state: StoredValue<AppState>, text: &str, default_via: &str) -> anyhow::Result<()> {
+pub(crate) fn apply_text(state: StoredValue<AppState>, text: &str, default_via: &str) -> anyhow::Result<()> {
     let mut dcr = String::new();
     let mut usd = String::new();
     let mut asof = String::new();

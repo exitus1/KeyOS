@@ -25,6 +25,8 @@
 //   SD : pick a *.dcrtx file (Airlock on hardware, $DECRED_FUZZ_DIR or
 //        ~/fuzz in the hosted sim), write signed.dcrtx back the same way.
 use anyhow::{anyhow, Result};
+use slint_keyos_platform::gui_server_api::navigation::qrscanner::{ScanQrOptions, ScanQrResult};
+use slint_keyos_platform::navigation::open_qr_scanner;
 use decred_core::airgap::{decode_sign_request, sign_request, ReviewSummary, SignRequest};
 use slint_keyos_platform::slint::ComponentHandle;
 use slint_keyos_platform::slint::{ModelRc, VecModel};
@@ -126,13 +128,58 @@ pub fn init(state: StoredValue<AppState>) {
 /// pump lives in a spawn_local loop that feeds foundation-ur until a complete
 /// "dcr-sign-request" is assembled, then calls `ingest`.
 pub fn begin_scan(state: StoredValue<AppState>) -> Result<()> {
-    let ui = state.borrow().ui();
-    ui.global::<SignTx>().set_origin(OriginView::Qr);
-    ui.global::<SignTx>().set_state(SignState::Scanning);
-    // NOTE: camera/UR frame loop omitted in this scaffold — see
-    // gui-app-qr-scanner for the animated-UR decode pattern to copy. On a
-    // completed UR payload, call `ingest(state, Origin::Qr, &bytes)`.
-    Ok(())
+    // The OS provides the entire scanner: camera, QR detection, and
+    // animated-UR fountain reassembly. We open it as a modal and receive the
+    // finished payload — the same pattern the Bitcoin app uses for PSBTs.
+    // (In the hosted simulator there is no camera; the modal opens and the
+    // user can only cancel. Real frames arrive on hardware.)
+    let opts = ScanQrOptions {
+        header_title: "Scan from companion".into(),
+        message: "Point the camera at the QR shown by your companion wallet.".into(),
+        header_left_icon: String::new(),
+        header_right_icon: String::from("close"),
+        ..ScanQrOptions::default()
+    };
+
+    let scan = match open_qr_scanner::<crate::gui_permissions::GuiPermissions>(opts) {
+        Ok(Some(s)) => s,
+        Ok(None) => return Ok(()),
+        Err(e) => return Err(anyhow!("scanner: {e:?}")),
+    };
+
+    match scan {
+        // Animated/typed UR: the OS hands us the UR type + reassembled bytes.
+        ScanQrResult::Ur2(ur_type, data) => match ur_type.as_str() {
+            "dcr-sign-request" => {
+                let ui = state.borrow().ui();
+                ui.global::<SignTx>().set_origin(OriginView::Qr);
+                ingest(state, Origin::Qr, &data)
+            }
+            "dcr-balance" => {
+                // Balance payload is plain UTF-8 key=value text.
+                let text = String::from_utf8(data)
+                    .map_err(|e| anyhow!("balance payload not UTF-8: {e}"))?;
+                crate::balance::apply_text(state, &text, "QR")
+                    .map_err(|e| anyhow!("balance: {e}"))
+            }
+            other => {
+                show_error(state, &format!("Unsupported QR type: {other}"));
+                Ok(())
+            }
+        },
+        // Plain (non-UR) QR: accept a single-part UR string as text.
+        ScanQrResult::Qr(data) => {
+            let text = String::from_utf8_lossy(&data);
+            if text.trim().to_uppercase().starts_with("UR:DCR-BALANCE/") {
+                crate::balance::ingest_qr(state, text.trim()).map_err(|e| anyhow!("{e}"))
+            } else {
+                show_error(state, "Unrecognized QR code.");
+                Ok(())
+            }
+        }
+        // Cancelled from the scanner UI: stay wherever we were.
+        _ => Ok(()),
+    }
 }
 
 // ---------------------------------------------------------------------------
