@@ -36,7 +36,6 @@ thiserror = { workspace = true }
 # Thin KeyOS adapter over the shared dcr-rs library; secp256k1 is re-exported
 # through it so the whole app provably uses one curve implementation.
 decred-core = { path = "../../utils/decred-core" }
-bip39 = "2.2"       # seed_display: entropy -> words/SeedQR (same crate dcr-rs pins)
 zeroize = "1"       # wipe heap copies of seed material after rendering
 serde = { workspace = true, features = ["derive"] }
 

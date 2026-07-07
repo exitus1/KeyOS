@@ -100,7 +100,7 @@ export component HomePage inherits BasePage {
             }
 
             Button {
-                label: TR2.lookup(TrId.HomeExport);
+                label: "Pair Wallet";
                 importance: Importance.secondary;
                 clicked => {
                     Navigate.export({ });
@@ -111,13 +111,6 @@ export component HomePage inherits BasePage {
                 importance: Importance.secondary;
                 clicked => {
                     Navigate.accounts({ });
-                }
-            }
-            Button {
-                label: TR2.lookup(TrId.HomeSeed);
-                importance: Importance.secondary;
-                clicked => {
-                    Navigate.seed({ });
                 }
             }
         }

@@ -4519,7 +4519,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-channel",
- "bip39",
  "decred-core",
  "foundation-ur",
  "foundation-urtypes",

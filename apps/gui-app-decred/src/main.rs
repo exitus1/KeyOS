@@ -19,7 +19,6 @@ mod create_account;
 mod passphrase;
 mod keys;
 mod receive;
-mod seed_display;
 mod sign_tx;
 mod state;
 
@@ -44,7 +43,6 @@ fn app_main(cx: AppContext, ui: AppWindow) {
     sign_tx::init(state);
     create_account::init(state);
     passphrase::init(state);
-    seed_display::init(state);
 
     // Handle deep-link navigation (e.g. "open Decred and start a QR scan").
     cx.set_input_handler({
