@@ -28,13 +28,18 @@ impl PowerButtonState {
 
 impl Gui {
     pub(crate) fn handle_power_button(&mut self, pressed: bool) {
+        if !self.power_button_enabled() {
+            debug!("Power button ignored while disabled by kiosk policy");
+            return;
+        }
+
         // Ignore power button events when shutting down
         if self.shutting_down.is_some() {
             return;
         }
 
         // Don't turn off the screen during init
-        if matches!(self.state, crate::GuiState::BootSplash) {
+        if matches!(self.state, crate::GuiState::Splash) {
             return;
         }
 
@@ -71,6 +76,11 @@ impl Gui {
     }
 
     pub(crate) fn handle_power_button_callback(&mut self) {
+        if !self.power_button_enabled() {
+            debug!("Power button callback ignored while disabled by kiosk policy");
+            return;
+        }
+
         debug!("Callback from power button ticktimer");
 
         if let Some(pressed_at) = self.power_button_state.last_pressed {

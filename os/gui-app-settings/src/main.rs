@@ -19,15 +19,18 @@ use security::{messages::Lockout, OsVersionInfo, PinEntryMode};
 use slint_keyos_platform::{
     app, async_archive,
     futures_lite::StreamExt as _,
-    gui_server_api::navigation::{
-        filepicker::{Location, SelectFileOptions},
-        lockscreen::{VerifyPinOptions, VerifyPinResult},
+    gui_server_api::{
+        msg::UpdateKioskPolicy,
+        navigation::{
+            filepicker::{AllowedExtensions, Location, SelectFileOptions},
+            lockscreen::{VerifyPinOptions, VerifyPinResult},
+        },
     },
     navigation::select_file,
     navigation::verify_pin,
     settings::{self, global::SystemTheme},
     slint::{Image, ModelRc, SharedString, Timer, TimerMode, VecModel},
-    spawn_local, spawn_worker, subscribe_archive, subscribe_scalar, StoredValue, TaskHandle,
+    spawn_local, spawn_worker, subscribe_archive, subscribe_scalar, timeout, StoredValue, TaskHandle,
 };
 use update::messages::ProgressUpdate;
 
@@ -47,7 +50,7 @@ backup::use_api!();
 bt::use_api!();
 haptics::use_api!();
 keycard::use_api!();
-power_manager::use_api!();
+power_manager::use_ext_api!();
 quantum_link::use_api!();
 security::use_api!();
 update::use_api!();
@@ -86,6 +89,7 @@ fn app_main(cx: AppContext, ui: AppWindow) {
     setup_update_global(state);
     setup_callbacks(state);
     setup_save_settings_global(state);
+    resume_update_if_needed(state);
 
     let timer = Timer::default();
     timer.start(TimerMode::Repeated, PERIODIC_UPDATE_INTERVAL, move || {
@@ -109,6 +113,21 @@ fn setup_settings_global(state: StoredValue<AppState>) {
                 let state = state.borrow();
                 let ui = state.ui();
                 ui.global::<SettingGlobal>().set_screen_brightness(brightness.0 as f32);
+            }
+        }
+    })
+    .detach();
+
+    spawn_local({
+        let state = state.clone();
+        async move {
+            let mut sub = subscribe_archive::<settings_permissions::SettingsPermissions, _>(
+                settings::messages::SubscribeDeviceName,
+            );
+            while let Some(device_name) = sub.next().await {
+                let state = state.borrow();
+                let ui = state.ui();
+                ui.global::<SettingGlobal>().set_device_name(device_name.0.into());
             }
         }
     })
@@ -188,6 +207,13 @@ fn setup_settings_global(state: StoredValue<AppState>) {
                 NavigateOptions { animate: Animate::None, replace: true },
             );
 
+            // Best-effort goodbye to Envoy before wiping. Awaits BLE flush so
+            // the bye is on the wire before erase_system_state() / Lockout reboots.
+            if let Err(e) =
+                async_archive::<QuantumLinkPermissions, _>(quantum_link::messages::UnpairFromEnvoy).await
+            {
+                log::warn!("failed to notify Envoy of unpair before factory reset: {e:?}");
+            }
             erase_system_state();
 
             match async_archive::<SecurityPermissions, _>(Lockout {
@@ -451,7 +477,7 @@ fn get_master_key(app_state: &AppState) -> anyhow::Result<MasterKey> {
 fn setup_callbacks(state: StoredValue<AppState>) {
     let ui = state.borrow().ui();
     let callbacks = ui.global::<Callbacks>();
-    callbacks.on_save_log_files(move || match state.borrow().with_otg_allowed(|s| s.save_log_files()) {
+    callbacks.on_save_log_files(move || match state.borrow().save_log_files() {
         Ok(_) => true,
         Err(e) => {
             log::error!("Failed to save log file: {}", e);
@@ -548,12 +574,21 @@ fn setup_backup_global(state: StoredValue<AppState>) {
         spawn_local(async move {
             let ui = state.borrow().ui();
             let global = ui.global::<BackupGlobal>();
-            global.set_creating_backup(true);
-            match async_archive::<BackupPermissions, _>(backup::messages::CreateBackup).await {
-                Ok(_) => (),
-                Err(e) => {
+            global.set_status(BackupStatus::Creating);
+            match timeout(
+                async_archive::<BackupPermissions, _>(backup::messages::CreateBackup),
+                Duration::from_secs(15),
+            )
+            .await
+            {
+                Ok(Ok(_)) => {}
+                Ok(Err(e)) => {
                     log::warn!("create backup failed {e:?}");
-                    global.set_creating_backup(false);
+                    global.set_status(BackupStatus::Error);
+                }
+                Err(_) => {
+                    log::warn!("create backup timed out");
+                    global.set_status(BackupStatus::Error);
                 }
             }
         })
@@ -570,7 +605,7 @@ fn setup_backup_global(state: StoredValue<AppState>) {
 
             let ui = state.ui();
             let global = ui.global::<BackupGlobal>();
-            global.set_creating_backup(false);
+            global.set_status(if status.publish_failed { BackupStatus::Error } else { BackupStatus::Idle });
         }
     })
     .detach();
@@ -653,7 +688,14 @@ fn setup_ql_global(state: StoredValue<AppState>) {
     });
 
     ql_global.on_disconnect(move || {
-        state.borrow().quantum.clear_paired_device();
+        spawn_local(async move {
+            if let Err(e) =
+                async_archive::<QuantumLinkPermissions, _>(quantum_link::messages::UnpairFromEnvoy).await
+            {
+                log::warn!("failed to notify Envoy of unpair: {e:?}");
+            }
+        })
+        .detach();
     });
 
     spawn_local(async move {
@@ -668,6 +710,14 @@ fn setup_ql_global(state: StoredValue<AppState>) {
                 PairingEvent::PairingComplete { device_name, new } => {
                     global.set_paired_device_name(device_name.into());
                     if new {
+                        let s = state.borrow();
+                        if s.settings.get_envoy_time_sync().0 {
+                            ql_utils::sync_system_timezone(s.settings.clone(), s.ql_status.clone(), |e| {
+                                log::warn!("failed to retrieve tz from envoy {e:?}")
+                            })
+                            .detach();
+                        }
+                        drop(s);
                         ql_utils::launch_bitcoin_app::<app_manager_permissions::AppManagerPermissions>()
                             .await
                             .inspect_err(|e| log::warn!("failed to start bitcoin app {e:?}"))
@@ -707,7 +757,7 @@ fn setup_update_global(state: StoredValue<AppState>) {
         start_firmware_download(state);
     });
 
-    ql_utils::on_update_sufficient_battery::<power_manager_permissions::PowerManagerPermissions, _>(
+    ql_utils::on_update_sufficient_battery::<power_manager_ext_permissions::PowerManagerExtPermissions, _>(
         move |sufficient_battery| {
             log::info!("update sufficient_battery={}", sufficient_battery);
             let ui = state.borrow().ui();
@@ -725,6 +775,20 @@ fn setup_update_global(state: StoredValue<AppState>) {
         let mut disconnect_monitor: Option<TaskHandle<()>> = None;
 
         while let Some(event) = update_events.next().await {
+            // Keep auto-lock disabled until the user leaves the update page.
+            let restore_update_exit_controls = || {
+                let state = state.borrow();
+                state
+                    .gui
+                    .update_kiosk_policy(
+                        UpdateKioskPolicy::default()
+                            .set_home_button(true)
+                            .set_power_button(true)
+                            .set_control_center(true),
+                    )
+                    .ok();
+                state.platform_config.enable_swipe_back.set(true);
+            };
             let ui = state.borrow().ui();
             let update_global = ui.global::<UpdateGlobal>();
 
@@ -733,9 +797,13 @@ fn setup_update_global(state: StoredValue<AppState>) {
                     update_global.set_fw_update_state(FwUpdateState::Receiving);
                     update_global.set_fw_update_progress(progress.completion_percentage() as f32);
 
-                    // Acquire the wake lock and start monitoring for disconnection when download starts
+                    // Disable auto-lock and start monitoring for disconnection when download starts
                     if progress.is_start() {
-                        state.borrow().gui.set_wake_lock(true).ok();
+                        state
+                            .borrow()
+                            .gui
+                            .update_kiosk_policy(UpdateKioskPolicy::default().set_auto_lock(false))
+                            .ok();
                         state.borrow().platform_config.enable_swipe_back.set(false);
                         let status = ql_status.clone().into_inner().into_stream();
                         let _ = disconnect_monitor.insert(spawn_local(async move {
@@ -779,16 +847,12 @@ fn setup_update_global(state: StoredValue<AppState>) {
                     log::info!("update complete. rebooting...");
                     update_global.set_fw_update_state(FwUpdateState::Restarting);
                     notify_update_progress(state, FirmwareInstallEvent::Rebooting);
-
-                    state.borrow().gui.set_wake_lock(false).ok();
-                    state.borrow().platform_config.enable_swipe_back.set(true);
+                    state.borrow().set_update_kiosk_enabled(true);
                 }
                 ProgressUpdate::InstallError(error) => {
                     disconnect_monitor = None;
                     log::error!("failed to apply update {error:?}");
-                    // Re-enable swipe back so the user can navigate away,
-                    // but keep the wake lock until they do.
-                    state.borrow().platform_config.enable_swipe_back.set(true);
+                    restore_update_exit_controls();
                     handle_update_error(
                         state,
                         error.to_string(),
@@ -799,9 +863,7 @@ fn setup_update_global(state: StoredValue<AppState>) {
                 ProgressUpdate::DownloadError(error) => {
                     disconnect_monitor = None;
                     log::error!("failed to download update {error:?}");
-                    // Re-enable swipe back so the user can navigate away,
-                    // but keep the wake lock until they do.
-                    state.borrow().platform_config.enable_swipe_back.set(true);
+                    restore_update_exit_controls();
                     handle_update_error(
                         state,
                         error.to_string(),
@@ -813,6 +875,29 @@ fn setup_update_global(state: StoredValue<AppState>) {
         }
     })
     .detach();
+}
+
+fn resume_update_if_needed(state: StoredValue<AppState>) {
+    let state = state.borrow();
+    if !state.update.update_status().needs_continue {
+        return;
+    }
+
+    let ui = state.ui();
+    let update_global = ui.global::<UpdateGlobal>();
+    if update_global.get_fw_update_state() == FwUpdateState::Installing {
+        return;
+    }
+
+    log::info!("continuing interrupted update");
+    state.set_update_kiosk_enabled(false);
+
+    update_global.set_fw_update_state(FwUpdateState::Installing);
+    update_global.set_fw_update_progress(0.0);
+    update_global.set_fw_update_eta(SharedString::default());
+
+    ui.global::<Navigate>().invoke_update_progress(NavigateOptions { animate: Animate::None, replace: true });
+    state.update.continue_update();
 }
 
 fn setup_save_settings_global(state: StoredValue<AppState>) {
@@ -872,13 +957,22 @@ async fn check_firmware_update_available(state: StoredValue<AppState>) {
     let ql_status = state.borrow().ql_status.clone();
 
     global.set_checking_fw_update(true);
-    let result = ql_status.send_ql_archive(quantum_link::messages::CheckFirmwareUpdate).await;
+    let result = timeout(
+        ql_status.send_ql_archive(quantum_link::messages::CheckFirmwareUpdate),
+        Duration::from_secs(10),
+    )
+    .await;
     global.set_checking_fw_update(false);
 
     let update = match result {
-        Ok(update) => update,
-        Err(e) => {
+        Ok(Ok(update)) => update,
+        Ok(Err(e)) => {
             log::error!("failed to check for firmware update {e:?}");
+            global.set_new_keyos_version(SharedString::default());
+            return;
+        }
+        Err(_) => {
+            log::error!("timed out checking for firmware update");
             global.set_new_keyos_version(SharedString::default());
             return;
         }
@@ -921,7 +1015,8 @@ async fn save_settings_file(state: StoredValue<AppState>) -> anyhow::Result<()> 
         .with_hidden_allowed(false)
         .with_dirs_allowed(true)
         .with_dir_selection_mode(true)
-        .with_multiple_selection_mode(false);
+        .with_multiple_selection_mode(false)
+        .with_allowed_extensions(AllowedExtensions::specific(&["tar"]));
 
     let (path, location) = select_file::<GuiPermissions>(options)
         .context("Failed to select a directory")?
@@ -934,7 +1029,12 @@ async fn save_settings_file(state: StoredValue<AppState>) -> anyhow::Result<()> 
         Location::Airlock => fs::Location::Airlock,
     };
 
-    let backup_path = format!("{}/settings.tar", path);
+    let now = jiff::Timestamp::now();
+    let tz = state.settings.get_time_zone();
+    let zoned = now.to_zoned(tz.timezone());
+    let timestamp =
+        jiff::fmt::strtime::format("%Y-%m-%d_%H-%M-%S", &zoned).unwrap_or_else(|_| "unknown".to_string());
+    let backup_path = format!("{}/settings-{}.tar", path, timestamp);
 
     state
         .backup_api
