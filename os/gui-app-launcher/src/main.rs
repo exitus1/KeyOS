@@ -165,31 +165,6 @@ fn app_main(cx: AppContext, ui: AppWindow) {
 
     let state = StoredValue::new(AppState::new(cx.gui.clone(), ui.as_weak()));
 
-    // MOCK Decred sparkline for the launcher card until QuantumLink pushes
-    // real DCR price history: deterministic pseudo-random walk around $12,
-    // rendered with the exact same draw_graph as the Bitcoin card.
-    {
-        let mut pts: Vec<PricePoint> = Vec::with_capacity(48);
-        let mut price: i64 = 1200; // cents
-        let mut seed: u64 = 0x00DE_CAED;
-        for i in 0..48u64 {
-            seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-            let delta = ((seed >> 33) % 21) as i64 - 10;
-            price = (price + delta).clamp(1100, 1300);
-            pts.push(PricePoint { price: price as u32, timestamp: i, is_pad: false });
-        }
-        let img = slint_keyos_platform::skia::draw_graph_rgb(
-            &pts,
-            GRAPH_WIDTH,
-            GRAPH_HEIGHT,
-            GRAPH_MAX_HEIGHT,
-            true,
-            (0x2d, 0xd8, 0xa3), // dcrdata green line
-            (0x2d, 0xd8, 0xa3), // green fill under the line
-        );
-        ui.global::<State>().set_decred_graph_image(img);
-    }
-
     #[cfg(not(feature = "production"))]
     {
         let hidden_apps = vec![
@@ -205,7 +180,7 @@ fn app_main(cx: AppContext, ui: AppWindow) {
             HiddenApp { label: "Playground".into(), app_id: "0x7c9f81f9bcee31425062fb0d8fbf3001".into() },
             HiddenApp { label: "Crypto Perf".into(), app_id: "0xc781da2a8f5f4a68b2ee0e6ad83d41b7".into() },
             HiddenApp { label: "Update".into(), app_id: "0x6b713041faef901f23743263a45dcb83".into() },
-        HiddenApp { label: "Decred".into(), app_id: "0x4465637265642057616c6c6574000000".into() },
+            HiddenApp { label: "Decred".into(), app_id: "0x4465637265642057616c6c6574000000".into() },
         ];
 
         ui.global::<State>().set_hidden_apps(slint::ModelRc::new(VecModel::from(hidden_apps)));

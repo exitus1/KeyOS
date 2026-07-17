@@ -149,7 +149,7 @@ pub fn begin_scan(state: StoredValue<AppState>) -> Result<()> {
 
     match scan {
         // Animated/typed UR: the OS hands us the UR type + reassembled bytes.
-        ScanQrResult::Ur2(ur_type, data) => match ur_type.as_str() {
+        ScanQrResult::Ur2 { ur_type, data, .. } => match ur_type.as_str() {
             "dcr-sign-request" => {
                 let ui = state.borrow().ui();
                 ui.global::<SignTx>().set_origin(OriginView::Qr);
@@ -168,7 +168,7 @@ pub fn begin_scan(state: StoredValue<AppState>) -> Result<()> {
             }
         },
         // Plain (non-UR) QR: accept a single-part UR string as text.
-        ScanQrResult::Qr(data) => {
+        ScanQrResult::Qr { data, .. } => {
             let text = String::from_utf8_lossy(&data);
             if text.trim().to_uppercase().starts_with("UR:DCR-BALANCE/") {
                 crate::balance::ingest_qr(state, text.trim()).map_err(|e| anyhow!("{e}"))
